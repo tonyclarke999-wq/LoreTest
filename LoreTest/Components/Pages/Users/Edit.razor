@@ -1,0 +1,142 @@
+@page "/users/edit/{Id}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using LoreTest.Data
+@using System.ComponentModel.DataAnnotations
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<PageTitle>Edit User</PageTitle>
+
+<h1>Edit User</h1>
+<hr />
+
+@if (user == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm Model="Input" OnValidSubmit="ValidSubmit" FormName="EditUser">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <InputText id="email" @bind-Value="Input.Email" class="form-control" disabled />
+                </div>
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <InputText id="name" @bind-Value="Input.Name" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label for="jobTitle" class="form-label">Job Title</label>
+                    <InputText id="jobTitle" @bind-Value="Input.JobTitle" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label for="role" class="form-label">Role</label>
+                    <InputSelect id="role" @bind-Value="Input.Role" class="form-select">
+                        <option value="">Select a Role...</option>
+                        <option value="Administrator">Administrator</option>
+                        <option value="Editor">Editor</option>
+                        <option value="Tester">Tester</option>
+                        <option value="Reviewer">Reviewer</option>
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <InputDate id="startDate" @bind-Value="Input.StartDate" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <InputDate id="endDate" @bind-Value="Input.EndDate" class="form-control" />
+                    <ValidationMessage For="() => Input.EndDate" class="text-danger" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="/users" class="btn btn-secondary">Back to List</a>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; } = default!;
+
+    private InputModel Input { get; set; } = new();
+
+    private ApplicationUser? user;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserManager.FindByIdAsync(Id);
+        if (user == null)
+        {
+            NavigationManager.NavigateTo("/users");
+            return;
+        }
+
+        Input.Email = user.Email ?? "";
+        Input.Name = user.Name;
+        Input.JobTitle = user.JobTitle;
+        Input.Role = user.Role;
+        Input.StartDate = user.StartDate;
+        Input.EndDate = user.EndDate;
+    }
+
+    public class InputModel : IValidatableObject
+    {
+        public string Email { get; set; } = "";
+        public string? Name { get; set; }
+        public string? JobTitle { get; set; }
+        public string? Role { get; set; }
+        public DateOnly? StartDate { get; set; }
+        public DateOnly? EndDate { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (StartDate.HasValue && EndDate.HasValue && EndDate.Value < StartDate.Value)
+            {
+                yield return new ValidationResult(
+                    "The end date can be empty or on or after the start date.",
+                    new[] { nameof(EndDate) });
+            }
+        }
+    }
+
+    private async Task ValidSubmit()
+    {
+        errorMessage = null;
+
+        if (user != null)
+        {
+            user.Name = Input.Name;
+            user.JobTitle = Input.JobTitle;
+            user.Role = Input.Role;
+            user.StartDate = Input.StartDate;
+            user.EndDate = Input.EndDate;
+
+            var result = await UserManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                NavigationManager.NavigateTo("/users");
+            }
+            else
+            {
+                errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+            }
+        }
+    }
+}
