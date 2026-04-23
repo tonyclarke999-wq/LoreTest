@@ -5,21 +5,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LoreTest.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IServiceProvider serviceProvider) : IdentityDbContext<ApplicationUser>(options)
     {
-        private readonly IServiceProvider _serviceProvider;
-
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IServiceProvider serviceProvider) : base(options)
-        {
-            _serviceProvider = serviceProvider;
-        }
+        private readonly IServiceProvider _serviceProvider = serviceProvider;
 
         public DbSet<AuditLog> AuditLogs { get; set; }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             string? userId = "Unknown";
-            
+
             try
             {
                 using var scope = _serviceProvider.CreateScope();
@@ -44,10 +39,10 @@ namespace LoreTest.Data
                     continue;
 
                 var tableName = entry.Metadata.GetTableName() ?? entry.Entity.GetType().Name;
-                
+
                 string? primaryKey = null;
                 var pk = entry.Properties.FirstOrDefault(p => p.Metadata.IsPrimaryKey());
-                if (pk != null && pk.CurrentValue != null)
+                if (pk?.CurrentValue != null)
                 {
                     primaryKey = pk.CurrentValue.ToString();
                 }
@@ -112,10 +107,7 @@ namespace LoreTest.Data
                 }
             }
 
-            foreach (var auditEntry in auditEntries)
-            {
-                AuditLogs.Add(auditEntry);
-            }
+            AuditLogs.AddRange(auditEntries);
 
             return await base.SaveChangesAsync(cancellationToken);
         }
