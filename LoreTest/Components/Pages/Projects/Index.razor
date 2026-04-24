@@ -1,0 +1,81 @@
+@page "/projects"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@attribute [Authorize]
+
+<PageTitle>Test Projects</PageTitle>
+
+<h1>Test Projects</h1>
+
+@if (canEdit)
+{
+    <p>
+        <a href="/projects/create" class="btn btn-primary">Create New</a>
+    </p>
+}
+
+@if (projects == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!projects.Any())
+{
+    <p>No projects found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Reference No.</th>
+                <th>Title</th>
+                <th>Description</th>
+                @if (canEdit)
+                {
+                    <th>Actions</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in projects)
+            {
+                <tr>
+                    <td>@project.Id</td>
+                    <td>@project.Title</td>
+                    <td>@((MarkupString)(project.Description ?? ""))</td>
+                    @if (canEdit)
+                    {
+                        <td>
+                            <a href="/projects/edit/@project.Id">Edit</a> |
+                            <a href="/projects/delete/@project.Id">Delete</a>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<TestProject>? projects;
+    private bool canEdit = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+        
+        if (user != null && (user.Role == "Administrator" || user.Role == "Tester"))
+        {
+            canEdit = true;
+        }
+
+        projects = await DbContext.TestProjects.OrderBy(p => p.Id).ToListAsync();
+    }
+}

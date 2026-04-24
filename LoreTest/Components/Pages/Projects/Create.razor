@@ -1,0 +1,114 @@
+@page "/projects/create"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject IJSRuntime JSRuntime
+@attribute [Authorize]
+
+<PageTitle>Create Test Project</PageTitle>
+
+<h1>Create Test Project</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm Model="Input" OnValidSubmit="ValidSubmit" FormName="CreateProject">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <InputText id="title" @bind-Value="Input.Title" class="form-control" />
+                <ValidationMessage For="() => Input.Title" class="text-danger" />
+            </div>
+            <div class="mb-3" style="margin-bottom: 60px !important;">
+                <label for="description" class="form-label">Description</label>
+                <div @ref="editorElement" style="height: 200px;"></div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a href="/projects" class="btn btn-secondary">Back to List</a>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private TestProject? Input { get; set; }
+
+    private ElementReference editorElement;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Input ??= new();
+        
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+        
+        if (user == null || (user.Role != "Administrator" && user.Role != "Tester"))
+        {
+            NavigationManager.NavigateTo("/projects");
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                if (!window.quillInitialized) {
+                    window.initQuill = function(element, initialContent) {
+                        var quill = new Quill(element, { 
+                            theme: 'snow',
+                            modules: {
+                                toolbar: [
+                                    [{ 'header': [1, 2, 3, false] }],
+                                    ['bold', 'italic', 'underline', 'strike'],
+                                    ['image', 'link', 'blockquote', 'code-block'],
+                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                                ]
+                            }
+                        });
+                        quill.root.innerHTML = initialContent || '';
+                        element.quill = quill;
+                    };
+                    window.getQuillContent = function(element) {
+                        return element.quill ? element.quill.root.innerHTML : '';
+                    };
+                    window.quillInitialized = true;
+                }
+            ");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorElement, Input?.Description ?? "");
+        }
+    }
+
+    private async Task ValidSubmit()
+    {
+        if (Input == null) return;
+        
+        Input.Description = await JSRuntime.InvokeAsync<string>("getQuillContent", editorElement);
+        
+        errorMessage = null;
+
+        try
+        {
+            DbContext.TestProjects.Add(Input);
+            await DbContext.SaveChangesAsync();
+            NavigationManager.NavigateTo("/projects");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred while creating the project: {ex.Message}";
+        }
+    }
+}

@@ -10,6 +10,7 @@ namespace LoreTest.Data
         private readonly IServiceProvider _serviceProvider = serviceProvider;
 
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<TestProject> TestProjects { get; set; }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

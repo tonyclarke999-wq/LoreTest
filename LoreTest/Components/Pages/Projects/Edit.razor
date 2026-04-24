@@ -1,0 +1,150 @@
+@page "/projects/edit/{id:int}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject IJSRuntime JSRuntime
+@attribute [Authorize]
+
+<PageTitle>Edit Test Project</PageTitle>
+
+<h1>Edit Test Project</h1>
+<hr />
+
+@if (Input == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm Model="Input" OnValidSubmit="ValidSubmit" FormName="EditProject">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+                
+                <input type="hidden" @bind="Input.Id" />
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <InputText id="title" @bind-Value="Input.Title" class="form-control" />
+                    <ValidationMessage For="() => Input.Title" class="text-danger" />
+                </div>
+                <div class="mb-3" style="margin-bottom: 60px !important;">
+                    <label for="description" class="form-label">Description</label>
+                    <div @ref="editorElement" style="height: 200px;"></div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="/projects" class="btn btn-secondary">Back to List</a>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private TestProject? Input { get; set; }
+
+    private ElementReference editorElement;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+        
+        if (user == null || (user.Role != "Administrator" && user.Role != "Tester"))
+        {
+            NavigationManager.NavigateTo("/projects");
+            return;
+        }
+
+        Input ??= await DbContext.TestProjects.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Input == null)
+        {
+            NavigationManager.NavigateTo("/projects");
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Input != null)
+        {
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                if (!window.quillInitialized) {
+                    window.initQuill = function(element, initialContent) {
+                        var quill = new Quill(element, { 
+                            theme: 'snow',
+                            modules: {
+                                toolbar: [
+                                    [{ 'header': [1, 2, 3, false] }],
+                                    ['bold', 'italic', 'underline', 'strike'],
+                                    ['image', 'link', 'blockquote', 'code-block'],
+                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                                ]
+                            }
+                        });
+                        quill.root.innerHTML = initialContent || '';
+                        element.quill = quill;
+                    };
+                    window.getQuillContent = function(element) {
+                        return element.quill ? element.quill.root.innerHTML : '';
+                    };
+                    window.quillInitialized = true;
+                }
+            ");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorElement, Input.Description ?? "");
+        }
+    }
+
+    private async Task ValidSubmit()
+    {
+        if (Input == null) return;
+        
+        Input.Description = await JSRuntime.InvokeAsync<string>("getQuillContent", editorElement);
+        
+        errorMessage = null;
+
+        try
+        {
+            DbContext.Attach(Input).State = EntityState.Modified;
+            await DbContext.SaveChangesAsync();
+            NavigationManager.NavigateTo("/projects");
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ProjectExists(Input.Id))
+            {
+                NavigationManager.NavigateTo("/projects");
+            }
+            else
+            {
+                errorMessage = "A concurrency error occurred while updating the project.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred while updating the project: {ex.Message}";
+        }
+    }
+
+    private bool ProjectExists(int id)
+    {
+        return DbContext.TestProjects.Any(e => e.Id == id);
+    }
+}
