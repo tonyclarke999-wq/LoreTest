@@ -11,6 +11,12 @@ namespace LoreTest.Data
 
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<TestProject> TestProjects { get; set; }
+        public DbSet<TestSuite> TestSuites { get; set; }
+        public DbSet<TestCase> TestCases { get; set; }
+        public DbSet<TestStep> TestSteps { get; set; }
+        public DbSet<TestRun> TestRuns { get; set; }
+        public DbSet<TestRunCaseResult> TestRunCaseResults { get; set; }
+        public DbSet<TestRunStepResult> TestRunStepResults { get; set; }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
@@ -18,8 +24,7 @@ namespace LoreTest.Data
 
             try
             {
-                using var scope = _serviceProvider.CreateScope();
-                var authStateProvider = scope.ServiceProvider.GetService<AuthenticationStateProvider>();
+                var authStateProvider = _serviceProvider.GetService<AuthenticationStateProvider>();
                 if (authStateProvider != null)
                 {
                     var authState = await authStateProvider.GetAuthenticationStateAsync();

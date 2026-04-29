@@ -142,6 +142,59 @@ namespace LoreTest.Data.Migrations
                     b.ToTable("AuditLogs");
                 });
 
+            modelBuilder.Entity("LoreTest.Data.TestCase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DefectId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Dependencies")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PostCondition")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PreConditions")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Priority")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("TestData")
+                        .HasColumnType("text");
+
+                    b.Property<int>("TestSuiteId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestSuiteId");
+
+                    b.ToTable("TestCases");
+                });
+
             modelBuilder.Entity("LoreTest.Data.TestProject", b =>
                 {
                     b.Property<int>("Id")
@@ -161,6 +214,164 @@ namespace LoreTest.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TestProjects");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestRun", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RunNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("StartedByUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("TestProjectId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TestSuiteId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StartedByUserId");
+
+                    b.HasIndex("TestProjectId");
+
+                    b.HasIndex("TestSuiteId");
+
+                    b.ToTable("TestRuns");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestRunCaseResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("TestCaseId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TestRunId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestCaseId");
+
+                    b.HasIndex("TestRunId");
+
+                    b.ToTable("TestRunCaseResults");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestRunStepResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActualResult")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("TestRunCaseResultId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TestStepId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestRunCaseResultId");
+
+                    b.HasIndex("TestStepId");
+
+                    b.ToTable("TestRunStepResults");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestStep", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActualResult")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ExpectedResult")
+                        .HasColumnType("text");
+
+                    b.Property<int>("StepNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TestCaseId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestCaseId");
+
+                    b.ToTable("TestSteps");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestSuite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<int>("TestProjectId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestProjectId");
+
+                    b.ToTable("TestSuites");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -316,6 +527,104 @@ namespace LoreTest.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("LoreTest.Data.TestCase", b =>
+                {
+                    b.HasOne("LoreTest.Data.TestSuite", "TestSuite")
+                        .WithMany("TestCases")
+                        .HasForeignKey("TestSuiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TestSuite");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestRun", b =>
+                {
+                    b.HasOne("LoreTest.Data.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("StartedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LoreTest.Data.TestProject", "Project")
+                        .WithMany()
+                        .HasForeignKey("TestProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LoreTest.Data.TestSuite", "TestSuite")
+                        .WithMany()
+                        .HasForeignKey("TestSuiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("TestSuite");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestRunCaseResult", b =>
+                {
+                    b.HasOne("LoreTest.Data.TestCase", "TestCase")
+                        .WithMany()
+                        .HasForeignKey("TestCaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LoreTest.Data.TestRun", "TestRun")
+                        .WithMany("CaseResults")
+                        .HasForeignKey("TestRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TestCase");
+
+                    b.Navigation("TestRun");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestRunStepResult", b =>
+                {
+                    b.HasOne("LoreTest.Data.TestRunCaseResult", "CaseResult")
+                        .WithMany("StepResults")
+                        .HasForeignKey("TestRunCaseResultId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LoreTest.Data.TestStep", "TestStep")
+                        .WithMany()
+                        .HasForeignKey("TestStepId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CaseResult");
+
+                    b.Navigation("TestStep");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestStep", b =>
+                {
+                    b.HasOne("LoreTest.Data.TestCase", "TestCase")
+                        .WithMany("TestSteps")
+                        .HasForeignKey("TestCaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TestCase");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestSuite", b =>
+                {
+                    b.HasOne("LoreTest.Data.TestProject", "Project")
+                        .WithMany("TestSuites")
+                        .HasForeignKey("TestProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -416,6 +725,31 @@ namespace LoreTest.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestCase", b =>
+                {
+                    b.Navigation("TestSteps");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestProject", b =>
+                {
+                    b.Navigation("TestSuites");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestRun", b =>
+                {
+                    b.Navigation("CaseResults");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestRunCaseResult", b =>
+                {
+                    b.Navigation("StepResults");
+                });
+
+            modelBuilder.Entity("LoreTest.Data.TestSuite", b =>
+                {
+                    b.Navigation("TestCases");
                 });
 #pragma warning restore 612, 618
         }

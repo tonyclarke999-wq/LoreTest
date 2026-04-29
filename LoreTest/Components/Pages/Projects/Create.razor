@@ -55,7 +55,7 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = await UserManager.GetUserAsync(authState.User);
         
-        if (user == null || (user.Role != "Administrator" && user.Role != "Tester"))
+        if (user == null || (user.Role != "Administrator" && user.Role != "Editor"))
         {
             NavigationManager.NavigateTo("/projects");
         }

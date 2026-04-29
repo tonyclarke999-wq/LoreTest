@@ -36,10 +36,7 @@ else
                 <th>Reference No.</th>
                 <th>Title</th>
                 <th>Description</th>
-                @if (canEdit)
-                {
-                    <th>Actions</th>
-                }
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -49,13 +46,15 @@ else
                     <td>@project.Id</td>
                     <td>@project.Title</td>
                     <td>@((MarkupString)(project.Description ?? ""))</td>
-                    @if (canEdit)
-                    {
-                        <td>
-                            <a href="/projects/edit/@project.Id">Edit</a> |
+                    <td>
+                        <a href="/projects/details/@project.Id">Details</a>
+                        @if (canEdit)
+                        {
+                            <span> | </span>
+                            <a href="/projects/edit/@project.Id">Edit</a> <span> | </span>
                             <a href="/projects/delete/@project.Id">Delete</a>
-                        </td>
-                    }
+                        }
+                    </td>
                 </tr>
             }
         </tbody>
@@ -71,7 +70,7 @@ else
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = await UserManager.GetUserAsync(authState.User);
         
-        if (user != null && (user.Role == "Administrator" || user.Role == "Tester"))
+        if (user != null && (user.Role == "Administrator" || user.Role == "Editor"))
         {
             canEdit = true;
         }

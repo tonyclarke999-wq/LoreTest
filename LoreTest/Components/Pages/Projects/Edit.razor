@@ -24,11 +24,9 @@ else
 {
     <div class="row">
         <div class="col-md-4">
-            <EditForm Model="Input" OnValidSubmit="ValidSubmit" FormName="EditProject">
+            <EditForm Model="Input" OnValidSubmit="ValidSubmit">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" />
-                
-                <input type="hidden" @bind="Input.Id" />
 
                 <div class="mb-3">
                     <label for="title" class="form-label">Title</label>
@@ -56,7 +54,6 @@ else
     [Parameter]
     public int Id { get; set; }
 
-    [SupplyParameterFromForm]
     private TestProject? Input { get; set; }
 
     private ElementReference editorElement;
@@ -67,13 +64,13 @@ else
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = await UserManager.GetUserAsync(authState.User);
         
-        if (user == null || (user.Role != "Administrator" && user.Role != "Tester"))
+        if (user == null || (user.Role != "Administrator" && user.Role != "Editor"))
         {
             NavigationManager.NavigateTo("/projects");
             return;
         }
 
-        Input ??= await DbContext.TestProjects.FirstOrDefaultAsync(m => m.Id == Id);
+        Input = await DbContext.TestProjects.FirstOrDefaultAsync(m => m.Id == Id);
 
         if (Input == null)
         {

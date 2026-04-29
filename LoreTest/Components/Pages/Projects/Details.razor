@@ -4,7 +4,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using LoreTest.Data
-@inject ApplicationDbContext DbContext
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
@@ -88,6 +88,9 @@ else
     private bool canEdit = false;
     private bool canCreateRun = false;
 
+    [Inject]
+    private IDbContextFactory<ApplicationDbContext> DbFactory { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -106,7 +109,8 @@ else
             }
         }
 
-        project = await DbContext.TestProjects
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        project = await dbContext.TestProjects
             .Include(p => p.TestSuites)
             .FirstOrDefaultAsync(m => m.Id == Id);
 
