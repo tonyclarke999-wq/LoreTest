@@ -1,0 +1,118 @@
+@page "/projects/details/{Id:int}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<PageTitle>Project Details</PageTitle>
+
+@if (project == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h1>Project: @project.Title</h1>
+    <p>@((MarkupString)(project.Description ?? ""))</p>
+
+    <hr />
+
+    <h2>Test Suites</h2>
+    @if (canEdit || canCreateRun)
+    {
+        <p>
+            @if (canEdit)
+            {
+                <a href="/testsuites/create?projectId=@project.Id" class="btn btn-primary">Create New Test Suite</a>
+            }
+            @if (canCreateRun)
+            {
+                <a href="/testruns/setup?projectId=@project.Id" class="btn btn-success ms-2">Start Test Run</a>
+            }
+        </p>
+    }
+
+    @if (!project.TestSuites.Any())
+    {
+        <p>No test suites found for this project.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var suite in project.TestSuites)
+                {
+                    <tr>
+                        <td>@suite.Id</td>
+                        <td>@suite.Title</td>
+                        <td>@((MarkupString)(suite.Description ?? ""))</td>
+                        <td>
+                            <a href="/testsuites/details/@suite.Id">View Test Cases</a>
+                            @if (canEdit)
+                            {
+                                <span> | </span>
+                                <a href="/testsuites/edit/@suite.Id">Edit</a> <span> | </span>
+                                <a href="/testsuites/delete/@suite.Id">Delete</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <div>
+        <a href="/projects">Back to List</a>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private TestProject? project;
+    private bool canEdit = false;
+    private bool canCreateRun = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        if (user != null)
+        {
+            if (user.Role == "Administrator" || user.Role == "Editor")
+            {
+                canEdit = true;
+            }
+            
+            if (user.Role != "Reviewer")
+            {
+                canCreateRun = true;
+            }
+        }
+
+        project = await DbContext.TestProjects
+            .Include(p => p.TestSuites)
+            .FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (project == null)
+        {
+            NavigationManager.NavigateTo("/projects");
+        }
+    }
+}

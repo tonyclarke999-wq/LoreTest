@@ -1,0 +1,334 @@
+@page "/testcases/edit/{Id:int}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@attribute [Authorize]
+
+<PageTitle>Edit Test Case</PageTitle>
+
+@if (!canEdit)
+{
+    <div class="alert alert-danger">You do not have permission to edit test cases.</div>
+}
+else if (testCase == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h1 class="mb-0">Edit: @testCase.Title</h1>
+    <p class="text-muted small mb-3">Suite: <a href="/testsuites/details/@testCase.TestSuiteId">@testCase.TestSuite?.Title</a></p>
+
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "details" ? "active" : "")"
+                    @onclick='() => SwitchTab("details")'>Case Details</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "steps" ? "active" : "")"
+                    @onclick='() => SwitchTab("steps")'>
+                Test Steps
+                @if (testCase.TestSteps.Any())
+                {
+                    <span class="badge bg-secondary ms-1">@testCase.TestSteps.Count</span>
+                }
+            </button>
+        </li>
+    </ul>
+
+    @if (activeTab == "details")
+    {
+        <div class="row">
+            <div class="col-md-8">
+                <EditForm Model="testCase" OnValidSubmit="UpdateTestCase">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Title:</label>
+                        <InputText @bind-Value="testCase.Title" class="form-control" />
+                        <ValidationMessage For="() => testCase.Title" class="text-danger" />
+                    </div>
+                    <div class="mb-3" style="margin-bottom:60px!important">
+                        <label class="form-label">Description:</label>
+                        <div @ref="editorDescription" style="height:150px"></div>
+                    </div>
+                    <div class="mb-3" style="margin-bottom:60px!important">
+                        <label class="form-label">Pre-Conditions:</label>
+                        <div @ref="editorPreConditions" style="height:150px"></div>
+                    </div>
+                    <div class="mb-3" style="margin-bottom:60px!important">
+                        <label class="form-label">Dependencies:</label>
+                        <div @ref="editorDependencies" style="height:150px"></div>
+                    </div>
+                    <div class="mb-3" style="margin-bottom:60px!important">
+                        <label class="form-label">Test Data:</label>
+                        <div @ref="editorTestData" style="height:150px"></div>
+                    </div>
+                    <div class="mb-3" style="margin-bottom:60px!important">
+                        <label class="form-label">Post-Condition:</label>
+                        <div @ref="editorPostCondition" style="height:150px"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Status:</label>
+                            <InputSelect @bind-Value="testCase.Status" class="form-select">
+                                <option value="">-- Select Status --</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Pass">Pass</option>
+                                <option value="Fail">Fail</option>
+                            </InputSelect>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Priority:</label>
+                            <InputSelect @bind-Value="testCase.Priority" class="form-select">
+                                <option value="">-- Select Priority --</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </InputSelect>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Defect ID:</label>
+                            <InputText @bind-Value="testCase.DefectId" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3" style="margin-bottom:60px!important">
+                        <label class="form-label">Notes:</label>
+                        <div @ref="editorNotes" style="height:150px"></div>
+                    </div>
+
+                    <div class="d-flex gap-2" style="margin-top:60px">
+                        <button type="submit" class="btn btn-primary">Save Case</button>
+                        <a href="/testcases/details/@testCase.Id" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+    @if (activeTab == "steps")
+    {
+        @if (testCase.TestSteps.Any())
+        {
+            <table class="table table-bordered table-hover align-middle mb-4">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:5%">#</th>
+                        <th style="width:33%">Step Description</th>
+                        <th style="width:28%">Expected Result</th>
+                        <th style="width:22%">Actual Result</th>
+                        <th style="width:12%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var step in testCase.TestSteps.OrderBy(s => s.StepNumber))
+                    {
+                        <tr>
+                            <td class="text-center fw-bold">@step.StepNumber</td>
+                            <td>@((MarkupString)(step.Description ?? ""))</td>
+                            <td>@((MarkupString)(step.ExpectedResult ?? ""))</td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(step.ActualResult))
+                                { @((MarkupString)(step.ActualResult)) }
+                                else
+                                { <span class="text-muted fst-italic">—</span> }
+                            </td>
+                            <td>
+                                <a href="/teststeps/edit/@step.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a href="/teststeps/delete/@step.Id" class="btn btn-sm btn-outline-danger ms-1">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-info mb-4">No steps yet — use the form below to add the first one.</div>
+        }
+
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex align-items-center gap-2">
+                <strong>Add New Step</strong>
+                <span class="badge bg-light text-dark">Step @nextStepNumber</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3" style="max-width:120px">
+                    <label class="form-label fw-semibold">Step #</label>
+                    <input type="number" class="form-control" @bind="newStep.StepNumber" min="1" />
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Step Description</label>
+                        <div @ref="editorStepDesc" style="height:160px"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Expected Result</label>
+                        <div @ref="editorExpected" style="height:160px"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Actual Result <span class="text-muted small">(if different)</span></label>
+                        <div @ref="editorActual" style="height:160px"></div>
+                    </div>
+                </div>
+                <div style="margin-top:55px">
+                    <button class="btn btn-success" @onclick="AddStep">Add Step</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="mt-4 mb-5">
+        <a href="/testcases/details/@testCase.Id" class="btn btn-secondary">Back to Details</a>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    [SupplyParameterFromQuery(Name = "tab")]
+    public string? TabParam { get; set; }
+
+    private TestCase? testCase;
+    private bool canEdit = false;
+    private string activeTab = "details";
+
+    // Case editors
+    private ElementReference editorDescription, editorPreConditions, editorDependencies;
+    private ElementReference editorTestData, editorPostCondition, editorNotes;
+    private bool caseQuillReady = false;
+
+    // Step editors
+    private ElementReference editorStepDesc, editorExpected, editorActual;
+    private bool stepsQuillReady = false;
+
+    private TestStep newStep = new();
+    private int nextStepNumber = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user != null && (user.Role == "Administrator" || user.Role == "Editor"))
+            canEdit = true;
+
+        if (TabParam == "steps") activeTab = "steps";
+
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        testCase = await DbContext.TestCases
+            .Include(tc => tc.TestSteps)
+            .Include(tc => tc.TestSuite)
+            .FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (testCase == null) { NavigationManager.NavigateTo("/projects"); return; }
+
+        nextStepNumber = testCase.TestSteps.Any() ? testCase.TestSteps.Max(s => s.StepNumber) + 1 : 1;
+        newStep = new TestStep { TestCaseId = Id, StepNumber = nextStepNumber };
+    }
+
+    private async Task SwitchTab(string tab)
+    {
+        activeTab = tab;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!canEdit || testCase == null) return;
+
+        if (activeTab == "details" && !caseQuillReady)
+        {
+            caseQuillReady = true;
+            await EnsureQuill();
+            await JSRuntime.InvokeVoidAsync("initQuill", editorDescription, testCase.Description ?? "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorPreConditions, testCase.PreConditions ?? "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorDependencies, testCase.Dependencies ?? "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorTestData, testCase.TestData ?? "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorPostCondition, testCase.PostCondition ?? "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorNotes, testCase.Notes ?? "");
+        }
+        else if (activeTab == "steps" && !stepsQuillReady)
+        {
+            stepsQuillReady = true;
+            await EnsureQuill();
+            await JSRuntime.InvokeVoidAsync("initQuill", editorStepDesc, "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorExpected, "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorActual, "");
+        }
+    }
+
+    private async Task EnsureQuill()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", @"
+            if (!window.quillInitialized) {
+                window.initQuill = function(el, html) {
+                    var q = new Quill(el, { theme:'snow', modules:{ toolbar:[
+                        [{'header':[1,2,3,false]}],
+                        ['bold','italic','underline','strike'],
+                        [{'list':'ordered'},{'list':'bullet'}],
+                        ['link','blockquote','code-block']
+                    ]}});
+                    q.root.innerHTML = html || '';
+                    el.quill = q;
+                };
+                window.getQuillContent = function(el) { return el.quill ? el.quill.root.innerHTML : ''; };
+                window.clearQuillEditor = function(el) { if (el && el.quill) { el.quill.setContents([]); } };
+                window.quillInitialized = true;
+            }
+        ");
+    }
+
+    private async Task UpdateTestCase()
+    {
+        if (!canEdit || testCase == null) return;
+        testCase.Description     = await JSRuntime.InvokeAsync<string>("getQuillContent", editorDescription);
+        testCase.PreConditions   = await JSRuntime.InvokeAsync<string>("getQuillContent", editorPreConditions);
+        testCase.Dependencies    = await JSRuntime.InvokeAsync<string>("getQuillContent", editorDependencies);
+        testCase.TestData        = await JSRuntime.InvokeAsync<string>("getQuillContent", editorTestData);
+        testCase.PostCondition   = await JSRuntime.InvokeAsync<string>("getQuillContent", editorPostCondition);
+        testCase.Notes           = await JSRuntime.InvokeAsync<string>("getQuillContent", editorNotes);
+
+        DbContext.Attach(testCase).State = EntityState.Modified;
+        try { await DbContext.SaveChangesAsync(); }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!DbContext.TestCases.Any(e => e.Id == testCase.Id))
+            { NavigationManager.NavigateTo("/projects"); return; }
+            throw;
+        }
+        NavigationManager.NavigateTo($"/testcases/details/{testCase.Id}");
+    }
+
+    private async Task AddStep()
+    {
+        if (!canEdit || testCase == null) return;
+        newStep.Description    = await JSRuntime.InvokeAsync<string>("getQuillContent", editorStepDesc);
+        newStep.ExpectedResult = await JSRuntime.InvokeAsync<string>("getQuillContent", editorExpected);
+        newStep.ActualResult   = await JSRuntime.InvokeAsync<string>("getQuillContent", editorActual);
+        newStep.TestCaseId = Id;
+
+        DbContext.TestSteps.Add(newStep);
+        await DbContext.SaveChangesAsync();
+
+        // Clear editor content without destroying/recreating Quill (avoids stacking toolbars)
+        await JSRuntime.InvokeVoidAsync("clearQuillEditor", editorStepDesc);
+        await JSRuntime.InvokeVoidAsync("clearQuillEditor", editorExpected);
+        await JSRuntime.InvokeVoidAsync("clearQuillEditor", editorActual);
+
+        await LoadData();
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,242 @@
+@page "/testcases/details/{Id:int}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<PageTitle>Test Case Details</PageTitle>
+
+@if (testCase == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h1 class="mb-0">@testCase.Title</h1>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="badge fs-6 @PriorityBadge(testCase.Priority)">@testCase.Priority</span>
+            <span class="badge fs-6 @StatusBadge(testCase.Status)">@testCase.Status</span>
+            @if (canEdit)
+            {
+                <a href="/testcases/edit/@testCase.Id" class="btn btn-outline-primary btn-sm">Edit Case</a>
+                <a href="/testcases/delete/@testCase.Id" class="btn btn-outline-danger btn-sm">Delete Case</a>
+            }
+        </div>
+    </div>
+    <p class="text-muted small">ID: @testCase.Id &nbsp;|&nbsp; Suite: <a href="/testsuites/details/@testCase.TestSuiteId">@testCase.TestSuite?.Title</a></p>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "details" ? "active" : "")"
+                    @onclick='() => activeTab = "details"'>
+                Case Details
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "steps" ? "active" : "")"
+                    @onclick='() => activeTab = "steps"'>
+                Test Steps
+                @if (testCase.TestSteps.Any())
+                {
+                    <span class="badge bg-secondary ms-1">@testCase.TestSteps.Count</span>
+                }
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab: Case Details -->
+    @if (activeTab == "details")
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header bg-light"><strong>Overview</strong></div>
+                    <div class="card-body">
+                        <p><strong>ID / Ref:</strong> @testCase.Id</p>
+                        <p><strong>Priority:</strong> @testCase.Priority</p>
+                        <p><strong>Status:</strong> @testCase.Status</p>
+                        @if (!string.IsNullOrWhiteSpace(testCase.DefectId))
+                        {
+                            <p><strong>Defect ID:</strong> @testCase.DefectId</p>
+                        }
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header bg-light"><strong>Description</strong></div>
+                    <div class="card-body">
+                        @((MarkupString)(testCase.Description ?? "<em class='text-muted'>None</em>"))
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header bg-light"><strong>Notes</strong></div>
+                    <div class="card-body">
+                        @((MarkupString)(testCase.Notes ?? "<em class='text-muted'>None</em>"))
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header bg-light"><strong>Pre-Conditions</strong></div>
+                    <div class="card-body">
+                        @((MarkupString)(testCase.PreConditions ?? "<em class='text-muted'>None</em>"))
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header bg-light"><strong>Dependencies</strong></div>
+                    <div class="card-body">
+                        @((MarkupString)(testCase.Dependencies ?? "<em class='text-muted'>None</em>"))
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header bg-light"><strong>Test Data</strong></div>
+                    <div class="card-body">
+                        @((MarkupString)(testCase.TestData ?? "<em class='text-muted'>None</em>"))
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header bg-light"><strong>Post-Condition</strong></div>
+                    <div class="card-body">
+                        @((MarkupString)(testCase.PostCondition ?? "<em class='text-muted'>None</em>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Tab: Test Steps -->
+    @if (activeTab == "steps")
+    {
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Steps for this test case</h5>
+            @if (canEdit)
+            {
+                <a href="/teststeps/create?testCaseId=@testCase.Id" class="btn btn-primary btn-sm">+ Add Step</a>
+            }
+        </div>
+
+        @if (!testCase.TestSteps.Any())
+        {
+            <div class="alert alert-info">No steps added yet. @(canEdit ? "Click \"+ Add Step\" to create the first step." : "")</div>
+        }
+        else
+        {
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 5%">#</th>
+                        <th style="width: 33%">Step Description</th>
+                        <th style="width: 28%">Expected Result</th>
+                        <th style="width: 22%">Actual Result</th>
+                        @if (canEdit)
+                        {
+                            <th style="width: 12%">Actions</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var step in testCase.TestSteps.OrderBy(s => s.StepNumber))
+                    {
+                        <tr>
+                            <td class="text-center fw-bold">@step.StepNumber</td>
+                            <td>@((MarkupString)(step.Description ?? ""))</td>
+                            <td>@((MarkupString)(step.ExpectedResult ?? ""))</td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(step.ActualResult))
+                                {
+                                    @((MarkupString)(step.ActualResult))
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">—</span>
+                                }
+                            </td>
+                            @if (canEdit)
+                            {
+                                <td>
+                                    <a href="/teststeps/edit/@step.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <a href="/teststeps/delete/@step.Id" class="btn btn-sm btn-outline-danger ms-1">Delete</a>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+
+    <div class="mt-4 mb-5">
+        <a href="/testsuites/details/@testCase.TestSuiteId" class="btn btn-secondary">Back to Test Suite</a>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [SupplyParameterFromQuery(Name = "tab")]
+    public string? TabParam { get; set; }
+
+    private TestCase? testCase;
+    private bool canEdit = false;
+    private string activeTab = "details";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        if (user != null && (user.Role == "Administrator" || user.Role == "Editor"))
+        {
+            canEdit = true;
+        }
+
+        // Default to steps tab if arriving back from step CRUD pages
+        if (TabParam == "steps")
+        {
+            activeTab = "steps";
+        }
+
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        testCase = await DbContext.TestCases
+            .Include(tc => tc.TestSteps)
+            .Include(tc => tc.TestSuite)
+            .FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (testCase == null)
+        {
+            NavigationManager.NavigateTo("/projects");
+        }
+    }
+
+    private static string StatusBadge(string? status) => status switch
+    {
+        "Pass" => "bg-success",
+        "Fail" => "bg-danger",
+        _ => "bg-warning text-dark"
+    };
+
+    private static string PriorityBadge(string? priority) => priority switch
+    {
+        "High" => "bg-danger",
+        "Medium" => "bg-warning text-dark",
+        _ => "bg-secondary"
+    };
+}

@@ -1,0 +1,189 @@
+@page "/testcases/create"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@attribute [Authorize]
+
+<PageTitle>Create Test Case</PageTitle>
+
+<h1>Create Test Case</h1>
+
+@if (!canEdit)
+{
+    <p>You do not have permission to create test cases.</p>
+}
+else
+{
+    <hr />
+    <div class="row">
+        <div class="col-md-8">
+            <EditForm Model="testCase" OnValidSubmit="AddTestCase" FormName="createTestCase">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+                
+                <input type="hidden" @bind="testCase.TestSuiteId" />
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title:</label>
+                    <InputText id="title" @bind-Value="testCase.Title" class="form-control" />
+                    <ValidationMessage For="() => testCase.Title" class="text-danger" />
+                </div>
+
+                <div class="mb-3" style="margin-bottom: 60px !important;">
+                    <label for="description" class="form-label">Description:</label>
+                    <div @ref="editorDescription" style="height: 150px;"></div>
+                </div>
+
+                <div class="mb-3" style="margin-bottom: 60px !important;">
+                    <label for="preConditions" class="form-label">Pre-Conditions:</label>
+                    <div @ref="editorPreConditions" style="height: 150px;"></div>
+                </div>
+
+                <div class="mb-3" style="margin-bottom: 60px !important;">
+                    <label for="dependencies" class="form-label">Dependencies:</label>
+                    <div @ref="editorDependencies" style="height: 150px;"></div>
+                </div>
+
+                <div class="mb-3" style="margin-bottom: 60px !important;">
+                    <label for="testData" class="form-label">Test Data:</label>
+                    <div @ref="editorTestData" style="height: 150px;"></div>
+                </div>
+
+                <div class="mb-3" style="margin-bottom: 60px !important;">
+                    <label for="postCondition" class="form-label">Post-Condition:</label>
+                    <div @ref="editorPostCondition" style="height: 150px;"></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="status" class="form-label">Status:</label>
+                        <InputSelect id="status" @bind-Value="testCase.Status" class="form-select">
+                            <option value="">-- Select Status --</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Pass">Pass</option>
+                            <option value="Fail">Fail</option>
+                        </InputSelect>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="priority" class="form-label">Priority:</label>
+                        <InputSelect id="priority" @bind-Value="testCase.Priority" class="form-select">
+                            <option value="">-- Select Priority --</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </InputSelect>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="defectId" class="form-label">Defect ID (Link):</label>
+                        <InputText id="defectId" @bind-Value="testCase.DefectId" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="mb-3" style="margin-bottom: 60px !important;">
+                    <label for="notes" class="form-label">Notes:</label>
+                    <div @ref="editorNotes" style="height: 150px;"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/testsuites/details/@SuiteId">Back to Test Suite</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "suiteId")]
+    public int SuiteId { get; set; }
+
+    [SupplyParameterFromForm]
+    private TestCase testCase { get; set; } = new();
+
+    private bool canEdit = false;
+    private ElementReference editorDescription;
+    private ElementReference editorPreConditions;
+    private ElementReference editorDependencies;
+    private ElementReference editorTestData;
+    private ElementReference editorPostCondition;
+    private ElementReference editorNotes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        if (user != null && (user.Role == "Administrator" || user.Role == "Editor"))
+        {
+            canEdit = true;
+        }
+        
+        if (testCase.TestSuiteId == 0)
+        {
+            testCase.TestSuiteId = SuiteId;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && canEdit)
+        {
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                if (!window.quillInitialized) {
+                    window.initQuill = function(element, initialContent) {
+                        var quill = new Quill(element, { 
+                            theme: 'snow',
+                            modules: {
+                                toolbar: [
+                                    [{ 'header': [1, 2, 3, false] }],
+                                    ['bold', 'italic', 'underline', 'strike'],
+                                    ['image', 'link', 'blockquote', 'code-block'],
+                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                                ]
+                            }
+                        });
+                        quill.root.innerHTML = initialContent || '';
+                        element.quill = quill;
+                    };
+                    window.getQuillContent = function(element) {
+                        return element.quill ? element.quill.root.innerHTML : '';
+                    };
+                    window.quillInitialized = true;
+                }
+            ");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorDescription, testCase.Description ?? "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorPreConditions, testCase.PreConditions ?? "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorDependencies, testCase.Dependencies ?? "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorTestData, testCase.TestData ?? "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorPostCondition, testCase.PostCondition ?? "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorNotes, testCase.Notes ?? "");
+        }
+    }
+
+    private async Task AddTestCase()
+    {
+        if (canEdit)
+        {
+            testCase.Description = await JSRuntime.InvokeAsync<string>("getQuillContent", editorDescription);
+            testCase.PreConditions = await JSRuntime.InvokeAsync<string>("getQuillContent", editorPreConditions);
+            testCase.Dependencies = await JSRuntime.InvokeAsync<string>("getQuillContent", editorDependencies);
+            testCase.TestData = await JSRuntime.InvokeAsync<string>("getQuillContent", editorTestData);
+            testCase.PostCondition = await JSRuntime.InvokeAsync<string>("getQuillContent", editorPostCondition);
+            testCase.Notes = await JSRuntime.InvokeAsync<string>("getQuillContent", editorNotes);
+            
+            DbContext.TestCases.Add(testCase);
+            await DbContext.SaveChangesAsync();
+            NavigationManager.NavigateTo($"/testsuites/details/{testCase.TestSuiteId}");
+        }
+    }
+}

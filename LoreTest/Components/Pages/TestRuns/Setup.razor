@@ -1,0 +1,216 @@
+@page "/testruns/setup"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@attribute [Authorize]
+
+<PageTitle>Setup Test Run</PageTitle>
+
+<h1>Setup Test Run</h1>
+
+@if (project == null)
+{
+    <p><em>Loading project...</em></p>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Project: @project.Title</h5>
+            <div class="mb-3">
+                <label for="suiteSelect" class="form-label fw-bold">Select Test Suite:</label>
+                <select id="suiteSelect" class="form-select" @onchange="OnSuiteChanged">
+                    <option value="0">-- Select a Suite --</option>
+                    @foreach (var suite in project.TestSuites)
+                    {
+                        <option value="@suite.Id" selected="@(selectedSuiteId == suite.Id)">@suite.Title</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    @if (selectedSuite != null)
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Select Test Cases</h5>
+            </div>
+            <div class="card-body">
+                @if (!selectedSuite.TestCases.Any())
+                {
+                    <p class="text-warning">This suite has no test cases.</p>
+                }
+                else
+                {
+                    <div class="mb-2">
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="SelectAll">Select All</button>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="SelectNone">Select None</button>
+                    </div>
+                    <ul class="list-group">
+                        @foreach (var tc in selectedSuite.TestCases)
+                        {
+                            <li class="list-group-item d-flex align-items-center">
+                                <input class="form-check-input me-3" type="checkbox" 
+                                       id="tc-@tc.Id" 
+                                       @onchange="(e) => ToggleTestCase(tc.Id, e)"
+                                       checked="@selectedTestCaseIds.Contains(tc.Id)" />
+                                <label class="form-check-label flex-grow-1" for="tc-@tc.Id">
+                                    <strong>@tc.Title</strong>
+                                    @if (!string.IsNullOrEmpty(tc.Priority))
+                                    {
+                                        <span class="badge bg-secondary ms-2">@tc.Priority</span>
+                                    }
+                                </label>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 mb-5">
+            <button class="btn btn-success btn-lg" @onclick="StartRun" disabled="@(!selectedTestCaseIds.Any())">
+                Start Execution
+            </button>
+            <a href="/projects/details/@ProjectId" class="btn btn-secondary btn-lg">Cancel</a>
+        </div>
+    }
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "projectId")]
+    public int ProjectId { get; set; }
+
+    private TestProject? project;
+    private int selectedSuiteId;
+    private TestSuite? selectedSuite;
+    private HashSet<int> selectedTestCaseIds = new();
+    private ApplicationUser? currentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        currentUser = await UserManager.GetUserAsync(authState.User);
+
+        if (currentUser == null || currentUser.Role == "Reviewer")
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        project = await DbContext.TestProjects
+            .Include(p => p.TestSuites)
+            .FirstOrDefaultAsync(p => p.Id == ProjectId);
+
+        if (project == null)
+        {
+            NavigationManager.NavigateTo("/projects");
+        }
+    }
+
+    private async Task OnSuiteChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int id))
+        {
+            selectedSuiteId = id;
+            if (id > 0)
+            {
+                selectedSuite = await DbContext.TestSuites
+                    .Include(s => s.TestCases)
+                    .FirstOrDefaultAsync(s => s.Id == id);
+
+                if (selectedSuite != null)
+                {
+                    selectedTestCaseIds = selectedSuite.TestCases.Select(tc => tc.Id).ToHashSet();
+                }
+            }
+            else
+            {
+                selectedSuite = null;
+                selectedTestCaseIds.Clear();
+            }
+        }
+    }
+
+    private void ToggleTestCase(int id, ChangeEventArgs e)
+    {
+        if (e.Value is bool checkedValue)
+        {
+            if (checkedValue) selectedTestCaseIds.Add(id);
+            else selectedTestCaseIds.Remove(id);
+        }
+    }
+
+    private void SelectAll()
+    {
+        if (selectedSuite != null)
+        {
+            selectedTestCaseIds = selectedSuite.TestCases.Select(tc => tc.Id).ToHashSet();
+        }
+    }
+
+    private void SelectNone()
+    {
+        selectedTestCaseIds.Clear();
+    }
+
+    private async Task StartRun()
+    {
+        if (project == null || selectedSuite == null || !selectedTestCaseIds.Any() || currentUser == null) return;
+
+        // Get next global sequential number
+        int nextRunNumber = 1;
+        if (await DbContext.TestRuns.AnyAsync())
+        {
+            nextRunNumber = await DbContext.TestRuns.MaxAsync(r => r.RunNumber) + 1;
+        }
+
+        var newRun = new TestRun
+        {
+            RunNumber = nextRunNumber,
+            StartTime = DateTime.UtcNow,
+            TestProjectId = project.Id,
+            TestSuiteId = selectedSuite.Id,
+            StartedByUserId = currentUser.Id,
+            Status = "In Progress"
+        };
+
+        // Create Case Results and Step Results placeholders
+        var cases = await DbContext.TestCases
+            .Include(tc => tc.TestSteps)
+            .Where(tc => selectedTestCaseIds.Contains(tc.Id))
+            .ToListAsync();
+
+        foreach (var tc in cases)
+        {
+            var caseResult = new TestRunCaseResult
+            {
+                TestCaseId = tc.Id,
+                Status = "Pending"
+            };
+
+            foreach (var step in tc.TestSteps.OrderBy(s => s.StepNumber))
+            {
+                caseResult.StepResults.Add(new TestRunStepResult
+                {
+                    TestStepId = step.Id,
+                    Status = "Not Run"
+                });
+            }
+
+            newRun.CaseResults.Add(caseResult);
+        }
+
+        DbContext.TestRuns.Add(newRun);
+        await DbContext.SaveChangesAsync();
+
+        NavigationManager.NavigateTo($"/testruns/execute/{newRun.Id}");
+    }
+}

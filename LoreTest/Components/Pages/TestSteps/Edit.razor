@@ -1,0 +1,153 @@
+@page "/teststeps/edit/{Id:int}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@attribute [Authorize]
+
+<PageTitle>Edit Test Step</PageTitle>
+
+@if (!canEdit)
+{
+    <div class="alert alert-danger">You do not have permission to edit test steps.</div>
+}
+else if (step == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/testsuites/details/@step.TestCase?.TestSuiteId">Test Suite</a></li>
+            <li class="breadcrumb-item"><a href="/testcases/details/@step.TestCaseId?tab=steps">@step.TestCase?.Title</a></li>
+            <li class="breadcrumb-item active">Edit Step @step.StepNumber</li>
+        </ol>
+    </nav>
+
+    <h1>Edit Test Step</h1>
+    <p class="text-muted">Step <strong>@step.StepNumber</strong> &mdash; @step.TestCase?.Title</p>
+
+    <hr />
+    <div class="row">
+        <div class="col-md-10 col-lg-8">
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Step Number</label>
+                <input type="number" class="form-control" style="max-width: 120px;"
+                       @bind="step.StepNumber" min="1" />
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Step Description</label>
+                    <div @ref="editorDescription" style="height: 180px;"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Expected Result</label>
+                    <div @ref="editorExpectedResult" style="height: 180px;"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Actual Result <span class="text-muted small">(if different)</span></label>
+                    <div @ref="editorActualResult" style="height: 180px;"></div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2" style="margin-top: 55px;">
+                <button class="btn btn-primary" @onclick="SaveStep">Save Changes</button>
+                <a href="/testcases/details/@step.TestCaseId?tab=steps" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private TestStep? step;
+    private bool canEdit = false;
+    private bool quillReady = false;
+
+    private ElementReference editorDescription;
+    private ElementReference editorExpectedResult;
+    private ElementReference editorActualResult;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        if (user != null && (user.Role == "Administrator" || user.Role == "Editor"))
+        {
+            canEdit = true;
+        }
+
+        if (canEdit)
+        {
+            step = await DbContext.TestSteps
+                .Include(s => s.TestCase)
+                    .ThenInclude(tc => tc!.TestSuite)
+                .FirstOrDefaultAsync(s => s.Id == Id);
+
+            if (step == null)
+            {
+                NavigationManager.NavigateTo("/projects");
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && canEdit && step != null && !quillReady)
+        {
+            quillReady = true;
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                if (!window.quillInitialized) {
+                    window.initQuill = function(element, initialContent) {
+                        var quill = new Quill(element, {
+                            theme: 'snow',
+                            modules: {
+                                toolbar: [
+                                    [{ 'header': [1, 2, 3, false] }],
+                                    ['bold', 'italic', 'underline', 'strike'],
+                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                    ['link', 'blockquote', 'code-block']
+                                ]
+                            }
+                        });
+                        quill.root.innerHTML = initialContent || '';
+                        element.quill = quill;
+                    };
+                    window.getQuillContent = function(element) {
+                        return element.quill ? element.quill.root.innerHTML : '';
+                    };
+                    window.quillInitialized = true;
+                }
+            ");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorDescription, step.Description ?? "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorExpectedResult, step.ExpectedResult ?? "");
+            await JSRuntime.InvokeVoidAsync("initQuill", editorActualResult, step.ActualResult ?? "");
+        }
+    }
+
+    private async Task SaveStep()
+    {
+        if (!canEdit || step == null) return;
+
+        step.Description = await JSRuntime.InvokeAsync<string>("getQuillContent", editorDescription);
+        step.ExpectedResult = await JSRuntime.InvokeAsync<string>("getQuillContent", editorExpectedResult);
+        step.ActualResult = await JSRuntime.InvokeAsync<string>("getQuillContent", editorActualResult);
+
+        DbContext.TestSteps.Update(step);
+        await DbContext.SaveChangesAsync();
+
+        NavigationManager.NavigateTo($"/testcases/details/{step.TestCaseId}?tab=steps");
+    }
+}

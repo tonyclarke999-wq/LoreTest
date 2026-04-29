@@ -1,0 +1,275 @@
+@page "/testruns/execute/{RunId:int}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@attribute [Authorize]
+
+<PageTitle>Execute Test Run</PageTitle>
+
+@if (testRun == null)
+{
+    <div class="p-5 text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading Test Run #@RunId...</p>
+    </div>
+}
+else if (testRun.Status == "Completed")
+{
+    <div class="alert alert-success">
+        <h4 class="alert-heading">Execution Completed!</h4>
+        <p>This test run was completed on @testRun.EndTime?.ToLocalTime().</p>
+        <hr>
+        <a href="/testruns/details/@testRun.Id" class="btn btn-success">View Final Results</a>
+    </div>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Run #@testRun.RunNumber <small class="text-muted fs-5">Execution</small></h1>
+        <div class="text-end">
+            <div class="fw-bold">@testRun.Project?.Title</div>
+            <div class="text-muted">@testRun.TestSuite?.Title</div>
+        </div>
+    </div>
+
+    <div class="progress mb-4" style="height: 25px;">
+        @{
+            var totalSteps = flattenedSteps.Count;
+            var completedSteps = flattenedSteps.Count(s => s.StepResult.Status != "Not Run");
+            var percent = totalSteps > 0 ? (int)((double)completedSteps / totalSteps * 100) : 0;
+        }
+        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" 
+             style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">
+            @percent% Complete (@completedSteps / @totalSteps Steps)
+        </div>
+    </div>
+
+    @if (currentStepIndex >= 0 && currentStepIndex < flattenedSteps.Count)
+    {
+        var current = flattenedSteps[currentStepIndex];
+        
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span>
+                    <strong>Test Case:</strong> @current.CaseResult.TestCase?.Title 
+                    <small class="ms-2 text-info">(Case @(currentCaseIndex + 1) of @testRun.CaseResults.Count)</small>
+                </span>
+                <span class="badge bg-light text-dark">Step @current.StepResult.TestStep?.StepNumber</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 border-end">
+                        <h6 class="text-uppercase text-muted fw-bold small mb-3">Requirements</h6>
+                        <div class="mb-3">
+                            <label class="fw-bold d-block mb-1">Step Description:</label>
+                            <div class="p-2 bg-light border rounded">
+                                @((MarkupString)(current.StepResult.TestStep?.Description ?? "<em>No description provided.</em>"))
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold d-block mb-1">Expected Result:</label>
+                            <div class="p-2 bg-light border rounded">
+                                @((MarkupString)(current.StepResult.TestStep?.ExpectedResult ?? "<em>No expected result defined.</em>"))
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 ps-md-4">
+                        <h6 class="text-uppercase text-muted fw-bold small mb-3">Actual Execution</h6>
+                        
+                        <div class="mb-4">
+                            <label class="fw-bold d-block mb-2">Set Status:</label>
+                            <div class="btn-group w-100" role="group">
+                                <button type="button" class="btn @(current.StepResult.Status == "Pass" ? "btn-success" : "btn-outline-success")"
+                                        @onclick='() => SetStepStatus("Pass")'>
+                                    <i class="bi bi-check-circle me-1"></i> PASS
+                                </button>
+                                <button type="button" class="btn @(current.StepResult.Status == "Fail" ? "btn-danger" : "btn-outline-danger")"
+                                        @onclick='() => SetStepStatus("Fail")'>
+                                    <i class="bi bi-x-circle me-1"></i> FAIL
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="actualResult" class="fw-bold d-block mb-2">Actual Result / Notes:</label>
+                            <textarea id="actualResult" class="form-control" rows="5" 
+                                      placeholder="Describe what actually happened..."
+                                      @bind="current.StepResult.ActualResult"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-between">
+                <button class="btn btn-outline-secondary" @onclick="PrevStep" disabled="@(currentStepIndex == 0)">
+                    <i class="bi bi-arrow-left"></i> Previous Step
+                </button>
+                
+                @if (currentStepIndex < flattenedSteps.Count - 1)
+                {
+                    <button class="btn btn-primary" @onclick="NextStep" disabled="@(current.StepResult.Status == "Not Run")">
+                        Next Step <i class="bi bi-arrow-right"></i>
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-success px-5" @onclick="FinishRun" disabled="@(current.StepResult.Status == "Not Run")">
+                        Complete Test Run
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h6>Run Progress Log</h6>
+            <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                <table class="table table-sm table-hover border">
+                    <thead class="sticky-top bg-white border-bottom">
+                        <tr>
+                            <th>Step</th>
+                            <th>Case</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < flattenedSteps.Count; i++)
+                        {
+                            var s = flattenedSteps[i];
+                            <tr class="@(i == currentStepIndex ? "table-primary" : "")" style="cursor:pointer" @onclick="() => currentStepIndex = i">
+                                <td>@s.StepResult.TestStep?.StepNumber</td>
+                                <td class="text-truncate" style="max-width: 200px;">@s.CaseResult.TestCase?.Title</td>
+                                <td>
+                                    @if (s.StepResult.Status == "Pass") { <span class="badge bg-success">P</span> }
+                                    else if (s.StepResult.Status == "Fail") { <span class="badge bg-danger">F</span> }
+                                    else { <span class="badge bg-secondary">-</span> }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int RunId { get; set; }
+
+    private TestRun? testRun;
+    private List<FlatStep> flattenedSteps = new();
+    private int currentStepIndex = 0;
+    private int currentCaseIndex => flattenedSteps.Count > currentStepIndex ? testRun!.CaseResults.ToList().IndexOf(flattenedSteps[currentStepIndex].CaseResult) : 0;
+
+    private class FlatStep
+    {
+        public TestRunCaseResult CaseResult { get; set; } = null!;
+        public TestRunStepResult StepResult { get; set; } = null!;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        if (user == null || user.Role == "Reviewer")
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        testRun = await DbContext.TestRuns
+            .Include(r => r.Project)
+            .Include(r => r.TestSuite)
+            .Include(r => r.CaseResults)
+                .ThenInclude(cr => cr.TestCase)
+            .Include(r => r.CaseResults)
+                .ThenInclude(cr => cr.StepResults)
+                    .ThenInclude(sr => sr.TestStep)
+            .FirstOrDefaultAsync(r => r.Id == RunId);
+
+        if (testRun == null)
+        {
+            NavigationManager.NavigateTo("/projects");
+            return;
+        }
+
+        // Flatten steps for easier iteration
+        foreach (var cr in testRun.CaseResults.OrderBy(cr => cr.Id))
+        {
+            foreach (var sr in cr.StepResults.OrderBy(sr => sr.TestStep?.StepNumber ?? 0))
+            {
+                flattenedSteps.Add(new FlatStep { CaseResult = cr, StepResult = sr });
+            }
+        }
+
+        // Find first non-completed step
+        currentStepIndex = flattenedSteps.FindIndex(s => s.StepResult.Status == "Not Run");
+        if (currentStepIndex == -1) currentStepIndex = 0;
+    }
+
+    private void SetStepStatus(string status)
+    {
+        if (currentStepIndex < flattenedSteps.Count)
+        {
+            flattenedSteps[currentStepIndex].StepResult.Status = status;
+        }
+    }
+
+    private async Task NextStep()
+    {
+        await SaveProgress();
+        if (currentStepIndex < flattenedSteps.Count - 1)
+        {
+            currentStepIndex++;
+        }
+    }
+
+    private async Task PrevStep()
+    {
+        await SaveProgress();
+        if (currentStepIndex > 0)
+        {
+            currentStepIndex--;
+        }
+    }
+
+    private async Task SaveProgress()
+    {
+        await DbContext.SaveChangesAsync();
+    }
+
+    private async Task FinishRun()
+    {
+        if (testRun == null) return;
+
+        // Finalize all case results based on step results
+        foreach (var cr in testRun.CaseResults)
+        {
+            if (cr.StepResults.Any(sr => sr.Status == "Fail"))
+            {
+                cr.Status = "Fail";
+            }
+            else if (cr.StepResults.All(sr => sr.Status == "Pass"))
+            {
+                cr.Status = "Pass";
+            }
+            else
+            {
+                cr.Status = "Incomplete";
+            }
+        }
+
+        testRun.Status = "Completed";
+        testRun.EndTime = DateTime.UtcNow;
+        await DbContext.SaveChangesAsync();
+
+        NavigationManager.NavigateTo($"/testruns/details/{testRun.Id}");
+    }
+}

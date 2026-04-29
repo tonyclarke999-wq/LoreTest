@@ -1,0 +1,125 @@
+@page "/testruns"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@attribute [Authorize]
+
+<PageTitle>Test Runs</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Test Runs</h1>
+    @if (canCreateRun)
+    {
+        <a href="/projects" class="btn btn-primary">Start New Run (from Projects)</a>
+    }
+</div>
+
+@if (testRuns == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!testRuns.Any())
+{
+    <div class="alert alert-info">
+        No test runs have been recorded yet.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Run #</th>
+                    <th>Date Started</th>
+                    <th>Project</th>
+                    <th>Suite</th>
+                    <th>Started By</th>
+                    <th>Status</th>
+                    <th>Result</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var run in testRuns)
+                {
+                    <tr>
+                        <td class="fw-bold">@run.RunNumber</td>
+                        <td>@run.StartTime.ToLocalTime().ToString("g")</td>
+                        <td>@run.Project?.Title</td>
+                        <td>@run.TestSuite?.Title</td>
+                        <td>@run.User?.Name</td>
+                        <td>
+                            @if (run.Status == "Completed")
+                            {
+                                <span class="badge bg-success">Completed</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">@run.Status</span>
+                            }
+                        </td>
+                        <td>
+                            @{
+                                var total = run.CaseResults.Count;
+                                var passed = run.CaseResults.Count(c => c.Status == "Pass");
+                                var failed = run.CaseResults.Count(c => c.Status == "Fail");
+                            }
+                            @if (total > 0)
+                            {
+                                <div class="d-flex flex-column" style="min-width: 100px;">
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar bg-success" style="width: @(passed * 100 / total)%"></div>
+                                        <div class="progress-bar bg-danger" style="width: @(failed * 100 / total)%"></div>
+                                    </div>
+                                    <small class="text-muted mt-1">@passed Pass, @failed Fail</small>
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="/testruns/details/@run.Id" class="btn btn-sm btn-outline-primary">Details</a>
+                                @if (run.Status != "Completed" && canCreateRun)
+                                {
+                                    <a href="/testruns/execute/@run.Id" class="btn btn-sm btn-success">Resume</a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<TestRun>? testRuns;
+    private bool canCreateRun = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        if (user != null)
+        {
+            if (user.Role != "Reviewer")
+            {
+                canCreateRun = true;
+            }
+        }
+
+        testRuns = await DbContext.TestRuns
+            .Include(r => r.Project)
+            .Include(r => r.TestSuite)
+            .Include(r => r.User)
+            .Include(r => r.CaseResults)
+            .OrderByDescending(r => r.StartTime)
+            .ToListAsync();
+    }
+}

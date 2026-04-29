@@ -1,0 +1,83 @@
+@page "/testcases/delete/{Id:int}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<PageTitle>Delete Test Case</PageTitle>
+
+<h1>Delete Test Case</h1>
+
+@if (!canEdit)
+{
+    <p>You do not have permission to delete test cases.</p>
+}
+else if (testCase == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h3>Are you sure you want to delete this?</h3>
+    <div>
+        <h4>Test Case</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-3">Title</dt>
+            <dd class="col-sm-9">@testCase.Title</dd>
+            
+            <dt class="col-sm-3">Description</dt>
+            <dd class="col-sm-9">@((MarkupString)(testCase.Description ?? ""))</dd>
+            
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9">@testCase.Status</dd>
+        </dl>
+        
+        <EditForm Model="testCase" OnValidSubmit="DeleteTestCase" FormName="deleteTestCase">
+            <button type="submit" class="btn btn-danger">Delete</button> |
+            <a href="/testsuites/details/@testCase.TestSuiteId">Back to Test Suite</a>
+        </EditForm>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private TestCase? testCase;
+    private bool canEdit = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        if (user != null && (user.Role == "Administrator" || user.Role == "Editor"))
+        {
+            canEdit = true;
+        }
+
+        testCase = await DbContext.TestCases.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (testCase == null)
+        {
+            NavigationManager.NavigateTo("/projects");
+        }
+    }
+
+    private async Task DeleteTestCase()
+    {
+        if (canEdit && testCase != null)
+        {
+            DbContext.TestCases.Remove(testCase);
+            await DbContext.SaveChangesAsync();
+            NavigationManager.NavigateTo($"/testsuites/details/{testCase.TestSuiteId}");
+        }
+    }
+}
