@@ -1,5 +1,3 @@
-using LoreTest.Components.Account.Pages;
-using LoreTest.Components.Account.Pages.Manage;
 using LoreTest.Data;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
@@ -11,8 +9,10 @@ using Microsoft.Extensions.Primitives;
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace Microsoft.AspNetCore.Routing
+namespace LoreTest.Components.Account
 {
+    using Microsoft.AspNetCore.Routing;
+
     internal static class IdentityComponentsEndpointRouteBuilderExtensions
     {
         // These endpoints are required by the Identity Razor components defined in the /Components/Account/Pages directory of this project.
@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.Routing
             {
                 IEnumerable<KeyValuePair<string, StringValues>> query = [
                     new("ReturnUrl", returnUrl),
-                    new("Action", ExternalLogin.LoginCallbackAction)];
+                    new("Action", global::LoreTest.Components.Account.Pages.ExternalLogin.LoginCallbackAction)];
 
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
@@ -42,7 +42,6 @@ namespace Microsoft.AspNetCore.Routing
             });
 
             accountGroup.MapPost("/Logout", async (
-                ClaimsPrincipal user,
                 [FromServices] SignInManager<ApplicationUser> signInManager,
                 [FromForm] string returnUrl) =>
             {
@@ -102,7 +101,7 @@ namespace Microsoft.AspNetCore.Routing
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
                     "/Account/Manage/ExternalLogins",
-                    QueryString.Create("Action", ExternalLogins.LinkLoginCallbackAction));
+                    QueryString.Create("Action", global::LoreTest.Components.Account.Pages.Manage.ExternalLogins.LinkLoginCallbackAction));
 
                 var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, signInManager.UserManager.GetUserId(context.User));
                 return TypedResults.Challenge(properties, [provider]);
@@ -113,8 +112,7 @@ namespace Microsoft.AspNetCore.Routing
 
             manageGroup.MapPost("/DownloadPersonalData", async (
                 HttpContext context,
-                [FromServices] UserManager<ApplicationUser> userManager,
-                [FromServices] AuthenticationStateProvider authenticationStateProvider) =>
+                [FromServices] UserManager<ApplicationUser> userManager) =>
             {
                 var user = await userManager.GetUserAsync(context.User);
                 if (user is null)

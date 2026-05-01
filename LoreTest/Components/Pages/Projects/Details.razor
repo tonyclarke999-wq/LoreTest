@@ -95,7 +95,6 @@ else
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = await UserManager.GetUserAsync(authState.User);
-
         if (user != null)
         {
             if (user.Role == "Administrator" || user.Role == "Editor")
