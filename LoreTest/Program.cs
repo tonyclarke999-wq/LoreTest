@@ -65,11 +65,29 @@ app.MapRazorComponents<App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-// Apply migrations on startup
-using (var scope = app.Services.CreateScope())
+// Apply migrations on startup with retries to wait for the database
+for (int i = 0; i < 10; i++)
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();
+    try
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            dbContext.Database.Migrate();
+        }
+        Console.WriteLine("Database migrations applied successfully.");
+        break;
+    }
+    catch (Exception ex)
+    {
+        if (i == 9)
+        {
+            Console.WriteLine("Could not connect to the database after 10 attempts.");
+            throw;
+        }
+        Console.WriteLine($"Database not ready yet... retrying ({i + 1}/10). Error: {ex.Message}");
+        Thread.Sleep(5000); // Wait 5 seconds
+    }
 }
 
 app.Run();
