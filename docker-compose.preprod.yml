@@ -1,0 +1,36 @@
+services:
+  loretest-db-preprod:
+    image: postgres:16-alpine
+    container_name: loretest-db-preprod
+    environment:
+      POSTGRES_DB: loretest_preprod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${PREPROD_DB_PASSWORD:-HomePlate4_PreProd}
+    ports:
+      - "5434:5432"
+    volumes:
+      - loretest-db-data-preprod:/var/lib/postgresql/data
+    networks:
+      - loretest-network-preprod
+
+  loretest-app-preprod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: loretest-app-preprod
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=loretest-db-preprod;Port=5432;Database=loretest_preprod;Username=postgres;Password=${PREPROD_DB_PASSWORD:-HomePlate4_PreProd}
+    ports:
+      - "5002:8080"
+    depends_on:
+      - loretest-db-preprod
+    networks:
+      - loretest-network-preprod
+
+networks:
+  loretest-network-preprod:
+    driver: bridge
+
+volumes:
+  loretest-db-data-preprod:

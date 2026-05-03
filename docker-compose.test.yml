@@ -1,0 +1,36 @@
+services:
+  loretest-db-test:
+    image: postgres:16-alpine
+    container_name: loretest-db-test
+    environment:
+      POSTGRES_DB: loretest_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD:-HomePlate4}
+    ports:
+      - "5433:5432"
+    volumes:
+      - loretest-db-data-test:/var/lib/postgresql/data
+    networks:
+      - loretest-network-test
+
+  loretest-app-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: loretest-app-test
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=loretest-db-test;Port=5432;Database=loretest_test;Username=postgres;Password=${TEST_DB_PASSWORD:-HomePlate4}
+    ports:
+      - "5001:8080"
+    depends_on:
+      - loretest-db-test
+    networks:
+      - loretest-network-test
+
+networks:
+  loretest-network-test:
+    driver: bridge
+
+volumes:
+  loretest-db-data-test:

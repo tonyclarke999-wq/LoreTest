@@ -1,0 +1,101 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+
+  build-and-push:
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: github/docker-login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: github/docker-metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha
+
+      - name: Build and push Docker image
+        uses: github/docker-build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy-test:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Test Environment
+        run: |
+          echo "Deploying to test environment..."
+          # STANDALONE MACHINE:
+          # On your local/standalone machine, you can run:
+          # docker compose -f docker-compose.test.yml pull && docker compose -f docker-compose.test.yml up -d
+
+          # AZURE OPTION (Placeholder):
+          # uses: azure/webapps-deploy@v2
+          # with:
+          #   app-name: 'loretest-test'
+          #   publish-profile: ${{ secrets.AZURE_TEST_PUBLISH_PROFILE }}
+          #   images: 'ghcr.io/${{ github.repository }}:develop'
+
+  deploy-preprod:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to PreProd Environment
+        run: |
+          echo "Deploying to preprod environment..."
+          # STANDALONE MACHINE:
+          # On your standalone preprod machine, you can run:
+          # docker compose -f docker-compose.preprod.yml pull && docker compose -f docker-compose.preprod.yml up -d
+
+          # AZURE OPTION (Placeholder):
+          # uses: azure/webapps-deploy@v2
+          # with:
+          #   app-name: 'loretest-preprod'
+          #   publish-profile: ${{ secrets.AZURE_PREPROD_PUBLISH_PROFILE }}
+          #   images: 'ghcr.io/${{ github.repository }}:main'
