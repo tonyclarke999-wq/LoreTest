@@ -1,0 +1,107 @@
+@page "/bugs"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize]
+
+<PageTitle>Bug Reports</PageTitle>
+
+<h1>Bug Reports</h1>
+
+<p>
+    <a href="/bugs/create" class="btn btn-primary">Report New Bug</a>
+</p>
+
+@if (bugs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!bugs.Any())
+{
+    <p>No bugs found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Severity</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Reporter</th>
+                <th>Assignee</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var bug in bugs)
+            {
+                <tr>
+                    <td>@bug.Id</td>
+                    <td>@bug.Title</td>
+                    <td>
+                        <span class="badge @GetSeverityClass(bug.Severity)">@bug.Severity</span>
+                    </td>
+                    <td>
+                        <span class="badge @GetPriorityClass(bug.Priority)">@bug.Priority</span>
+                    </td>
+                    <td>
+                        <span class="badge @GetStatusClass(bug.Status)">@bug.Status</span>
+                    </td>
+                    <td>@(bug.Reporter?.UserName ?? "Unknown")</td>
+                    <td>@(bug.Assignee?.UserName ?? "Unassigned")</td>
+                    <td>
+                        <a href="/bugs/details/@bug.Id">Details</a> |
+                        <a href="/bugs/edit/@bug.Id">Edit</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Bug>? bugs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bugs = await DbContext.Bugs
+            .Include(b => b.Reporter)
+            .Include(b => b.Assignee)
+            .OrderByDescending(b => b.ReportedDate)
+            .ToListAsync();
+    }
+
+    private string GetSeverityClass(BugSeverity severity) => severity switch
+    {
+        BugSeverity.Critical => "bg-danger",
+        BugSeverity.Major => "bg-warning text-dark",
+        BugSeverity.Minor => "bg-info text-dark",
+        BugSeverity.Cosmetic => "bg-secondary",
+        _ => "bg-light text-dark"
+    };
+
+    private string GetPriorityClass(BugPriority priority) => priority switch
+    {
+        BugPriority.High => "text-danger",
+        BugPriority.Medium => "text-warning",
+        BugPriority.Low => "text-success",
+        _ => ""
+    };
+
+    private string GetStatusClass(BugStatus status) => status switch
+    {
+        BugStatus.Open => "bg-primary",
+        BugStatus.InProgress => "bg-warning text-dark",
+        BugStatus.Resolved => "bg-success",
+        BugStatus.Closed => "bg-secondary",
+        BugStatus.Reopened => "bg-info text-dark",
+        _ => "bg-light text-dark"
+    };
+}

@@ -1,0 +1,200 @@
+@page "/bugs/create"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@using System.IO
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject IWebHostEnvironment Environment
+@attribute [Authorize]
+
+<PageTitle>Report Bug</PageTitle>
+
+<h1>Report New Bug</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+        <EditForm Model="bug" OnValidSubmit="HandleValidSubmit" FormName="CreateBugForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <InputText id="title" @bind-Value="bug.Title" class="form-control" placeholder="Short descriptive title" />
+                <ValidationMessage For="() => bug.Title" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Detailed Description / Reproduction Steps</label>
+                <InputTextArea id="description" @bind-Value="bug.Description" class="form-control" rows="5" placeholder="1. Go to... 2. Click on..." />
+                <ValidationMessage For="() => bug.Description" class="text-danger" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="expected" class="form-label">Expected Result</label>
+                    <InputTextArea id="expected" @bind-Value="bug.ExpectedResult" class="form-control" rows="3" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="actual" class="form-label">Actual Result</label>
+                    <InputTextArea id="actual" @bind-Value="bug.ActualResult" class="form-control" rows="3" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="severity" class="form-label">Severity</label>
+                    <InputSelect id="severity" @bind-Value="bug.Severity" class="form-select">
+                        @foreach (var val in Enum.GetValues<BugSeverity>())
+                        {
+                            <option value="@val">@val</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="priority" class="form-label">Priority</label>
+                    <InputSelect id="priority" @bind-Value="bug.Priority" class="form-select">
+                        @foreach (var val in Enum.GetValues<BugPriority>())
+                        {
+                            <option value="@val">@val</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="environment" class="form-label">Environment</label>
+                    <InputText id="environment" @bind-Value="bug.Environment" class="form-control" placeholder="OS, Browser, Device..." />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="components" class="form-label">Components</label>
+                    <InputText id="components" @bind-Value="bug.Components" class="form-control" placeholder="UI, API, Database..." />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="labels" class="form-label">Labels</label>
+                    <InputText id="labels" @bind-Value="bug.Labels" class="form-control" placeholder="regression, ui-glitch, etc." />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="assignee" class="form-label">Assignee</label>
+                    <InputSelect id="assignee" @bind-Value="bug.AssigneeId" class="form-select">
+                        <option value="">-- Unassigned --</option>
+                        @foreach (var user in users)
+                        {
+                            <option value="@user.Id">@user.UserName</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="dueDate" class="form-label">Due Date</label>
+                    <InputDate id="dueDate" @bind-Value="bug.DueDate" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="affectedVersion" class="form-label">Affected Version</label>
+                    <InputText id="affectedVersion" @bind-Value="bug.AffectedVersion" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="fixVersion" class="form-label">Fix Version</label>
+                    <InputText id="fixVersion" @bind-Value="bug.FixVersion" class="form-control" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="attachments" class="form-label">Attachments (Screenshots, Docs)</label>
+                <InputFile OnChange="LoadFiles" class="form-control" multiple />
+                @if (selectedFiles.Any())
+                {
+                    <ul class="mt-2 list-unstyled">
+                        @foreach (var file in selectedFiles)
+                        {
+                            <li><i class="bi bi-file-earmark"></i> @file.Name (@(file.Size / 1024) KB)</li>
+                        }
+                    </ul>
+                }
+            </div>
+
+            <div class="mt-4 mb-5">
+                <button type="submit" class="btn btn-success me-2">Create Bug Report</button>
+                <a href="/bugs" class="btn btn-secondary">Cancel</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private Bug bug = new();
+    private List<ApplicationUser> users = new();
+    private List<IBrowserFile> selectedFiles = new();
+    private long maxFileSize = 1024 * 1024 * 10; // 10MB
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await UserManager.Users.OrderBy(u => u.UserName).ToListAsync();
+        
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user != null)
+        {
+            bug.ReporterId = user.Id;
+        }
+    }
+
+    private void LoadFiles(InputFileChangeEventArgs e)
+    {
+        selectedFiles.Clear();
+        foreach (var file in e.GetMultipleFiles())
+        {
+            selectedFiles.Add(file);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        DbContext.Bugs.Add(bug);
+        await DbContext.SaveChangesAsync();
+
+        if (selectedFiles.Any())
+        {
+            var uploadsFolder = Path.Combine(Environment.WebRootPath, "uploads", "bugs", bug.Id.ToString());
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            foreach (var file in selectedFiles)
+            {
+                var fileName = file.Name;
+                var filePath = Path.Combine("uploads", "bugs", bug.Id.ToString(), fileName);
+                var fullPath = Path.Combine(Environment.WebRootPath, filePath);
+
+                await using FileStream fs = new(fullPath, FileMode.Create);
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+
+                bug.Attachments.Add(new BugAttachment
+                {
+                    BugId = bug.Id,
+                    FileName = fileName,
+                    FilePath = filePath,
+                    ContentType = file.ContentType,
+                    FileSize = file.Size
+                });
+            }
+
+            await DbContext.SaveChangesAsync();
+        }
+
+        NavigationManager.NavigateTo("/bugs");
+    }
+}

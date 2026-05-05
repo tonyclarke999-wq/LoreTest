@@ -17,6 +17,8 @@ namespace LoreTest.Data
         public DbSet<TestRun> TestRuns { get; set; }
         public DbSet<TestRunCaseResult> TestRunCaseResults { get; set; }
         public DbSet<TestRunStepResult> TestRunStepResults { get; set; }
+        public DbSet<Bug> Bugs { get; set; }
+        public DbSet<BugAttachment> BugAttachments { get; set; }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

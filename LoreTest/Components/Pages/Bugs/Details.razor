@@ -1,0 +1,164 @@
+@page "/bugs/details/{Id:int}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<PageTitle>Bug Details - @bug?.Title</PageTitle>
+
+@if (bug == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Bug #@bug.Id: @bug.Title</h1>
+        <div>
+            <a href="/bugs/edit/@bug.Id" class="btn btn-warning">Edit Bug</a>
+            <a href="/bugs" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    Description & Reproduction Steps
+                </div>
+                <div class="card-body">
+                    <p style="white-space: pre-wrap;">@bug.Description</p>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">Expected Result</div>
+                        <div class="card-body">
+                            <p style="white-space: pre-wrap;">@(bug.ExpectedResult ?? "N/A")</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">Actual Result</div>
+                        <div class="card-body">
+                            <p style="white-space: pre-wrap;">@(bug.ActualResult ?? "N/A")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(bug.Resolution))
+            {
+                <div class="card mb-4 border-success">
+                    <div class="card-header bg-success text-white">Resolution</div>
+                    <div class="card-body">
+                        <p style="white-space: pre-wrap;">@bug.Resolution</p>
+                    </div>
+                </div>
+            }
+
+            <div class="card mb-4">
+                <div class="card-header bg-light">Attachments</div>
+                <div class="card-body">
+                    @if (!bug.Attachments.Any())
+                    {
+                        <p class="text-muted">No attachments found.</p>
+                    }
+                    else
+                    {
+                        <div class="list-group">
+                            @foreach (var attachment in bug.Attachments)
+                            {
+                                <a href="@attachment.FilePath" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <i class="bi bi-file-earmark"></i> @attachment.FileName
+                                    </span>
+                                    <span class="badge bg-primary rounded-pill">@(attachment.FileSize / 1024) KB</span>
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-light">Attributes</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Status <span class="badge bg-primary">@bug.Status</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Severity <span class="badge bg-danger">@bug.Severity</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Priority <span class="badge bg-warning text-dark">@bug.Priority</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Environment:</strong><br />
+                        <span class="text-muted small">@(bug.Environment ?? "Not specified")</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Components:</strong><br />
+                        <span class="text-muted small">@(bug.Components ?? "None")</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Labels:</strong><br />
+                        <span class="text-muted small">@(bug.Labels ?? "None")</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-light">People & Dates</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Reporter:</strong><br />
+                        <span class="text-muted">@(bug.Reporter?.UserName ?? "Unknown")</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Assignee:</strong><br />
+                        <span class="text-muted">@(bug.Assignee?.UserName ?? "Unassigned")</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Reported:</strong><br />
+                        <span class="text-muted small">@bug.ReportedDate.ToLocalTime()</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Due Date:</strong><br />
+                        <span class="text-muted small">@(bug.DueDate?.ToShortDateString() ?? "None")</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Affected Version:</strong><br />
+                        <span class="text-muted small">@(bug.AffectedVersion ?? "Unknown")</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Fix Version:</strong><br />
+                        <span class="text-muted small">@(bug.FixVersion ?? "TBD")</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Bug? bug;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bug = await DbContext.Bugs
+            .Include(b => b.Reporter)
+            .Include(b => b.Assignee)
+            .Include(b => b.Attachments)
+            .FirstOrDefaultAsync(b => b.Id == Id);
+    }
+}
