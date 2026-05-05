@@ -14,9 +14,7 @@ services:
       - loretest-network-preprod
 
   loretest-app-preprod:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/tonyclarke999-wq/loretest:main
     container_name: loretest-app-preprod
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
