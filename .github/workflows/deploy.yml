@@ -70,16 +70,7 @@ jobs:
       - name: Deploy to Test Environment
         run: |
           echo "Deploying to test environment..."
-          # STANDALONE MACHINE:
-          # On your local/standalone machine, you can run:
-          # docker compose -f docker-compose.test.yml pull && docker compose -f docker-compose.test.yml up -d
-
-          # AZURE OPTION (Placeholder):
-          # uses: azure/webapps-deploy@v2
-          # with:
-          #   app-name: 'loretest-test'
-          #   publish-profile: ${{ secrets.AZURE_TEST_PUBLISH_PROFILE }}
-          #   images: 'ghcr.io/${{ github.repository }}:develop'
+          docker compose -f docker-compose.test.yml pull && docker compose -f docker-compose.test.yml up -d
 
   deploy-preprod:
     needs: build-and-push
@@ -89,7 +80,7 @@ jobs:
       - name: Deploy to PreProd Environment
         run: |
           echo "Deploying to preprod environment..."
-          # docker compose -f docker-compose.preprod.yml pull && docker compose -f docker-compose.preprod.yml up -d
+          docker compose -f docker-compose.preprod.yml pull && docker compose -f docker-compose.preprod.yml up -d
 
   playwright-tests:
     needs: deploy-preprod
