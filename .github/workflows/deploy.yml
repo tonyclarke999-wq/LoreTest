@@ -65,21 +65,23 @@ jobs:
   deploy-test:
     needs: build-and-push
     if: github.ref == 'refs/heads/develop'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
+      - uses: actions/checkout@v4
       - name: Deploy to Test Environment
         run: |
-          echo "Deploying to test environment..."
+          echo "Deploying to test environment (Localhost)..."
           docker compose -f docker-compose.test.yml pull && docker compose -f docker-compose.test.yml up -d
 
   deploy-preprod:
     needs: build-and-push
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
+      - uses: actions/checkout@v4
       - name: Deploy to PreProd Environment
         run: |
-          echo "Deploying to preprod environment..."
+          echo "Deploying to preprod environment (Localhost)..."
           docker compose -f docker-compose.preprod.yml pull && docker compose -f docker-compose.preprod.yml up -d
 
   playwright-tests:
