@@ -71,7 +71,8 @@ jobs:
       - name: Deploy to Test Environment
         run: |
           echo "Deploying to test environment (Localhost)..."
-          docker compose -f docker-compose.test.yml pull && docker compose -f docker-compose.test.yml up -d
+          docker compose -f docker-compose.test.yml pull
+          docker compose -f docker-compose.test.yml up -d
 
   deploy-preprod:
     needs: build-and-push
@@ -82,7 +83,8 @@ jobs:
       - name: Deploy to PreProd Environment
         run: |
           echo "Deploying to preprod environment (Localhost)..."
-          docker compose -f docker-compose.preprod.yml pull && docker compose -f docker-compose.preprod.yml up -d
+          docker compose -f docker-compose.preprod.yml pull
+          docker compose -f docker-compose.preprod.yml up -d
 
   playwright-tests:
     needs: deploy-preprod
