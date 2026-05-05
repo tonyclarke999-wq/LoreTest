@@ -98,6 +98,12 @@ else
                             </div>
                         </div>
 
+                        <div class="mb-4">
+                            <button type="button" class="btn btn-warning w-100" @onclick="OpenBugModal">
+                                <i class="bi bi-bug-fill me-1"></i> Report Bug
+                            </button>
+                        </div>
+
                         <div class="mb-3">
                             <label for="actualResult" class="fw-bold d-block mb-2">Actual Result / Notes:</label>
                             <textarea id="actualResult" class="form-control" rows="5" 
@@ -159,6 +165,48 @@ else
     }
 }
 
+@if (showBugModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg shadow-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="bi bi-bug-fill me-2"></i>Report Bug from Execution</h5>
+                    <button type="button" class="btn-close" @onclick="() => showBugModal = false" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Title</label>
+                        <input type="text" class="form-control" @bind="newBug.Title" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Description / Repro Steps</label>
+                        <textarea class="form-control" rows="5" @bind="newBug.Description"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Severity</label>
+                            <select class="form-select" @bind="newBug.Severity">
+                                @foreach (var val in Enum.GetValues<BugSeverity>()) { <option value="@val">@val</option> }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Priority</label>
+                            <select class="form-select" @bind="newBug.Priority">
+                                @foreach (var val in Enum.GetValues<BugPriority>()) { <option value="@val">@val</option> }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showBugModal = false">Cancel</button>
+                    <button type="button" class="btn btn-warning" @onclick="SaveBugFromExecution">Save Bug & Continue Test</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [Parameter] public int RunId { get; set; }
 
@@ -166,6 +214,9 @@ else
     private List<FlatStep> flattenedSteps = new();
     private int currentStepIndex = 0;
     private int currentCaseIndex => flattenedSteps.Count > currentStepIndex ? testRun!.CaseResults.ToList().IndexOf(flattenedSteps[currentStepIndex].CaseResult) : 0;
+
+    private bool showBugModal = false;
+    private Bug newBug = new();
 
     private class FlatStep
     {
@@ -271,5 +322,41 @@ else
         await DbContext.SaveChangesAsync();
 
         NavigationManager.NavigateTo($"/testruns/details/{testRun.Id}");
+    }
+
+    private void OpenBugModal()
+    {
+        if (currentStepIndex < 0 || currentStepIndex >= flattenedSteps.Count) return;
+        
+        var current = flattenedSteps[currentStepIndex];
+        newBug = new Bug
+        {
+            Title = $"Bug in {current.CaseResult.TestCase?.Title}",
+            Description = $"Found during execution of Run #{testRun?.RunNumber}.\n\nTest Case: {current.CaseResult.TestCase?.Title}\nStep: {current.StepResult.TestStep?.Description}\n\nReproduction Steps:\n1. ",
+            ExpectedResult = current.StepResult.TestStep?.ExpectedResult,
+            ActualResult = current.StepResult.ActualResult,
+            Status = BugStatus.Open,
+            Severity = BugSeverity.Major,
+            Priority = BugPriority.Medium,
+            ReportedDate = DateTime.UtcNow
+        };
+        showBugModal = true;
+    }
+
+    private async Task SaveBugFromExecution()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user != null)
+        {
+            newBug.ReporterId = user.Id;
+        }
+
+        DbContext.Bugs.Add(newBug);
+        await DbContext.SaveChangesAsync();
+        
+        showBugModal = false;
+        // Optionally set the step to Fail automatically
+        SetStepStatus("Fail");
     }
 }

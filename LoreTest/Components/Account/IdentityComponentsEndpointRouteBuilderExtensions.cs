@@ -11,8 +11,8 @@ using System.Text.Json;
 
 namespace LoreTest.Components.Account
 {
-    using LoreTest.Components.Account.Pages;
-    using LoreTest.Components.Account.Pages.Manage;
+    using global::LoreTest.Components.Account.Pages;
+    using global::LoreTest.Components.Account.Pages.Manage;
     using Microsoft.AspNetCore.Routing;
 
     internal static class IdentityComponentsEndpointRouteBuilderExtensions
@@ -32,7 +32,7 @@ namespace LoreTest.Components.Account
             {
                 IEnumerable<KeyValuePair<string, StringValues>> query = [
                     new("ReturnUrl", returnUrl),
-                    new("Action", ExternalLogin.LoginCallbackAction)];
+                    new("Action", global::LoreTest.Components.Account.Pages.ExternalLogin.LoginCallbackAction)];
 
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
@@ -103,7 +103,7 @@ namespace LoreTest.Components.Account
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
                     "/Account/Manage/ExternalLogins",
-                    QueryString.Create("Action", ExternalLogins.LinkLoginCallbackAction));
+                    QueryString.Create("Action", global::LoreTest.Components.Account.Pages.Manage.ExternalLogins.LinkLoginCallbackAction));
 
                 var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, signInManager.UserManager.GetUserId(context.User));
                 return TypedResults.Challenge(properties, [provider]);
