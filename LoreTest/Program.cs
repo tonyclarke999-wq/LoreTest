@@ -24,8 +24,8 @@ builder.Services.AddAuthentication(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
-builder.Services.AddTransient<ApplicationDbContext>(p =>
+    options.UseNpgsql(connectionString), ServiceLifetime.Scoped);
+builder.Services.AddScoped<ApplicationDbContext>(p =>
     p.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
