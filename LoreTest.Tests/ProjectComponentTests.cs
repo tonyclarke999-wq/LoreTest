@@ -85,9 +85,9 @@ namespace LoreTest.Tests
 
             // Assert
             var rows = cut.FindAll("tbody tr");
-            Assert.AreEqual(2, rows.Count);
-            Assert.IsTrue(cut.Markup.Contains("Project 1"));
-            Assert.IsTrue(cut.Markup.Contains("Project 2"));
+            Assert.HasCount(2, rows);
+            StringAssert.Contains(cut.Markup, "Project 1");
+            StringAssert.Contains(cut.Markup, "Project 2");
         }
 
         [TestMethod]
@@ -110,7 +110,7 @@ namespace LoreTest.Tests
             var cut = RenderComponent<LoreTest.Components.Pages.Projects.Index>();
 
             // Assert
-            Assert.IsTrue(cut.Markup.Contains("Create New"));
+            StringAssert.Contains(cut.Markup, "Create New");
         }
 
         private Mock<UserManager<ApplicationUser>> CreateUserManagerMock()
