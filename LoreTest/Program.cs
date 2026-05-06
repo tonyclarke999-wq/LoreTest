@@ -59,7 +59,7 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
-app.MapRazorComponents<global::LoreTest.Components.App>()
+app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.
