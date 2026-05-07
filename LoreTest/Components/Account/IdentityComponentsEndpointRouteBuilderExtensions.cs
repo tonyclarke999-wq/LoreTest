@@ -11,8 +11,9 @@ using System.Text.Json;
 
 namespace LoreTest.Components.Account
 {
-    using LoreTest.Components.Account.Pages;
-    using LoreTest.Components.Account.Pages.Manage;
+    // Using global:: to resolve IDE namespace resolution issues
+    using ExternalLogin = global::LoreTest.Components.Account.Pages.ExternalLogin;
+    using ExternalLogins = global::LoreTest.Components.Account.Pages.Manage.ExternalLogins;
     using Microsoft.AspNetCore.Routing;
 
     internal static class IdentityComponentsEndpointRouteBuilderExtensions
