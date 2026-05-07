@@ -9,7 +9,7 @@ using Microsoft.Extensions.Primitives;
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace LoreTest.Components.Account
+namespace LoreTest.Components.Account.Builders
 {
     // Using global:: to resolve IDE namespace resolution issues
     using ExternalLogin = global::LoreTest.Components.Account.Pages.ExternalLogin;

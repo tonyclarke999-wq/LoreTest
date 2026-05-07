@@ -1,5 +1,6 @@
 using LoreTest.Components;
 using LoreTest.Components.Account;
+using LoreTest.Components.Account.Builders;
 using LoreTest.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
