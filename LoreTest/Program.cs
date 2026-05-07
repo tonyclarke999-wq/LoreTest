@@ -1,6 +1,5 @@
 using LoreTest.Components;
 using LoreTest.Components.Account;
-using LoreTest.Components.Account.Builders;
 using LoreTest.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -60,7 +59,7 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
-app.MapRazorComponents<global::LoreTest.Components.App>()
+app.MapRazorComponents<LoreTest.App>()
     .AddInteractiveServerRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.

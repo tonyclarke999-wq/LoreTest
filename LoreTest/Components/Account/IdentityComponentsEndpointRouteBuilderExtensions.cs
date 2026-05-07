@@ -9,11 +9,12 @@ using Microsoft.Extensions.Primitives;
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace LoreTest.Components.Account.Builders
+namespace LoreTest.Components.Account
 {
     // Using global:: to resolve IDE namespace resolution issues
-    using ExternalLogin = global::LoreTest.Components.Account.Pages.ExternalLogin;
-    using ExternalLogins = global::LoreTest.Components.Account.Pages.Manage.ExternalLogins;
+    // Using simplified namespaces to resolve IDE resolution issues
+    using ExternalLogin = LoreTest.Identity.ExternalLogin;
+    using ExternalLogins = LoreTest.Identity.ExternalLogins;
     using Microsoft.AspNetCore.Routing;
 
     internal static class IdentityComponentsEndpointRouteBuilderExtensions
