@@ -8,11 +8,12 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject IJSRuntime JSRuntime
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Create Test Project</PageTitle>
+<PageTitle>@L["CreateTestProject"]</PageTitle>
 
-<h1>Create Test Project</h1>
+<h1>@L["CreateTestProject"]</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -21,12 +22,12 @@
             <ValidationSummary class="text-danger" />
 
             <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
+                <label for="title" class="form-label">@L["Title"]</label>
                 <InputText id="title" @bind-Value="Input.Title" class="form-control" />
                 <ValidationMessage For="() => Input.Title" class="text-danger" />
             </div>
             <div class="mb-3" style="margin-bottom: 60px !important;">
-                <label for="description" class="form-label">Description</label>
+                <label for="description" class="form-label">@L["Description"]</label>
                 <div @ref="editorElement" style="height: 200px;"></div>
             </div>
 
@@ -35,8 +36,8 @@
                 <div class="alert alert-danger">@errorMessage</div>
             }
 
-            <button type="submit" class="btn btn-primary">Create</button>
-            <a href="/projects" class="btn btn-secondary">Back to List</a>
+            <button type="submit" class="btn btn-primary">@L["Create"]</button>
+            <a href="/projects" class="btn btn-secondary">@L["BackToList"]</a>
         </EditForm>
     </div>
 </div>

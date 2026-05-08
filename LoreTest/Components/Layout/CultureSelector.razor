@@ -1,0 +1,35 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.Localization
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
+
+<div class="culture-selector">
+    <form action="/Culture/SetCulture" method="post" class="d-inline-flex">
+        <AntiforgeryToken />
+        <select name="culture" class="form-select form-select-sm" onchange="this.form.submit()">
+            @foreach (var culture in SupportedCultures)
+            {
+                <option value="@culture.Name" selected="@(culture.Name == CurrentCulture.Name)">
+                    @culture.NativeName
+                </option>
+            }
+        </select>
+        <input type="hidden" name="returnUrl" value="@GetLocalPath(NavigationManager.Uri)" />
+    </form>
+</div>
+
+@code {
+    private CultureInfo CurrentCulture => CultureInfo.CurrentUICulture;
+    private List<CultureInfo> SupportedCultures = new List<CultureInfo>
+    {
+        new CultureInfo("en"),
+        new CultureInfo("fr"),
+        new CultureInfo("de"),
+        new CultureInfo("es")
+    };
+
+    private string GetLocalPath(string uri)
+    {
+        return new Uri(uri).PathAndQuery;
+    }
+}

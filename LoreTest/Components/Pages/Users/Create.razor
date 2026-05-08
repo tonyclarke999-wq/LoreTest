@@ -6,11 +6,12 @@
 @using System.ComponentModel.DataAnnotations
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Create User</PageTitle>
+<PageTitle>@L["CreateUser"]</PageTitle>
 
-<h1>Create User</h1>
+<h1>@L["CreateUser"]</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -19,39 +20,39 @@
             <ValidationSummary class="text-danger" />
 
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
+                <label for="email" class="form-label">@L["Email"]</label>
                 <InputText id="email" @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
                 <ValidationMessage For="() => Input.Email" class="text-danger" />
             </div>
             <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
+                <label for="password" class="form-label">@L["Password"]</label>
                 <InputText id="password" type="password" @bind-Value="Input.Password" class="form-control" aria-required="true" />
                 <ValidationMessage For="() => Input.Password" class="text-danger" />
             </div>
             <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
+                <label for="name" class="form-label">@L["Name"]</label>
                 <InputText id="name" @bind-Value="Input.Name" class="form-control" />
             </div>
             <div class="mb-3">
-                <label for="jobTitle" class="form-label">Job Title</label>
+                <label for="jobTitle" class="form-label">@L["JobTitle"]</label>
                 <InputText id="jobTitle" @bind-Value="Input.JobTitle" class="form-control" />
             </div>
             <div class="mb-3">
-                <label for="role" class="form-label">Role</label>
+                <label for="role" class="form-label">@L["Role"]</label>
                 <InputSelect id="role" @bind-Value="Input.Role" class="form-select">
-                    <option value="">Select a Role...</option>
-                    <option value="Administrator">Administrator</option>
-                    <option value="Editor">Editor</option>
-                    <option value="Tester">Tester</option>
-                    <option value="Reviewer">Reviewer</option>
+                    <option value="">@L["SelectRole"]</option>
+                    <option value="Administrator">@L["Administrator"]</option>
+                    <option value="Editor">@L["Editor"]</option>
+                    <option value="Tester">@L["Tester"]</option>
+                    <option value="Reviewer">@L["Reviewer"]</option>
                 </InputSelect>
             </div>
             <div class="mb-3">
-                <label for="startDate" class="form-label">Start Date</label>
+                <label for="startDate" class="form-label">@L["StartDate"]</label>
                 <InputDate id="startDate" @bind-Value="Input.StartDate" class="form-control" />
             </div>
             <div class="mb-3">
-                <label for="endDate" class="form-label">End Date</label>
+                <label for="endDate" class="form-label">@L["EndDate"]</label>
                 <InputDate id="endDate" @bind-Value="Input.EndDate" class="form-control" />
                 <ValidationMessage For="() => Input.EndDate" class="text-danger" />
             </div>
@@ -61,8 +62,8 @@
                 <div class="alert alert-danger">@errorMessage</div>
             }
 
-            <button type="submit" class="btn btn-primary">Create</button>
-            <a href="/users" class="btn btn-secondary">Back to List</a>
+            <button type="submit" class="btn btn-primary">@L["Create"]</button>
+            <a href="/users" class="btn btn-secondary">@L["BackToList"]</a>
         </EditForm>
     </div>
 </div>

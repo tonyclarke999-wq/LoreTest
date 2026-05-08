@@ -1,0 +1,97 @@
+@page "/admin/settings"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IStringLocalizer<SharedResource> L
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+<PageTitle>@L["AdminSettings"]</PageTitle>
+
+<h1>@L["AdminSettings"]</h1>
+
+<hr />
+
+@if (settings == null)
+{
+    <p><em>@L["Loading"]</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            @if (successMessage != null)
+            {
+                <div class="alert alert-success">@successMessage</div>
+            }
+
+            <EditForm Model="settings" OnValidSubmit="HandleValidSubmit" FormName="AdminSettingsForm">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        @L["TranslationServiceSettings"]
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="translationApi" class="form-label">@L["TranslationAPI"]</label>
+                            <InputSelect id="translationApi" @bind-Value="settings.TranslationApi" class="form-select">
+                                <option value="Mock">Mock (Demo Mode)</option>
+                                <option value="Google">Google Cloud Translation</option>
+                                <option value="Azure">Azure Translator</option>
+                                <option value="DeepL">DeepL API</option>
+                            </InputSelect>
+                            <div class="form-text">@L["TranslationApiHelp"]</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="apiKey" class="form-label">@L["APIKey"]</label>
+                            <InputText id="apiKey" @bind-Value="settings.TranslationApiKey" class="form-control" type="password" />
+                            <div class="form-text">@L["ApiKeyHelp"]</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">@L["SaveSettings"]</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    private AppSettings? settings;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+        if (settings == null)
+        {
+            settings = new AppSettings();
+            DbContext.AppSettings.Add(settings);
+            await DbContext.SaveChangesAsync();
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        settings!.LastUpdated = DateTime.UtcNow;
+        settings.UpdatedBy = authState.User.Identity?.Name;
+
+        DbContext.AppSettings.Update(settings);
+        await DbContext.SaveChangesAsync();
+        
+        successMessage = L["SettingsSavedSuccessfully"];
+        StateHasChanged();
+        
+        await Task.Delay(3000);
+        successMessage = null;
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,895 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Home" xml:space="preserve">
+    <value>Startseite</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Benutzer</value>
+  </data>
+  <data name="Projects" xml:space="preserve">
+    <value>Projekte</value>
+  </data>
+  <data name="TestRuns" xml:space="preserve">
+    <value>Testläufe</value>
+  </data>
+  <data name="Bugs" xml:space="preserve">
+    <value>Fehler</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Abmelden</value>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>Registrieren</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="PreferredLanguage" xml:space="preserve">
+    <value>Bevorzugte Sprache</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="WelcomeTitle" xml:space="preserve">
+    <value>Hallo Welt!</value>
+  </data>
+  <data name="WelcomeMessage" xml:space="preserve">
+    <value>Willkommen in Ihrer neuen App.</value>
+  </data>
+  <data name="ManageUsers" xml:space="preserve">
+    <value>Anwendungsbenutzer verwalten</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>Über</value>
+  </data>
+  <data name="CreateNew" xml:space="preserve">
+    <value>Neu erstellen</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Laden...</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="JobTitle" xml:space="preserve">
+    <value>Jobtitel</value>
+  </data>
+  <data name="Role" xml:space="preserve">
+    <value>Rolle</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Startdatum</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>Enddatum</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Bearbeiten</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="CreateUser" xml:space="preserve">
+    <value>Benutzer erstellen</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Passwort</value>
+  </data>
+  <data name="SelectRole" xml:space="preserve">
+    <value>Rolle auswählen...</value>
+  </data>
+  <data name="Editor" xml:space="preserve">
+    <value>Editor</value>
+  </data>
+  <data name="Tester" xml:space="preserve">
+    <value>Tester</value>
+  </data>
+  <data name="Reviewer" xml:space="preserve">
+    <value>Prüfer</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>Zurück zur Liste</value>
+  </data>
+  <data name="EditUser" xml:space="preserve">
+    <value>Benutzer bearbeiten</value>
+  </data>
+  <data name="DeleteUser" xml:space="preserve">
+    <value>Benutzer löschen</value>
+  </data>
+  <data name="DeleteConfirmation" xml:space="preserve">
+    <value>Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?</value>
+  </data>
+  <data name="TestProjects" xml:space="preserve">
+    <value>Testprojekte</value>
+  </data>
+  <data name="NoProjectsFound" xml:space="preserve">
+    <value>Keine Projekte gefunden.</value>
+  </data>
+  <data name="ReferenceNo" xml:space="preserve">
+    <value>Referenznummer</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Titel</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Aktionen</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="CreateTestProject" xml:space="preserve">
+    <value>Testprojekt erstellen</value>
+  </data>
+  <data name="ProjectDetails" xml:space="preserve">
+    <value>Projektdetails</value>
+  </data>
+  <data name="ProjectTitlePrefix" xml:space="preserve">
+    <value>Projekt: </value>
+  </data>
+  <data name="TestSuites" xml:space="preserve">
+    <value>Testsuites</value>
+  </data>
+  <data name="CreateNewTestSuite" xml:space="preserve">
+    <value>Neue Testsuite erstellen</value>
+  </data>
+  <data name="StartTestRun" xml:space="preserve">
+    <value>Testlauf starten</value>
+  </data>
+  <data name="NoTestSuitesFound" xml:space="preserve">
+    <value>Keine Testsuites für dieses Projekt gefunden.</value>
+  </data>
+  <data name="ViewTestCases" xml:space="preserve">
+    <value>Testfälle anzeigen</value>
+  </data>
+  <data name="EditTestProject" xml:space="preserve">
+    <value>Testprojekt bearbeiten</value>
+  </data>
+  <data name="DeleteTestProject" xml:space="preserve">
+    <value>Testprojekt löschen</value>
+  </data>
+  <data name="DeleteConfirmationGeneral" xml:space="preserve">
+    <value>Sind Sie sicher, dass Sie dies löschen möchten?</value>
+  </data>
+  <data name="NoPermissionCreateTestSuite" xml:space="preserve">
+    <value>Sie haben keine Berechtigung zum Erstellen von Testsuites.</value>
+  </data>
+  <data name="BackToProject" xml:space="preserve">
+    <value>Zurück zum Projekt</value>
+  </data>
+  <data name="DeleteTestSuite" xml:space="preserve">
+    <value>Testsuite löschen</value>
+  </data>
+  <data name="NoPermissionDeleteTestSuite" xml:space="preserve">
+    <value>Sie haben keine Berechtigung zum Löschen von Testsuites.</value>
+  </data>
+  <data name="DeleteTestSuiteConfirmation" xml:space="preserve">
+    <value>Sind Sie sicher, dass Sie diese Testsuite löschen möchten?</value>
+  </data>
+  <data name="DeleteTestSuiteWarning" xml:space="preserve">
+    <value>Dies löscht auch alle damit verbundenen Testfälle und Schritte.</value>
+  </data>
+  <data name="TestCases" xml:space="preserve">
+    <value>Testfälle</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="TestSuiteDetails" xml:space="preserve">
+    <value>Testsuite-Details</value>
+  </data>
+  <data name="TestSuiteTitlePrefix" xml:space="preserve">
+    <value>Testsuite: </value>
+  </data>
+  <data name="EditSuite" xml:space="preserve">
+    <value>Suite bearbeiten</value>
+  </data>
+  <data name="DeleteSuite" xml:space="preserve">
+    <value>Suite löschen</value>
+  </data>
+  <data name="AddTestCase" xml:space="preserve">
+    <value>+ Testfall hinzufügen</value>
+  </data>
+  <data name="NoTestCasesFound" xml:space="preserve">
+    <value>Keine Testfälle in dieser Suite gefunden.</value>
+  </data>
+  <data name="Priority" xml:space="preserve">
+    <value>Priorität</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>Anzeigen</value>
+  </data>
+  <data name="CreateTestCase" xml:space="preserve">
+    <value>Testfall erstellen</value>
+  </data>
+  <data name="NoPermissionCreateTestCase" xml:space="preserve">
+    <value>Sie haben keine Berechtigung zum Erstellen von Testfällen.</value>
+  </data>
+  <data name="PreConditions" xml:space="preserve">
+    <value>Vorbedingungen</value>
+  </data>
+  <data name="Dependencies" xml:space="preserve">
+    <value>Abhängigkeiten</value>
+  </data>
+  <data name="TestData" xml:space="preserve">
+    <value>Testdaten</value>
+  </data>
+  <data name="PostCondition" xml:space="preserve">
+    <value>Nachbedingung</value>
+  </data>
+  <data name="SelectStatus" xml:space="preserve">
+    <value>-- Status auswählen --</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Ausstehend</value>
+  </data>
+  <data name="Pass" xml:space="preserve">
+    <value>Bestanden</value>
+  </data>
+  <data name="Fail" xml:space="preserve">
+    <value>Fehlgeschlagen</value>
+  </data>
+  <data name="SelectPriority" xml:space="preserve">
+    <value>-- Priorität auswählen --</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>Niedrig</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>Mittel</value>
+  </data>
+  <data name="High" xml:space="preserve">
+    <value>Hoch</value>
+  </data>
+  <data name="DefectId" xml:space="preserve">
+    <value>Defekt-ID (Link)</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notizen</value>
+  </data>
+  <data name="DeleteTestCase" xml:space="preserve">
+    <value>Testfall löschen</value>
+  </data>
+  <data name="NoPermissionDeleteTestCase" xml:space="preserve">
+    <value>Sie haben keine Berechtigung zum Löschen von Testfällen.</value>
+  </data>
+  <data name="TestCase" xml:space="preserve">
+    <value>Testfall</value>
+  </data>
+  <data name="TestCaseDetails" xml:space="preserve">
+    <value>Testfall-Details</value>
+  </data>
+  <data name="EditCase" xml:space="preserve">
+    <value>Fall bearbeiten</value>
+  </data>
+  <data name="DeleteCase" xml:space="preserve">
+    <value>Fall löschen</value>
+  </data>
+  <data name="CaseDetails" xml:space="preserve">
+    <value>Falldetails</value>
+  </data>
+  <data name="TestSteps" xml:space="preserve">
+    <value>Testschritte</value>
+  </data>
+  <data name="Overview" xml:space="preserve">
+    <value>Übersicht</value>
+  </data>
+  <data name="IdRef" xml:space="preserve">
+    <value>ID / Ref</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>Keine</value>
+  </data>
+  <data name="StepsForThisCase" xml:space="preserve">
+    <value>Schritte für diesen Testfall</value>
+  </data>
+  <data name="AddStep" xml:space="preserve">
+    <value>+ Schritt hinzufügen</value>
+  </data>
+  <data name="NoStepsAdded" xml:space="preserve">
+    <value>Noch keine Schritte hinzugefügt.</value>
+  </data>
+  <data name="ClickAddStep" xml:space="preserve">
+    <value>Klicken Sie auf "+ Schritt hinzufügen", um den ersten Schritt zu erstellen.</value>
+  </data>
+  <data name="StepDescription" xml:space="preserve">
+    <value>Schrittbeschreibung</value>
+  </data>
+  <data name="ExpectedResult" xml:space="preserve">
+    <value>Erwartetes Ergebnis</value>
+  </data>
+  <data name="ActualResult" xml:space="preserve">
+    <value>Tatsächliches Ergebnis</value>
+  </data>
+  <data name="EditPrefix" xml:space="preserve">
+    <value>Bearbeiten: </value>
+  </data>
+  <data name="SaveCase" xml:space="preserve">
+    <value>Fall speichern</value>
+  </data>
+  <data name="NoStepsYetFormBelow" xml:space="preserve">
+    <value>Noch keine Schritte — verwenden Sie das untenstehende Formular, um den ersten hinzuzufügen.</value>
+  </data>
+  <data name="AddNewStep" xml:space="preserve">
+    <value>Neuen Schritt hinzufügen</value>
+  </data>
+  <data name="StepPrefix" xml:space="preserve">
+    <value>Schritt </value>
+  </data>
+  <data name="StepNumberPrefix" xml:space="preserve">
+    <value>Schritt Nr.</value>
+  </data>
+  <data name="IfDifferent" xml:space="preserve">
+    <value>(falls abweichend)</value>
+  </data>
+  <data name="BackToDetails" xml:space="preserve">
+    <value>Zurück zu Details</value>
+  </data>
+  <data name="AddTestStep" xml:space="preserve">
+    <value>Testschritt hinzufügen</value>
+  </data>
+  <data name="NoPermissionAddTestStep" xml:space="preserve">
+    <value>Sie haben keine Berechtigung zum Hinzufügen von Testschritten.</value>
+  </data>
+  <data name="StepNumber" xml:space="preserve">
+    <value>Schrittnummer</value>
+  </data>
+  <data name="StepNumberHelp" xml:space="preserve">
+    <value>Automatisch als nächste fortlaufende Nummer vergeben. Bei Bedarf anpassen.</value>
+  </data>
+  <data name="SaveStep" xml:space="preserve">
+    <value>Schritt speichern</value>
+  </data>
+  <data name="AddStepPrefix" xml:space="preserve">
+    <value>Schritt hinzufügen </value>
+  </data>
+  <data name="DeleteTestStep" xml:space="preserve">
+    <value>Testschritt löschen</value>
+  </data>
+  <data name="NoPermissionDeleteTestStep" xml:space="preserve">
+    <value>Sie haben keine Berechtigung zum Löschen von Testschritten.</value>
+  </data>
+  <data name="DeleteStepPrefix" xml:space="preserve">
+    <value>Schritt löschen </value>
+  </data>
+  <data name="DeleteStepConfirmation" xml:space="preserve">
+    <value>Sind Sie sicher, dass Sie diesen Schritt dauerhaft löschen möchten?</value>
+  </data>
+  <data name="ActionCannotBeUndone" xml:space="preserve">
+    <value>Diese Aktion kann nicht rückgängig gemacht werden.</value>
+  </data>
+  <data name="YesDeleteStep" xml:space="preserve">
+    <value>Ja, Schritt löschen</value>
+  </data>
+  <data name="EditTestStep" xml:space="preserve">
+    <value>Testschritt bearbeiten</value>
+  </data>
+  <data name="NoPermissionEditTestStep" xml:space="preserve">
+    <value>Sie haben keine Berechtigung zum Bearbeiten von Testschritten.</value>
+  </data>
+  <data name="EditStepPrefix" xml:space="preserve">
+    <value>Schritt bearbeiten </value>
+  </data>
+  <data name="StartNewRunFromProjects" xml:space="preserve">
+    <value>Neuen Lauf starten (aus Projekten)</value>
+  </data>
+  <data name="NoTestRunsRecorded" xml:space="preserve">
+    <value>Es wurden noch keine Testläufe aufgezeichnet.</value>
+  </data>
+  <data name="RunNumberPrefix" xml:space="preserve">
+    <value>Lauf Nr.</value>
+  </data>
+  <data name="DateStarted" xml:space="preserve">
+    <value>Startdatum</value>
+  </data>
+  <data name="StartedBy" xml:space="preserve">
+    <value>Gestartet von</value>
+  </data>
+  <data name="Result" xml:space="preserve">
+    <value>Ergebnis</value>
+  </data>
+  <data name="Completed" xml:space="preserve">
+    <value>Abgeschlossen</value>
+  </data>
+  <data name="Resume" xml:space="preserve">
+    <value>Fortsetzen</value>
+  </data>
+  <data name="PassSummary" xml:space="preserve">
+    <value>{0} Bestanden</value>
+  </data>
+  <data name="FailSummary" xml:space="preserve">
+    <value>{0} Fehlgeschlagen</value>
+  </data>
+  <data name="SetupTestRun" xml:space="preserve">
+    <value>Testlauf einrichten</value>
+  </data>
+  <data name="LoadingProject" xml:space="preserve">
+    <value>Projekt wird geladen...</value>
+  </data>
+  <data name="SelectTestSuite" xml:space="preserve">
+    <value>Testsuite auswählen:</value>
+  </data>
+  <data name="SelectASuite" xml:space="preserve">
+    <value>-- Suite auswählen --</value>
+  </data>
+  <data name="SelectTestCases" xml:space="preserve">
+    <value>Testfälle auswählen</value>
+  </data>
+  <data name="SuiteHasNoTestCases" xml:space="preserve">
+    <value>Diese Suite hat keine Testfälle.</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Alle auswählen</value>
+  </data>
+  <data name="SelectNone" xml:space="preserve">
+    <value>Keine auswählen</value>
+  </data>
+  <data name="StartExecution" xml:space="preserve">
+    <value>Ausführung starten</value>
+  </data>
+  <data name="TestRunDetails" xml:space="preserve">
+    <value>Testlaufdetails</value>
+  </data>
+  <data name="LoadingDetails" xml:space="preserve">
+    <value>Details werden geladen...</value>
+  </data>
+  <data name="RunDetailsPrefix" xml:space="preserve">
+    <value>Details zu Lauf Nr. {0}</value>
+  </data>
+  <data name="ResumeExecution" xml:space="preserve">
+    <value>Ausführung fortsetzen</value>
+  </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Zusammenfassung</value>
+  </data>
+  <data name="Started" xml:space="preserve">
+    <value>Gestartet</value>
+  </data>
+  <data name="Finished" xml:space="preserve">
+    <value>Beendet</value>
+  </data>
+  <data name="Duration" xml:space="preserve">
+    <value>Dauer</value>
+  </data>
+  <data name="PassRate" xml:space="preserve">
+    <value>{0}% Erfolgsquote</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Andere</value>
+  </data>
+  <data name="PassedUpper" xml:space="preserve">
+    <value>BESTANDEN</value>
+  </data>
+  <data name="FailedUpper" xml:space="preserve">
+    <value>FEHLGESCHLAGEN</value>
+  </data>
+  <data name="TotalCasesUpper" xml:space="preserve">
+    <value>TESTFÄLLE GESAMT</value>
+  </data>
+  <data name="ReportBug" xml:space="preserve">
+    <value>Fehler melden</value>
+  </data>
+  <data name="NotRun" xml:space="preserve">
+    <value>Nicht ausgeführt</value>
+  </data>
+  <data name="ReportBugFromTestResult" xml:space="preserve">
+    <value>Fehler aus Testergebnis melden</value>
+  </data>
+  <data name="DescriptionReproSteps" xml:space="preserve">
+    <value>Beschreibung / Repro-Schritte</value>
+  </data>
+  <data name="Severity" xml:space="preserve">
+    <value>Schweregrad</value>
+  </data>
+  <data name="SaveBugReport" xml:space="preserve">
+    <value>Fehlerbericht speichern</value>
+  </data>
+  <data name="ExecuteTestRun" xml:space="preserve">
+    <value>Testlauf ausführen</value>
+  </data>
+  <data name="LoadingRunPrefix" xml:space="preserve">
+    <value>Testlauf Nr. {0} wird geladen...</value>
+  </data>
+  <data name="ExecutionCompleted" xml:space="preserve">
+    <value>Ausführung abgeschlossen!</value>
+  </data>
+  <data name="RunCompletedOn" xml:space="preserve">
+    <value>Dieser Testlauf wurde am {0} abgeschlossen.</value>
+  </data>
+  <data name="ViewFinalResults" xml:space="preserve">
+    <value>Endergebnisse anzeigen</value>
+  </data>
+  <data name="Execution" xml:space="preserve">
+    <value>Ausführung</value>
+  </data>
+  <data name="ProgressSummary" xml:space="preserve">
+    <value>{0}% abgeschlossen ({1} / {2} Schritte)</value>
+  </data>
+  <data name="CaseOfTotal" xml:space="preserve">
+    <value>Fall {0} von {1}</value>
+  </data>
+  <data name="Requirements" xml:space="preserve">
+    <value>Anforderungen</value>
+  </data>
+  <data name="NoDescriptionProvided" xml:space="preserve">
+    <value>Keine Beschreibung angegeben.</value>
+  </data>
+  <data name="NoExpectedResultDefined" xml:space="preserve">
+    <value>Kein erwartetes Ergebnis definiert.</value>
+  </data>
+  <data name="ActualExecution" xml:space="preserve">
+    <value>Tatsächliche Ausführung</value>
+  </data>
+  <data name="SetStatus" xml:space="preserve">
+    <value>Status festlegen:</value>
+  </data>
+  <data name="ActualResultNotes" xml:space="preserve">
+    <value>Tatsächliches Ergebnis / Notizen:</value>
+  </data>
+  <data name="DescribeWhatHappened" xml:space="preserve">
+    <value>Beschreiben Sie, was tatsächlich passiert ist...</value>
+  </data>
+  <data name="PreviousStep" xml:space="preserve">
+    <value>Vorheriger Schritt</value>
+  </data>
+  <data name="NextStep" xml:space="preserve">
+    <value>Nächster Schritt</value>
+  </data>
+  <data name="CompleteTestRun" xml:space="preserve">
+    <value>Testlauf abschließen</value>
+  </data>
+  <data name="RunProgressLog" xml:space="preserve">
+    <value>Protokoll des Testlauf-Fortschritts</value>
+  </data>
+  <data name="ReportBugFromExecution" xml:space="preserve">
+    <value>Fehler aus Ausführung melden</value>
+  </data>
+  <data name="SaveBugContinue" xml:space="preserve">
+    <value>Fehler speichern &amp; Test fortsetzen</value>
+  </data>
+  <data name="BugReports" xml:space="preserve">
+    <value>Fehlerberichte</value>
+  </data>
+  <data name="ReportNewBug" xml:space="preserve">
+    <value>Neuen Fehler melden</value>
+  </data>
+  <data name="NoBugsFound" xml:space="preserve">
+    <value>Keine Fehler gefunden.</value>
+  </data>
+  <data name="Reporter" xml:space="preserve">
+    <value>Berichterstatter</value>
+  </data>
+  <data name="Assignee" xml:space="preserve">
+    <value>Verantwortlicher</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Unbekannt</value>
+  </data>
+  <data name="Unassigned" xml:space="preserve">
+    <value>Nicht zugewiesen</value>
+  </data>
+  <data name="Critical" xml:space="preserve">
+    <value>Kritisch</value>
+  </data>
+  <data name="Major" xml:space="preserve">
+    <value>Schwerwiegend</value>
+  </data>
+  <data name="Minor" xml:space="preserve">
+    <value>Geringfügig</value>
+  </data>
+  <data name="Cosmetic" xml:space="preserve">
+    <value>Kosmetisch</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Offen</value>
+  </data>
+  <data name="InProgress" xml:space="preserve">
+    <value>In Bearbeitung</value>
+  </data>
+  <data name="Resolved" xml:space="preserve">
+    <value>Gelöst</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Geschlossen</value>
+  </data>
+  <data name="Reopened" xml:space="preserve">
+    <value>Wiedereröffnet</value>
+  </data>
+  <data name="BugDetailsTitle" xml:space="preserve">
+    <value>Fehlerdetails - {0}</value>
+  </data>
+  <data name="BugIdPrefix" xml:space="preserve">
+    <value>Fehler Nr. {0}:</value>
+  </data>
+  <data name="EditBug" xml:space="preserve">
+    <value>Fehler bearbeiten</value>
+  </data>
+  <data name="DescriptionReproductionSteps" xml:space="preserve">
+    <value>Beschreibung &amp; Repro-Schritte</value>
+  </data>
+  <data name="NA" xml:space="preserve">
+    <value>n.v.</value>
+  </data>
+  <data name="Resolution" xml:space="preserve">
+    <value>Lösung</value>
+  </data>
+  <data name="Attachments" xml:space="preserve">
+    <value>Anhänge</value>
+  </data>
+  <data name="NoAttachmentsFound" xml:space="preserve">
+    <value>Keine Anhänge gefunden.</value>
+  </data>
+  <data name="Attributes" xml:space="preserve">
+    <value>Attribute</value>
+  </data>
+  <data name="Environment" xml:space="preserve">
+    <value>Umgebung</value>
+  </data>
+  <data name="NotSpecified" xml:space="preserve">
+    <value>Nicht angegeben</value>
+  </data>
+  <data name="Components" xml:space="preserve">
+    <value>Komponenten</value>
+  </data>
+  <data name="Labels" xml:space="preserve">
+    <value>Labels</value>
+  </data>
+  <data name="PeopleAndDates" xml:space="preserve">
+    <value>Personen &amp; Daten</value>
+  </data>
+  <data name="Reported" xml:space="preserve">
+    <value>Gemeldet</value>
+  </data>
+  <data name="DueDate" xml:space="preserve">
+    <value>Fälligkeitsdatum</value>
+  </data>
+  <data name="AffectedVersion" xml:space="preserve">
+    <value>Betroffene Version</value>
+  </data>
+  <data name="FixVersion" xml:space="preserve">
+    <value>Korrekturversion</value>
+  </data>
+  <data name="TBD" xml:space="preserve">
+    <value>Noch festzulegen</value>
+  </data>
+  <data name="TitlePlaceholder" xml:space="preserve">
+    <value>Kurzer aussagekräftiger Titel</value>
+  </data>
+  <data name="DescriptionPlaceholder" xml:space="preserve">
+    <value>1. Gehe zu... 2. Klicke auf...</value>
+  </data>
+  <data name="EnvironmentPlaceholder" xml:space="preserve">
+    <value>Betriebssystem, Browser, Gerät...</value>
+  </data>
+  <data name="ComponentsPlaceholder" xml:space="preserve">
+    <value>Benutzeroberfläche, API, Datenbank...</value>
+  </data>
+  <data name="LabelsPlaceholder" xml:space="preserve">
+    <value>Regression, UI-Fehler, etc.</value>
+  </data>
+  <data name="AttachmentsLabel" xml:space="preserve">
+    <value>Anhänge (Screenshots, Dokumente)</value>
+  </data>
+  <data name="CreateBugReport" xml:space="preserve">
+    <value>Fehlerbericht erstellen</value>
+  </data>
+  <data name="EditBugTitle" xml:space="preserve">
+    <value>Fehler Nr. {0} bearbeiten</value>
+  </data>
+  <data name="ResolutionNotes" xml:space="preserve">
+    <value>Notizen zur Lösung</value>
+  </data>
+  <data name="ResolutionPlaceholder" xml:space="preserve">
+    <value>Wie wurde das behoben?</value>
+  </data>
+  <data name="PageNotFound" xml:space="preserve">
+    <value>Nicht gefunden</value>
+  </data>
+  <data name="NotFoundMessage" xml:space="preserve">
+    <value>Entschuldigung, der von Ihnen gesuchte Inhalt existiert nicht.</value>
+  </data>
+  <data name="ErrorTitle" xml:space="preserve">
+    <value>Fehler</value>
+  </data>
+  <data name="ErrorMessage" xml:space="preserve">
+    <value>Ein Fehler ist beim Verarbeiten Ihrer Anfrage aufgetreten.</value>
+  </data>
+  <data name="RequestID" xml:space="preserve">
+    <value>Anforderungs-ID</value>
+  </data>
+  <data name="DevelopmentMode" xml:space="preserve">
+    <value>Entwicklungsmodus</value>
+  </data>
+  <data name="AuthRequired" xml:space="preserve">
+    <value>Authentifizierung erforderlich</value>
+  </data>
+  <data name="UnhandledError" xml:space="preserve">
+    <value>Ein unbehandelter Fehler ist aufgetreten.</value>
+  </data>
+  <data name="Reload" xml:space="preserve">
+    <value>Neu laden</value>
+  </data>
+  <data name="LoginTitle" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="UseLocalAccount" xml:space="preserve">
+    <value>Verwenden Sie ein lokales Konto zum Anmelden.</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Angemeldet bleiben</value>
+  </data>
+  <data name="LoginButton" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="OrSeparator" xml:space="preserve">
+    <value>ODER</value>
+  </data>
+  <data name="LoginWithPasskey" xml:space="preserve">
+    <value>Mit einem Passkey anmelden</value>
+  </data>
+  <data name="ForgotPasswordLink" xml:space="preserve">
+    <value>Passwort vergessen?</value>
+  </data>
+  <data name="RegisterAsNewUser" xml:space="preserve">
+    <value>Als neuer Benutzer registrieren</value>
+  </data>
+  <data name="ResendEmailConfirmation" xml:space="preserve">
+    <value>E-Mail-Bestätigung erneut senden</value>
+  </data>
+  <data name="UseAnotherService" xml:space="preserve">
+    <value>Verwenden Sie einen anderen Dienst zum Anmelden.</value>
+  </data>
+  <data name="RegisterTitle" xml:space="preserve">
+    <value>Registrieren</value>
+  </data>
+  <data name="RegistrationDisabledMsg" xml:space="preserve">
+    <value>Die Registrierung ist derzeit deaktiviert, da bereits ein aktiver Administrator vorhanden ist. Bitte wenden Sie sich an Ihren Administrator, um ein Konto für Sie erstellen zu lassen.</value>
+  </data>
+  <data name="CreateNewAccount" xml:space="preserve">
+    <value>Ein neues Konto erstellen.</value>
+  </data>
+  <data name="NoAdminsExistMsg" xml:space="preserve">
+    <value>Keine aktiven Administratoren gefunden. Sie werden als Administrator registriert.</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Passwort bestätigen</value>
+  </data>
+  <data name="UseAnotherServiceRegister" xml:space="preserve">
+    <value>Verwenden Sie einen anderen Dienst zur Registrierung.</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Benutzername</value>
+  </data>
+  <data name="UsernamePlaceholder" xml:space="preserve">
+    <value>Wählen Sie Ihren Benutzernamen.</value>
+  </data>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>Telefonnummer</value>
+  </data>
+  <data name="PhoneNumberPlaceholder" xml:space="preserve">
+    <value>Geben Sie Ihre Telefonnummer ein</value>
+  </data>
+  <data name="NoPermissionEditTestSuite" xml:space="preserve">
+    <value>Sie haben keine Berechtigung zum Bearbeiten von Testsuites.</value>
+  </data>
+  <data name="BackToTestSuite" xml:space="preserve">
+    <value>Zurück zur Testsuite</value>
+  </data>
+  <data name="ProfileUpdated" xml:space="preserve">
+    <value>Ihr Profil wurde aktualisiert</value>
+  </data>
+  <data name="PhoneUpdateError" xml:space="preserve">
+    <value>Fehler: Telefonnummer konnte nicht festgelegt werden.</value>
+  </data>
+  <data name="LanguageUpdateError" xml:space="preserve">
+    <value>Fehler: Bevorzugte Sprache konnte nicht festgelegt werden.</value>
+  </data>
+  <data name="ExternalLogins" xml:space="preserve">
+    <value>Externe Logins</value>
+  </data>
+  <data name="TwoFactorAuth" xml:space="preserve">
+    <value>Zwei-Faktor-Authentifizierung</value>
+  </data>
+  <data name="Passkeys" xml:space="preserve">
+    <value>Passkeys</value>
+  </data>
+  <data name="PersonalData" xml:space="preserve">
+    <value>Persönliche Daten</value>
+  </data>
+  <data name="AdminSettings" xml:space="preserve">
+    <value>Admin-Einstellungen</value>
+  </data>
+  <data name="TranslationServiceSettings" xml:space="preserve">
+    <value>Einstellungen des Übersetzungsdienstes</value>
+  </data>
+  <data name="TranslationAPI" xml:space="preserve">
+    <value>Übersetzungs-API</value>
+  </data>
+  <data name="TranslationApiHelp" xml:space="preserve">
+    <value>Wählen Sie den externen Dienstleister für die Echtzeit-Inhaltsübersetzung aus.</value>
+  </data>
+  <data name="APIKey" xml:space="preserve">
+    <value>API-Schlüssel</value>
+  </data>
+  <data name="ApiKeyHelp" xml:space="preserve">
+    <value>Der Authentifizierungsschlüssel Ihres API-Anbieters.</value>
+  </data>
+  <data name="SaveSettings" xml:space="preserve">
+    <value>Einstellungen speichern</value>
+  </data>
+  <data name="SettingsSavedSuccessfully" xml:space="preserve">
+    <value>Einstellungen erfolgreich gespeichert!</value>
+  </data>
+</root>

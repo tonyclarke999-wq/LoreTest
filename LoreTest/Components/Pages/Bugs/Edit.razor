@@ -7,15 +7,16 @@
 @inject ApplicationDbContext DbContext
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Edit Bug #@Id</PageTitle>
+<PageTitle>@string.Format(L["EditBugTitle"], Id)</PageTitle>
 
-<h1>Edit Bug #@Id</h1>
+<h1>@string.Format(L["EditBugTitle"], Id)</h1>
 
 @if (bug == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else
 {
@@ -26,58 +27,58 @@ else
                 <ValidationSummary class="text-danger" />
 
                 <div class="mb-3">
-                    <label for="title" class="form-label">Title</label>
+                    <label for="title" class="form-label">@L["Title"]</label>
                     <InputText id="title" @bind-Value="bug.Title" class="form-control" />
                 </div>
 
                 <div class="mb-3">
-                    <label for="description" class="form-label">Description / Repro Steps</label>
+                    <label for="description" class="form-label">@L["DescriptionReproductionSteps"]</label>
                     <InputTextArea id="description" @bind-Value="bug.Description" class="form-control" rows="5" />
                 </div>
 
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label for="status" class="form-label text-primary fw-bold">Status</label>
+                        <label for="status" class="form-label text-primary fw-bold">@L["Status"]</label>
                         <InputSelect id="status" @bind-Value="bug.Status" class="form-select border-primary">
-                            @foreach (var val in Enum.GetValues<BugStatus>()) { <option value="@val">@val</option> }
+                            @foreach (var val in Enum.GetValues<BugStatus>()) { <option value="@val">@L[val.ToString()]</option> }
                         </InputSelect>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <label for="severity" class="form-label">Severity</label>
+                        <label for="severity" class="form-label">@L["Severity"]</label>
                         <InputSelect id="severity" @bind-Value="bug.Severity" class="form-select">
-                            @foreach (var val in Enum.GetValues<BugSeverity>()) { <option value="@val">@val</option> }
+                            @foreach (var val in Enum.GetValues<BugSeverity>()) { <option value="@val">@L[val.ToString()]</option> }
                         </InputSelect>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <label for="priority" class="form-label">Priority</label>
+                        <label for="priority" class="form-label">@L["Priority"]</label>
                         <InputSelect id="priority" @bind-Value="bug.Priority" class="form-select">
-                            @foreach (var val in Enum.GetValues<BugPriority>()) { <option value="@val">@val</option> }
+                            @foreach (var val in Enum.GetValues<BugPriority>()) { <option value="@val">@L[val.ToString()]</option> }
                         </InputSelect>
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label for="resolution" class="form-label fw-bold">Resolution Notes</label>
-                    <InputTextArea id="resolution" @bind-Value="bug.Resolution" class="form-control" rows="3" placeholder="How was this fixed?" />
+                    <label for="resolution" class="form-label fw-bold">@L["ResolutionNotes"]</label>
+                    <InputTextArea id="resolution" @bind-Value="bug.Resolution" class="form-control" rows="3" placeholder="@L["ResolutionPlaceholder"]" />
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="assignee" class="form-label">Assignee</label>
+                        <label for="assignee" class="form-label">@L["Assignee"]</label>
                         <InputSelect id="assignee" @bind-Value="bug.AssigneeId" class="form-select">
-                            <option value="">-- Unassigned --</option>
+                            <option value="">-- @L["Unassigned"] --</option>
                             @foreach (var user in users) { <option value="@user.Id">@user.UserName</option> }
                         </InputSelect>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="fixVersion" class="form-label">Fix Version</label>
+                        <label for="fixVersion" class="form-label">@L["FixVersion"]</label>
                         <InputText id="fixVersion" @bind-Value="bug.FixVersion" class="form-control" />
                     </div>
                 </div>
 
                 <div class="mt-4">
-                    <button type="submit" class="btn btn-primary me-2">Save Changes</button>
-                    <a href="/bugs/details/@Id" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary me-2">@L["SaveChanges"]</button>
+                    <a href="/bugs/details/@Id" class="btn btn-secondary">@L["Cancel"]</a>
                 </div>
             </EditForm>
         </div>

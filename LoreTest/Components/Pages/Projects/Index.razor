@@ -7,36 +7,37 @@
 @inject ApplicationDbContext DbContext
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Test Projects</PageTitle>
+<PageTitle>@L["TestProjects"]</PageTitle>
 
-<h1>Test Projects</h1>
+<h1>@L["TestProjects"]</h1>
 
 @if (canEdit)
 {
     <p>
-        <a href="/projects/create" class="btn btn-primary">Create New</a>
+        <a href="/projects/create" class="btn btn-primary">@L["CreateNew"]</a>
     </p>
 }
 
 @if (projects == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else if (!projects.Any())
 {
-    <p>No projects found.</p>
+    <p>@L["NoProjectsFound"]</p>
 }
 else
 {
     <table class="table">
         <thead>
             <tr>
-                <th>Reference No.</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Actions</th>
+                <th>@L["ReferenceNo"]</th>
+                <th>@L["Title"]</th>
+                <th>@L["Description"]</th>
+                <th>@L["Actions"]</th>
             </tr>
         </thead>
         <tbody>
@@ -47,12 +48,12 @@ else
                     <td>@project.Title</td>
                     <td>@((MarkupString)(project.Description ?? ""))</td>
                     <td>
-                        <a href="/projects/details/@project.Id">Details</a>
+                        <a href="/projects/details/@project.Id">@L["Details"]</a>
                         @if (canEdit)
                         {
                             <span> | </span>
-                            <a href="/projects/edit/@project.Id">Edit</a> <span> | </span>
-                            <a href="/projects/delete/@project.Id">Delete</a>
+                            <a href="/projects/edit/@project.Id">@L["Edit"]</a> <span> | </span>
+                            <a href="/projects/delete/@project.Id">@L["Delete"]</a>
                         }
                     </td>
                 </tr>

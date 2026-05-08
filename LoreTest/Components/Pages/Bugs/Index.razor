@@ -6,37 +6,39 @@
 @using LoreTest.Data
 @inject ApplicationDbContext DbContext
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IStringLocalizer<SharedResource> L
+@inject ITranslationService TranslationService
 @attribute [Authorize]
 
-<PageTitle>Bug Reports</PageTitle>
+<PageTitle>@L["BugReports"]</PageTitle>
 
-<h1>Bug Reports</h1>
+<h1>@L["BugReports"]</h1>
 
 <p>
-    <a href="/bugs/create" class="btn btn-primary">Report New Bug</a>
+    <a href="/bugs/create" class="btn btn-primary">@L["ReportNewBug"]</a>
 </p>
 
 @if (bugs == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else if (!bugs.Any())
 {
-    <p>No bugs found.</p>
+    <p>@L["NoBugsFound"]</p>
 }
 else
 {
     <table class="table">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Severity</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Reporter</th>
-                <th>Assignee</th>
-                <th>Actions</th>
+                <th>@L["ID"]</th>
+                <th>@L["Title"]</th>
+                <th>@L["Severity"]</th>
+                <th>@L["Priority"]</th>
+                <th>@L["Status"]</th>
+                <th>@L["Reporter"]</th>
+                <th>@L["Assignee"]</th>
+                <th>@L["Actions"]</th>
             </tr>
         </thead>
         <tbody>
@@ -44,21 +46,21 @@ else
             {
                 <tr>
                     <td>@bug.Id</td>
-                    <td>@bug.Title</td>
+                    <td>@translatedTitles.GetValueOrDefault(bug.Id, bug.Title)</td>
                     <td>
-                        <span class="badge @GetSeverityClass(bug.Severity)">@bug.Severity</span>
+                        <span class="badge @GetSeverityClass(bug.Severity)">@L[bug.Severity.ToString()]</span>
                     </td>
                     <td>
-                        <span class="badge @GetPriorityClass(bug.Priority)">@bug.Priority</span>
+                        <span class="badge @GetPriorityClass(bug.Priority)">@L[bug.Priority.ToString()]</span>
                     </td>
                     <td>
-                        <span class="badge @GetStatusClass(bug.Status)">@bug.Status</span>
+                        <span class="badge @GetStatusClass(bug.Status)">@L[bug.Status.ToString()]</span>
                     </td>
-                    <td>@(bug.Reporter?.UserName ?? "Unknown")</td>
-                    <td>@(bug.Assignee?.UserName ?? "Unassigned")</td>
+                    <td>@(bug.Reporter?.UserName ?? L["Unknown"])</td>
+                    <td>@(bug.Assignee?.UserName ?? L["Unassigned"])</td>
                     <td>
-                        <a href="/bugs/details/@bug.Id">Details</a> |
-                        <a href="/bugs/edit/@bug.Id">Edit</a>
+                        <a href="/bugs/details/@bug.Id">@L["Details"]</a> |
+                        <a href="/bugs/edit/@bug.Id">@L["Edit"]</a>
                     </td>
                 </tr>
             }
@@ -68,6 +70,7 @@ else
 
 @code {
     private List<Bug>? bugs;
+    private Dictionary<int, string> translatedTitles = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -76,6 +79,12 @@ else
             .Include(b => b.Assignee)
             .OrderByDescending(b => b.ReportedDate)
             .ToListAsync();
+
+        var currentCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+        foreach (var bug in bugs)
+        {
+            translatedTitles[bug.Id] = await TranslationService.TranslateAsync(bug.Title, bug.OriginalCulture ?? "en", currentCulture);
+        }
     }
 
     private string GetSeverityClass(BugSeverity severity) => severity switch

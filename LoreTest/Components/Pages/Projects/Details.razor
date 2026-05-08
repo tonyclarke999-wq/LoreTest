@@ -8,39 +8,40 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Project Details</PageTitle>
+<PageTitle>@L["ProjectDetails"]</PageTitle>
 
 @if (project == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else
 {
-    <h1>Project: @project.Title</h1>
+    <h1>@L["ProjectTitlePrefix"] @project.Title</h1>
     <p>@((MarkupString)(project.Description ?? ""))</p>
 
     <hr />
 
-    <h2>Test Suites</h2>
+    <h2>@L["TestSuites"]</h2>
     @if (canEdit || canCreateRun)
     {
         <p>
             @if (canEdit)
             {
-                <a href="/testsuites/create?projectId=@project.Id" class="btn btn-primary">Create New Test Suite</a>
+                <a href="/testsuites/create?projectId=@project.Id" class="btn btn-primary">@L["CreateNewTestSuite"]</a>
             }
             @if (canCreateRun)
             {
-                <a href="/testruns/setup?projectId=@project.Id" class="btn btn-success ms-2">Start Test Run</a>
+                <a href="/testruns/setup?projectId=@project.Id" class="btn btn-success ms-2">@L["StartTestRun"]</a>
             }
         </p>
     }
 
     @if (!project.TestSuites.Any())
     {
-        <p>No test suites found for this project.</p>
+        <p>@L["NoTestSuitesFound"]</p>
     }
     else
     {
@@ -48,9 +49,9 @@ else
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Actions</th>
+                    <th>@L["Title"]</th>
+                    <th>@L["Description"]</th>
+                    <th>@L["Actions"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -61,12 +62,12 @@ else
                         <td>@suite.Title</td>
                         <td>@((MarkupString)(suite.Description ?? ""))</td>
                         <td>
-                            <a href="/testsuites/details/@suite.Id">View Test Cases</a>
+                            <a href="/testsuites/details/@suite.Id">@L["ViewTestCases"]</a>
                             @if (canEdit)
                             {
                                 <span> | </span>
-                                <a href="/testsuites/edit/@suite.Id">Edit</a> <span> | </span>
-                                <a href="/testsuites/delete/@suite.Id">Delete</a>
+                                <a href="/testsuites/edit/@suite.Id">@L["Edit"]</a> <span> | </span>
+                                <a href="/testsuites/delete/@suite.Id">@L["Delete"]</a>
                             }
                         </td>
                     </tr>
@@ -76,7 +77,7 @@ else
     }
 
     <div>
-        <a href="/projects">Back to List</a>
+        <a href="/projects">@L["BackToList"]</a>
     </div>
 }
 

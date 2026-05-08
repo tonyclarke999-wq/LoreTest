@@ -8,59 +8,60 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Delete Test Step</PageTitle>
+<PageTitle>@L["DeleteTestStep"]</PageTitle>
 
 @if (!canEdit)
 {
-    <div class="alert alert-danger">You do not have permission to delete test steps.</div>
+    <div class="alert alert-danger">@L["NoPermissionDeleteTestStep"]</div>
 }
 else if (step == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else
 {
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/testsuites/details/@step.TestCase?.TestSuiteId">Test Suite</a></li>
+            <li class="breadcrumb-item"><a href="/testsuites/details/@step.TestCase?.TestSuiteId">@L["TestSuite"]</a></li>
             <li class="breadcrumb-item"><a href="/testcases/details/@step.TestCaseId?tab=steps">@step.TestCase?.Title</a></li>
-            <li class="breadcrumb-item active">Delete Step @step.StepNumber</li>
+            <li class="breadcrumb-item active">@L["DeleteStepPrefix"] @step.StepNumber</li>
         </ol>
     </nav>
 
-    <h1>Delete Test Step</h1>
+    <h1>@L["DeleteTestStep"]</h1>
 
     <div class="alert alert-danger mt-3">
-        <strong>Are you sure you want to permanently delete this step?</strong>
-        <br />This action cannot be undone.
+        <strong>@L["DeleteStepConfirmation"]</strong>
+        <br />@L["ActionCannotBeUndone"]
     </div>
 
     <div class="card mt-3" style="max-width: 700px;">
         <div class="card-header">
-            <strong>Step @step.StepNumber</strong>
+            <strong>@L["StepPrefix"] @step.StepNumber</strong>
             &mdash;
             <span class="text-muted">@step.TestCase?.Title</span>
         </div>
         <div class="card-body">
             @if (!string.IsNullOrWhiteSpace(step.Description))
             {
-                <p><strong>Description:</strong></p>
+                <p><strong>@L["Description"]:</strong></p>
                 <div class="border rounded p-2 bg-light mb-3">
                     @((MarkupString)(step.Description))
                 </div>
             }
             @if (!string.IsNullOrWhiteSpace(step.ExpectedResult))
             {
-                <p><strong>Expected Result:</strong></p>
+                <p><strong>@L["ExpectedResult"]:</strong></p>
                 <div class="border rounded p-2 bg-light mb-3">
                     @((MarkupString)(step.ExpectedResult))
                 </div>
             }
             @if (!string.IsNullOrWhiteSpace(step.ActualResult))
             {
-                <p><strong>Actual Result:</strong></p>
+                <p><strong>@L["ActualResult"]:</strong></p>
                 <div class="border rounded p-2 bg-light">
                     @((MarkupString)(step.ActualResult))
                 </div>
@@ -69,8 +70,8 @@ else
     </div>
 
     <div class="d-flex gap-2 mt-4">
-        <button class="btn btn-danger" @onclick="ConfirmDelete">Yes, Delete Step</button>
-        <a href="/testcases/details/@step.TestCaseId?tab=steps" class="btn btn-secondary">Cancel</a>
+        <button class="btn btn-danger" @onclick="ConfirmDelete">@L["YesDeleteStep"]</button>
+        <a href="/testcases/details/@step.TestCaseId?tab=steps" class="btn btn-secondary">@L["Cancel"]</a>
     </div>
 }
 

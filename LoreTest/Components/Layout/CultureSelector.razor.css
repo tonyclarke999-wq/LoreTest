@@ -1,0 +1,15 @@
+.culture-selector {
+    margin-right: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.culture-selector select {
+    width: auto;
+    min-width: 120px;
+    background-color: white;
+    color: black;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 2px 5px;
+}

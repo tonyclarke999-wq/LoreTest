@@ -4,12 +4,16 @@ using LoreTest.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
@@ -36,9 +40,11 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddClaimsPrincipalFactory<AdditionalUserClaimsPrincipalFactory>();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<ITranslationService, MockTranslationService>();
 
 var app = builder.Build();
 
@@ -58,12 +64,34 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
+var supportedCultures = new[] { "en", "fr", "de", "es" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture(supportedCultures[0])
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+
+app.UseRequestLocalization(localizationOptions);
+
 app.MapStaticAssets();
 app.MapRazorComponents<global::LoreTest.Components.App>()
     .AddInteractiveServerRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
+
+app.MapPost("/Culture/SetCulture", ([FromForm] string culture, [FromForm] string returnUrl, HttpContext httpContext) =>
+{
+    if (culture != null)
+    {
+        httpContext.Response.Cookies.Append(
+            CookieRequestCultureProvider.DefaultCookieName,
+            CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+            new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+        );
+    }
+
+    return Results.LocalRedirect(returnUrl ?? "/");
+});
 
 // Apply migrations on startup
 using (var scope = app.Services.CreateScope())

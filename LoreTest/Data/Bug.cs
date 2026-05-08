@@ -37,6 +37,10 @@ namespace LoreTest.Data
         public string Title { get; set; } = string.Empty;
 
         [Required]
+        [StringLength(10)]
+        public string OriginalCulture { get; set; } = "en";
+
+        [Required]
         public string Description { get; set; } = string.Empty;
 
         public string? ExpectedResult { get; set; }
@@ -63,20 +67,20 @@ namespace LoreTest.Data
         public string? FixVersion { get; set; }
         public string? Resolution { get; set; }
 
-        public ICollection<BugAttachment> Attachments { get; set; } = new List<BugAttachment>();
+        public ICollection<BugAttachment> Attachments { get; set; } = [];
     }
 
     public class BugAttachment
     {
         [Key]
         public int Id { get; set; }
-        
+
         [Required]
         public string FileName { get; set; } = string.Empty;
-        
+
         [Required]
         public string FilePath { get; set; } = string.Empty;
-        
+
         public string? ContentType { get; set; }
         public long FileSize { get; set; }
         public DateTime UploadedDate { get; set; } = DateTime.UtcNow;

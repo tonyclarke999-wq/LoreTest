@@ -8,42 +8,43 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Test Case Details</PageTitle>
+<PageTitle>@L["TestCaseDetails"]</PageTitle>
 
 @if (testCase == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else
 {
     <div class="d-flex justify-content-between align-items-center mb-2">
         <h1 class="mb-0">@testCase.Title</h1>
         <div class="d-flex gap-2 align-items-center">
-            <span class="badge fs-6 @PriorityBadge(testCase.Priority)">@testCase.Priority</span>
-            <span class="badge fs-6 @StatusBadge(testCase.Status)">@testCase.Status</span>
+            <span class="badge fs-6 @PriorityBadge(testCase.Priority)">@L[testCase.Priority ?? "Low"]</span>
+            <span class="badge fs-6 @StatusBadge(testCase.Status)">@L[testCase.Status ?? "Pending"]</span>
             @if (canEdit)
             {
-                <a href="/testcases/edit/@testCase.Id" class="btn btn-outline-primary btn-sm">Edit Case</a>
-                <a href="/testcases/delete/@testCase.Id" class="btn btn-outline-danger btn-sm">Delete Case</a>
+                <a href="/testcases/edit/@testCase.Id" class="btn btn-outline-primary btn-sm">@L["EditCase"]</a>
+                <a href="/testcases/delete/@testCase.Id" class="btn btn-outline-danger btn-sm">@L["DeleteCase"]</a>
             }
         </div>
     </div>
-    <p class="text-muted small">ID: @testCase.Id &nbsp;|&nbsp; Suite: <a href="/testsuites/details/@testCase.TestSuiteId">@testCase.TestSuite?.Title</a></p>
+    <p class="text-muted small">ID: @testCase.Id &nbsp;|&nbsp; @L["Suite"]: <a href="/testsuites/details/@testCase.TestSuiteId">@testCase.TestSuite?.Title</a></p>
 
     <!-- Tabs -->
     <ul class="nav nav-tabs mb-3">
         <li class="nav-item">
             <button class="nav-link @(activeTab == "details" ? "active" : "")"
                     @onclick='() => activeTab = "details"'>
-                Case Details
+                @L["CaseDetails"]
             </button>
         </li>
         <li class="nav-item">
             <button class="nav-link @(activeTab == "steps" ? "active" : "")"
                     @onclick='() => activeTab = "steps"'>
-                Test Steps
+                @L["TestSteps"]
                 @if (testCase.TestSteps.Any())
                 {
                     <span class="badge bg-secondary ms-1">@testCase.TestSteps.Count</span>
@@ -58,59 +59,59 @@ else
         <div class="row">
             <div class="col-md-6">
                 <div class="card mb-3">
-                    <div class="card-header bg-light"><strong>Overview</strong></div>
+                    <div class="card-header bg-light"><strong>@L["Overview"]</strong></div>
                     <div class="card-body">
-                        <p><strong>ID / Ref:</strong> @testCase.Id</p>
-                        <p><strong>Priority:</strong> @testCase.Priority</p>
-                        <p><strong>Status:</strong> @testCase.Status</p>
+                        <p><strong>@L["IdRef"]:</strong> @testCase.Id</p>
+                        <p><strong>@L["Priority"]:</strong> @L[testCase.Priority ?? "Low"]</p>
+                        <p><strong>@L["Status"]:</strong> @L[testCase.Status ?? "Pending"]</p>
                         @if (!string.IsNullOrWhiteSpace(testCase.DefectId))
                         {
-                            <p><strong>Defect ID:</strong> @testCase.DefectId</p>
+                            <p><strong>@L["DefectId"]:</strong> @testCase.DefectId</p>
                         }
                     </div>
                 </div>
 
                 <div class="card mb-3">
-                    <div class="card-header bg-light"><strong>Description</strong></div>
+                    <div class="card-header bg-light"><strong>@L["Description"]</strong></div>
                     <div class="card-body">
-                        @((MarkupString)(testCase.Description ?? "<em class='text-muted'>None</em>"))
+                        @((MarkupString)(testCase.Description ?? $"<em class='text-muted'>{L["None"]}</em>"))
                     </div>
                 </div>
 
                 <div class="card mb-3">
-                    <div class="card-header bg-light"><strong>Notes</strong></div>
+                    <div class="card-header bg-light"><strong>@L["Notes"]</strong></div>
                     <div class="card-body">
-                        @((MarkupString)(testCase.Notes ?? "<em class='text-muted'>None</em>"))
+                        @((MarkupString)(testCase.Notes ?? $"<em class='text-muted'>{L["None"]}</em>"))
                     </div>
                 </div>
             </div>
 
             <div class="col-md-6">
                 <div class="card mb-3">
-                    <div class="card-header bg-light"><strong>Pre-Conditions</strong></div>
+                    <div class="card-header bg-light"><strong>@L["PreConditions"]</strong></div>
                     <div class="card-body">
-                        @((MarkupString)(testCase.PreConditions ?? "<em class='text-muted'>None</em>"))
+                        @((MarkupString)(testCase.PreConditions ?? $"<em class='text-muted'>{L["None"]}</em>"))
                     </div>
                 </div>
 
                 <div class="card mb-3">
-                    <div class="card-header bg-light"><strong>Dependencies</strong></div>
+                    <div class="card-header bg-light"><strong>@L["Dependencies"]</strong></div>
                     <div class="card-body">
-                        @((MarkupString)(testCase.Dependencies ?? "<em class='text-muted'>None</em>"))
+                        @((MarkupString)(testCase.Dependencies ?? $"<em class='text-muted'>{L["None"]}</em>"))
                     </div>
                 </div>
 
                 <div class="card mb-3">
-                    <div class="card-header bg-light"><strong>Test Data</strong></div>
+                    <div class="card-header bg-light"><strong>@L["TestData"]</strong></div>
                     <div class="card-body">
-                        @((MarkupString)(testCase.TestData ?? "<em class='text-muted'>None</em>"))
+                        @((MarkupString)(testCase.TestData ?? $"<em class='text-muted'>{L["None"]}</em>"))
                     </div>
                 </div>
 
                 <div class="card mb-3">
-                    <div class="card-header bg-light"><strong>Post-Condition</strong></div>
+                    <div class="card-header bg-light"><strong>@L["PostCondition"]</strong></div>
                     <div class="card-body">
-                        @((MarkupString)(testCase.PostCondition ?? "<em class='text-muted'>None</em>"))
+                        @((MarkupString)(testCase.PostCondition ?? $"<em class='text-muted'>{L["None"]}</em>"))
                     </div>
                 </div>
             </div>
@@ -121,16 +122,16 @@ else
     @if (activeTab == "steps")
     {
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Steps for this test case</h5>
+            <h5 class="mb-0">@L["StepsForThisCase"]</h5>
             @if (canEdit)
             {
-                <a href="/teststeps/create?testCaseId=@testCase.Id" class="btn btn-primary btn-sm">+ Add Step</a>
+                <a href="/teststeps/create?testCaseId=@testCase.Id" class="btn btn-primary btn-sm">@L["AddStep"]</a>
             }
         </div>
 
         @if (!testCase.TestSteps.Any())
         {
-            <div class="alert alert-info">No steps added yet. @(canEdit ? "Click \"+ Add Step\" to create the first step." : "")</div>
+            <div class="alert alert-info">@L["NoStepsAdded"] @(canEdit ? L["ClickAddStep"] : "")</div>
         }
         else
         {
@@ -138,12 +139,12 @@ else
                 <thead class="table-dark">
                     <tr>
                         <th style="width: 5%">#</th>
-                        <th style="width: 33%">Step Description</th>
-                        <th style="width: 28%">Expected Result</th>
-                        <th style="width: 22%">Actual Result</th>
+                        <th style="width: 33%">@L["StepDescription"]</th>
+                        <th style="width: 28%">@L["ExpectedResult"]</th>
+                        <th style="width: 22%">@L["ActualResult"]</th>
                         @if (canEdit)
                         {
-                            <th style="width: 12%">Actions</th>
+                            <th style="width: 12%">@L["Actions"]</th>
                         }
                     </tr>
                 </thead>
@@ -167,8 +168,8 @@ else
                             @if (canEdit)
                             {
                                 <td>
-                                    <a href="/teststeps/edit/@step.Id" class="btn btn-sm btn-outline-primary">Edit</a>
-                                    <a href="/teststeps/delete/@step.Id" class="btn btn-sm btn-outline-danger ms-1">Delete</a>
+                                    <a href="/teststeps/edit/@step.Id" class="btn btn-sm btn-outline-primary">@L["Edit"]</a>
+                                    <a href="/teststeps/delete/@step.Id" class="btn btn-sm btn-outline-danger ms-1">@L["Delete"]</a>
                                 </td>
                             }
                         </tr>
@@ -179,7 +180,7 @@ else
     }
 
     <div class="mt-4 mb-5">
-        <a href="/testsuites/details/@testCase.TestSuiteId" class="btn btn-secondary">Back to Test Suite</a>
+        <a href="/testsuites/details/@testCase.TestSuiteId" class="btn btn-secondary">@L["BackToTestSuite"]</a>
     </div>
 }
 
