@@ -37,15 +37,23 @@ namespace LoreTest.Tests
             var auth = this.AddTestAuthorization();
             auth.SetAuthorized("TestUser");
 
+            var tcs = new TaskCompletionSource<ApplicationUser?>();
             var userManagerMock = CreateUserManagerMock();
+            userManagerMock.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .Returns(tcs.Task);
             Services.AddSingleton(userManagerMock.Object);
 
-            // Register a mock DbContext that returns null for TestProjects initially? 
-            // Actually, in the real component, it's initialized in OnInitializedAsync.
-            // So if we don't await, it might show loading.
+            using var context = new ApplicationDbContext(_options, new Mock<IServiceProvider>().Object);
+            Services.AddSingleton(context);
+
+            // Act
+            var cut = RenderComponent<LoreTest.Components.Pages.Projects.Index>();
+
+            // Assert
+            StringAssert.Contains(cut.Markup, "Loading");
             
-            // To test "Loading...", we'd need a way to delay the data load.
-            // But let's test the main functionality instead.
+            // Cleanup to avoid hanging tasks
+            tcs.SetResult(null);
         }
 
         [TestMethod]

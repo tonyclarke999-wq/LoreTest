@@ -57,13 +57,14 @@ else
     public int ProjectId { get; set; }
 
     [SupplyParameterFromForm]
-    private TestSuite testSuite { get; set; } = new();
+    private TestSuite testSuite { get; set; } = default!;
 
     private bool canEdit = false;
     private ElementReference editorDescription;
 
     protected override async Task OnInitializedAsync()
     {
+        testSuite ??= new();
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = await UserManager.GetUserAsync(authState.User);
 

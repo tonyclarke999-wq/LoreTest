@@ -109,7 +109,7 @@ else
     public int SuiteId { get; set; }
 
     [SupplyParameterFromForm]
-    private TestCase testCase { get; set; } = new();
+    private TestCase testCase { get; set; } = default!;
 
     private bool canEdit = false;
     private ElementReference editorDescription;
@@ -121,6 +121,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        testCase ??= new();
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = await UserManager.GetUserAsync(authState.User);
 
