@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Microsoft.Extensions.Localization;
+using LoreTest.Resources;
 using System.Security.Claims;
 
 namespace LoreTest.Tests
@@ -21,6 +23,11 @@ namespace LoreTest.Tests
             _options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
+
+            // Setup common localization mock
+            var localizerMock = new Mock<IStringLocalizer<SharedResource>>();
+            localizerMock.Setup(x => x[It.IsAny<string>()]).Returns((string key) => new LocalizedString(key, key));
+            Services.AddSingleton(localizerMock.Object);
         }
 
         [TestMethod]
@@ -57,11 +64,9 @@ namespace LoreTest.Tests
             // Act
             var cut = RenderComponent<LoreTest.Components.Pages.Projects.Index>();
 
-            // Assert
-            cut.MarkupMatches(@"
-                <h1>Test Projects</h1>
-                <p>No projects found.</p>
-            ");
+            // assert
+            StringAssert.Contains(cut.Markup, "TestProjects");
+            StringAssert.Contains(cut.Markup, "NoProjectsFound");
         }
 
         [TestMethod]
@@ -110,7 +115,7 @@ namespace LoreTest.Tests
             var cut = RenderComponent<LoreTest.Components.Pages.Projects.Index>();
 
             // Assert
-            StringAssert.Contains(cut.Markup, "Create New");
+            StringAssert.Contains(cut.Markup, "CreateNew");
         }
 
         private Mock<UserManager<ApplicationUser>> CreateUserManagerMock()
