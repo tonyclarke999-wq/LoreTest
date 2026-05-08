@@ -56,6 +56,15 @@
                 <InputDate id="endDate" @bind-Value="Input.EndDate" class="form-control" />
                 <ValidationMessage For="() => Input.EndDate" class="text-danger" />
             </div>
+            <div class="mb-3">
+                <label for="preferredLanguage" class="form-label">@L["PreferredLanguage"]</label>
+                <InputSelect id="preferredLanguage" @bind-Value="Input.PreferredLanguage" class="form-select">
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="es">Español</option>
+                </InputSelect>
+            </div>
 
             @if (!string.IsNullOrEmpty(errorMessage))
             {
@@ -91,6 +100,7 @@
         public string? Role { get; set; }
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
+        public string? PreferredLanguage { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -116,6 +126,7 @@
             Role = Input.Role,
             StartDate = Input.StartDate,
             EndDate = Input.EndDate,
+            PreferredLanguage = Input.PreferredLanguage,
             EmailConfirmed = true
         };
 
