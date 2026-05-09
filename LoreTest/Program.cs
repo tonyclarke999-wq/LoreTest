@@ -30,7 +30,7 @@ builder.Services.AddAuthentication(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString), ServiceLifetime.Scoped);
+    options.UseNpgsql(connectionString));
 builder.Services.AddScoped<ApplicationDbContext>(p =>
     p.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -95,11 +95,12 @@ app.MapPost("/Culture/SetCulture", ([FromForm] string culture, [FromForm] string
     return Results.LocalRedirect(returnUrl ?? "/");
 });
 
-// Apply migrations on startup
+// Apply migrations and seed data on startup
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
+    await LoreTest.Utilities.LocalizationSeeder.SeedAsync(app.Services);
 }
 
 app.Run();
