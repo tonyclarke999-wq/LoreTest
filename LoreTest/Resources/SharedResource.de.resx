@@ -892,4 +892,61 @@
   <data name="SettingsSavedSuccessfully" xml:space="preserve">
     <value>Einstellungen erfolgreich gespeichert!</value>
   </data>
+  <data name="Internationalization" xml:space="preserve">
+    <value>Internationalisierung</value>
+  </data>
+  <data name="ManageLanguagesAndTranslationsHelp" xml:space="preserve">
+    <value>Konfigurieren Sie unterstützte Sprachen und überschreiben Sie Feldüberschriften dynamisch.</value>
+  </data>
+  <data name="ManageLanguages" xml:space="preserve">
+    <value>Sprachen verwalten</value>
+  </data>
+  <data name="ManageFieldTranslations" xml:space="preserve">
+    <value>Feldübersetzungen verwalten</value>
+  </data>
+  <data name="SupportedLanguages" xml:space="preserve">
+    <value>Unterstützte Sprachen</value>
+  </data>
+  <data name="AddLanguage" xml:space="preserve">
+    <value>Sprache hinzufügen</value>
+  </data>
+  <data name="AddNewLanguage" xml:space="preserve">
+    <value>Neue Sprache hinzufügen</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="SetAsDefault" xml:space="preserve">
+    <value>Als Standard festlegen</value>
+  </data>
+  <data name="SelectLanguage" xml:space="preserve">
+    <value>Sprache auswählen</value>
+  </data>
+  <data name="ChooseLanguage" xml:space="preserve">
+    <value>Sprache wählen</value>
+  </data>
+  <data name="FieldKey" xml:space="preserve">
+    <value>Feldschlüssel</value>
+  </data>
+  <data name="TranslatedValue" xml:space="preserve">
+    <value>Übersetzter Wert</value>
+  </data>
+  <data name="AddTranslation" xml:space="preserve">
+    <value>Übersetzung hinzufügen</value>
+  </data>
+  <data name="EditTranslation" xml:space="preserve">
+    <value>Übersetzung bearbeiten</value>
+  </data>
+  <data name="Translations" xml:space="preserve">
+    <value>Übersetzungen</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Nein</value>
+  </data>
 </root>

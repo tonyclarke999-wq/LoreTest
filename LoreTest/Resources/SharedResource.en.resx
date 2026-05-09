@@ -892,4 +892,61 @@
   <data name="SettingsSavedSuccessfully" xml:space="preserve">
     <value>Settings saved successfully!</value>
   </data>
+  <data name="Internationalization" xml:space="preserve">
+    <value>Internationalization</value>
+  </data>
+  <data name="ManageLanguagesAndTranslationsHelp" xml:space="preserve">
+    <value>Configure supported languages and override field headings dynamically.</value>
+  </data>
+  <data name="ManageLanguages" xml:space="preserve">
+    <value>Manage Languages</value>
+  </data>
+  <data name="ManageFieldTranslations" xml:space="preserve">
+    <value>Manage Field Translations</value>
+  </data>
+  <data name="SupportedLanguages" xml:space="preserve">
+    <value>Supported Languages</value>
+  </data>
+  <data name="AddLanguage" xml:space="preserve">
+    <value>Add Language</value>
+  </data>
+  <data name="AddNewLanguage" xml:space="preserve">
+    <value>Add New Language</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="SetAsDefault" xml:space="preserve">
+    <value>Set as Default</value>
+  </data>
+  <data name="SelectLanguage" xml:space="preserve">
+    <value>Select Language</value>
+  </data>
+  <data name="ChooseLanguage" xml:space="preserve">
+    <value>Choose Language</value>
+  </data>
+  <data name="FieldKey" xml:space="preserve">
+    <value>Field Key</value>
+  </data>
+  <data name="TranslatedValue" xml:space="preserve">
+    <value>Translated Value</value>
+  </data>
+  <data name="AddTranslation" xml:space="preserve">
+    <value>Add Translation</value>
+  </data>
+  <data name="EditTranslation" xml:space="preserve">
+    <value>Edit Translation</value>
+  </data>
+  <data name="Translations" xml:space="preserve">
+    <value>Translations</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
 </root>

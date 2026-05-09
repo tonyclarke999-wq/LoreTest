@@ -1,0 +1,170 @@
+@page "/admin/translations"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@using Microsoft.Extensions.Localization
+@inject ApplicationDbContext DbContext
+@inject IStringLocalizer<SharedResource> L
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+<PageTitle>@L["ManageFieldTranslations"]</PageTitle>
+
+<h1>@L["ManageFieldTranslations"]</h1>
+
+<hr />
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <label class="form-label">@L["SelectLanguage"]</label>
+        <select class="form-select" @onchange="OnLanguageChanged">
+            <option value="">-- @L["ChooseLanguage"] --</option>
+            @foreach (var lang in languages)
+            {
+                <option value="@lang.Id">@lang.Name (@lang.Code)</option>
+            }
+        </select>
+    </div>
+</div>
+
+@if (selectedLanguageId > 0)
+{
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <span>@L["Translations"]</span>
+            <button class="btn btn-sm btn-success" @onclick="ShowAddTranslationForm">@L["AddTranslation"]</button>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@L["FieldKey"]</th>
+                        <th>@L["TranslatedValue"]</th>
+                        <th>@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var trans in translations)
+                    {
+                        <tr>
+                            <td>@trans.FieldKey</td>
+                            <td>@trans.TranslatedValue</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" @onclick="() => EditTranslation(trans)">@L["Edit"]</button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteTranslation(trans)">@L["Delete"]</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (showForm)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(editingTranslation.Id == 0 ? L["AddTranslation"] : L["EditTranslation"])</h5>
+                    <button type="button" class="btn-close" @onclick="() => showForm = false"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="editingTranslation" OnValidSubmit="HandleSubmit">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">@L["FieldKey"]</label>
+                            <InputText @bind-Value="editingTranslation.FieldKey" class="form-control" />
+                            <ValidationMessage For="() => editingTranslation.FieldKey" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">@L["TranslatedValue"]</label>
+                            <InputText @bind-Value="editingTranslation.TranslatedValue" class="form-control" />
+                            <ValidationMessage For="() => editingTranslation.TranslatedValue" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="() => showForm = false">@L["Cancel"]</button>
+                            <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<SupportedLanguage> languages = new();
+    private List<DynamicTranslation> translations = new();
+    private DynamicTranslation editingTranslation = new();
+    private int selectedLanguageId;
+    private bool showForm = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        languages = await DbContext.SupportedLanguages.ToListAsync();
+    }
+
+    private async Task OnLanguageChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int id))
+        {
+            selectedLanguageId = id;
+            await LoadTranslations();
+        }
+        else
+        {
+            selectedLanguageId = 0;
+            translations.Clear();
+        }
+    }
+
+    private async Task LoadTranslations()
+    {
+        translations = await DbContext.DynamicTranslations
+            .Where(t => t.LanguageId == selectedLanguageId)
+            .ToListAsync();
+    }
+
+    private void ShowAddTranslationForm()
+    {
+        editingTranslation = new DynamicTranslation { LanguageId = selectedLanguageId };
+        showForm = true;
+    }
+
+    private void EditTranslation(DynamicTranslation trans)
+    {
+        editingTranslation = new DynamicTranslation 
+        { 
+            Id = trans.Id, 
+            LanguageId = trans.LanguageId, 
+            FieldKey = trans.FieldKey, 
+            TranslatedValue = trans.TranslatedValue 
+        };
+        showForm = true;
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (editingTranslation.Id == 0)
+        {
+            DbContext.DynamicTranslations.Add(editingTranslation);
+        }
+        else
+        {
+            DbContext.DynamicTranslations.Update(editingTranslation);
+        }
+
+        await DbContext.SaveChangesAsync();
+        await LoadTranslations();
+        showForm = false;
+    }
+
+    private async Task DeleteTranslation(DynamicTranslation trans)
+    {
+        DbContext.DynamicTranslations.Remove(trans);
+        await DbContext.SaveChangesAsync();
+        await LoadTranslations();
+    }
+}

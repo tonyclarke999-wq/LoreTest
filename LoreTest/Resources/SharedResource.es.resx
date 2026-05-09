@@ -868,4 +868,85 @@
   <data name="PersonalData" xml:space="preserve">
     <value>Datos personales</value>
   </data>
+  <data name="AdminSettings" xml:space="preserve">
+    <value>Ajustes de administración</value>
+  </data>
+  <data name="TranslationServiceSettings" xml:space="preserve">
+    <value>Ajustes del servicio de traducción</value>
+  </data>
+  <data name="TranslationAPI" xml:space="preserve">
+    <value>API de traducción</value>
+  </data>
+  <data name="TranslationApiHelp" xml:space="preserve">
+    <value>Seleccione el proveedor de servicios externo para la traducción de contenido sobre la marcha.</value>
+  </data>
+  <data name="APIKey" xml:space="preserve">
+    <value>Clave API</value>
+  </data>
+  <data name="ApiKeyHelp" xml:space="preserve">
+    <value>La clave de autenticación proporcionada por el proveedor de la API.</value>
+  </data>
+  <data name="SaveSettings" xml:space="preserve">
+    <value>Guardar ajustes</value>
+  </data>
+  <data name="SettingsSavedSuccessfully" xml:space="preserve">
+    <value>¡Ajustes guardados correctamente!</value>
+  </data>
+  <data name="Internationalization" xml:space="preserve">
+    <value>Internacionalización</value>
+  </data>
+  <data name="ManageLanguagesAndTranslationsHelp" xml:space="preserve">
+    <value>Configure los idiomas admitidos y sobrescriba los encabezados de los campos dinámicamente.</value>
+  </data>
+  <data name="ManageLanguages" xml:space="preserve">
+    <value>Gestionar idiomas</value>
+  </data>
+  <data name="ManageFieldTranslations" xml:space="preserve">
+    <value>Gestionar traducciones de campos</value>
+  </data>
+  <data name="SupportedLanguages" xml:space="preserve">
+    <value>Idiomas admitidos</value>
+  </data>
+  <data name="AddLanguage" xml:space="preserve">
+    <value>Añadir idioma</value>
+  </data>
+  <data name="AddNewLanguage" xml:space="preserve">
+    <value>Añadir nuevo idioma</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Código</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Predeterminado</value>
+  </data>
+  <data name="SetAsDefault" xml:space="preserve">
+    <value>Establecer como predeterminado</value>
+  </data>
+  <data name="SelectLanguage" xml:space="preserve">
+    <value>Seleccionar idioma</value>
+  </data>
+  <data name="ChooseLanguage" xml:space="preserve">
+    <value>Elegir idioma</value>
+  </data>
+  <data name="FieldKey" xml:space="preserve">
+    <value>Clave de campo</value>
+  </data>
+  <data name="TranslatedValue" xml:space="preserve">
+    <value>Valor traducido</value>
+  </data>
+  <data name="AddTranslation" xml:space="preserve">
+    <value>Añadir traducción</value>
+  </data>
+  <data name="EditTranslation" xml:space="preserve">
+    <value>Editar traducción</value>
+  </data>
+  <data name="Translations" xml:space="preserve">
+    <value>Traducciones</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Sí</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
 </root>
