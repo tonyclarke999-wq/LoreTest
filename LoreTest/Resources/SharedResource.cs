@@ -1,5 +1,3 @@
 namespace LoreTest.Resources;
 
-public class SharedResource
-{
-}
+public class SharedResource { }

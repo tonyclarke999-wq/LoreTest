@@ -1,6 +1,6 @@
+#nullable enable
 using Bunit;
 using Bunit.TestDoubles;
-using LoreTest.Components.Pages.Projects;
 using LoreTest.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -47,10 +47,10 @@ namespace LoreTest.Tests
             Services.AddSingleton(context);
 
             // Act
-            var cut = RenderComponent<LoreTest.Components.Pages.Projects.Index>();
+            var cut = RenderComponent<global::LoreTest.Components.Pages.Projects.Index>();
 
             // Assert
-            StringAssert.Contains(cut.Markup, "Loading");
+            Assert.Contains("Loading", cut.Markup);
             
             // Cleanup to avoid hanging tasks
             tcs.SetResult(null);
@@ -70,11 +70,11 @@ namespace LoreTest.Tests
             Services.AddSingleton(context);
 
             // Act
-            var cut = RenderComponent<LoreTest.Components.Pages.Projects.Index>();
+            var cut = RenderComponent<global::LoreTest.Components.Pages.Projects.Index>();
 
             // assert
-            StringAssert.Contains(cut.Markup, "TestProjects");
-            StringAssert.Contains(cut.Markup, "NoProjectsFound");
+            Assert.Contains("TestProjects", cut.Markup);
+            Assert.Contains("NoProjectsFound", cut.Markup);
         }
 
         [TestMethod]
@@ -94,13 +94,13 @@ namespace LoreTest.Tests
             Services.AddSingleton(context);
 
             // Act
-            var cut = RenderComponent<LoreTest.Components.Pages.Projects.Index>();
+            var cut = RenderComponent<global::LoreTest.Components.Pages.Projects.Index>();
 
             // Assert
             var rows = cut.FindAll("tbody tr");
             Assert.HasCount(2, rows);
-            StringAssert.Contains(cut.Markup, "Project 1");
-            StringAssert.Contains(cut.Markup, "Project 2");
+            Assert.Contains("Project 1", cut.Markup);
+            Assert.Contains("Project 2", cut.Markup);
         }
 
         [TestMethod]
@@ -120,13 +120,13 @@ namespace LoreTest.Tests
             Services.AddSingleton(context);
 
             // Act
-            var cut = RenderComponent<LoreTest.Components.Pages.Projects.Index>();
+            var cut = RenderComponent<global::LoreTest.Components.Pages.Projects.Index>();
 
             // Assert
-            StringAssert.Contains(cut.Markup, "CreateNew");
+            Assert.Contains("CreateNew", cut.Markup);
         }
 
-        private Mock<UserManager<ApplicationUser>> CreateUserManagerMock()
+        private static Mock<UserManager<ApplicationUser>> CreateUserManagerMock()
         {
             var store = new Mock<IUserStore<ApplicationUser>>();
             return new Mock<UserManager<ApplicationUser>>(

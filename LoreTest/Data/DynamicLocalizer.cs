@@ -4,16 +4,10 @@ using System.Globalization;
 
 namespace LoreTest.Data
 {
-    public class DynamicLocalizer : IStringLocalizer
+    public class DynamicLocalizer(IStringLocalizer fallbackLocalizer, IDbContextFactory<ApplicationDbContext> dbContextFactory) : IStringLocalizer
     {
-        private readonly IStringLocalizer _fallbackLocalizer;
-        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
-
-        public DynamicLocalizer(IStringLocalizer fallbackLocalizer, IDbContextFactory<ApplicationDbContext> dbContextFactory)
-        {
-            _fallbackLocalizer = fallbackLocalizer;
-            _dbContextFactory = dbContextFactory;
-        }
+        private readonly IStringLocalizer _fallbackLocalizer = fallbackLocalizer;
+        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory = dbContextFactory;
 
         public LocalizedString this[string name]
         {
@@ -43,11 +37,11 @@ namespace LoreTest.Data
 
         private string? GetTranslationFromDb(string key)
         {
-            try 
+            try
             {
                 var culture = CultureInfo.CurrentUICulture.Name;
                 using var context = _dbContextFactory.CreateDbContext();
-                
+
                 var translation = context.DynamicTranslations
                     .Include(t => t.Language)
                     .FirstOrDefault(t => t.FieldKey == key && (t.Language.Code == culture || t.Language.Code == culture.Split('-', StringSplitOptions.None)[0]));

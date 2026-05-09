@@ -4,19 +4,13 @@ using Microsoft.Extensions.Options;
 
 namespace LoreTest.Data
 {
-    public class DynamicLocalizerFactory : IStringLocalizerFactory
-    {
-        private readonly ResourceManagerStringLocalizerFactory _resourceFactory;
-        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
-
-        public DynamicLocalizerFactory(
+    public class DynamicLocalizerFactory(
             IOptions<LocalizationOptions> localizationOptions,
             IDbContextFactory<ApplicationDbContext> dbContextFactory,
-            ILoggerFactory loggerFactory)
-        {
-            _resourceFactory = new ResourceManagerStringLocalizerFactory(localizationOptions, loggerFactory);
-            _dbContextFactory = dbContextFactory;
-        }
+            ILoggerFactory loggerFactory) : IStringLocalizerFactory
+    {
+        private readonly ResourceManagerStringLocalizerFactory _resourceFactory = new(localizationOptions, loggerFactory);
+        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory = dbContextFactory;
 
         public IStringLocalizer Create(Type resourceSource)
         {
