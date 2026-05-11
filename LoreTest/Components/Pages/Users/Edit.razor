@@ -6,16 +6,17 @@
 @using System.ComponentModel.DataAnnotations
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Edit User</PageTitle>
+<PageTitle>@L["EditUser"]</PageTitle>
 
-<h1>Edit User</h1>
+<h1>@L["EditUser"]</h1>
 <hr />
 
 @if (user == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else
 {
@@ -26,35 +27,44 @@ else
                 <ValidationSummary class="text-danger" />
 
                 <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
+                    <label for="email" class="form-label">@L["Email"]</label>
                     <InputText id="email" @bind-Value="Input.Email" class="form-control" disabled />
                 </div>
                 <div class="mb-3">
-                    <label for="name" class="form-label">Name</label>
+                    <label for="name" class="form-label">@L["Name"]</label>
                     <InputText id="name" @bind-Value="Input.Name" class="form-control" />
                 </div>
                 <div class="mb-3">
-                    <label for="jobTitle" class="form-label">Job Title</label>
+                    <label for="jobTitle" class="form-label">@L["JobTitle"]</label>
                     <InputText id="jobTitle" @bind-Value="Input.JobTitle" class="form-control" />
                 </div>
                 <div class="mb-3">
-                    <label for="role" class="form-label">Role</label>
+                    <label for="role" class="form-label">@L["Role"]</label>
                     <InputSelect id="role" @bind-Value="Input.Role" class="form-select">
-                        <option value="">Select a Role...</option>
-                        <option value="Administrator">Administrator</option>
-                        <option value="Editor">Editor</option>
-                        <option value="Tester">Tester</option>
-                        <option value="Reviewer">Reviewer</option>
+                        <option value="">@L["SelectRole"]</option>
+                        <option value="Administrator">@L["Administrator"]</option>
+                        <option value="Editor">@L["Editor"]</option>
+                        <option value="Tester">@L["Tester"]</option>
+                        <option value="Reviewer">@L["Reviewer"]</option>
                     </InputSelect>
                 </div>
                 <div class="mb-3">
-                    <label for="startDate" class="form-label">Start Date</label>
+                    <label for="startDate" class="form-label">@L["StartDate"]</label>
                     <InputDate id="startDate" @bind-Value="Input.StartDate" class="form-control" />
                 </div>
                 <div class="mb-3">
-                    <label for="endDate" class="form-label">End Date</label>
+                    <label for="endDate" class="form-label">@L["EndDate"]</label>
                     <InputDate id="endDate" @bind-Value="Input.EndDate" class="form-control" />
                     <ValidationMessage For="() => Input.EndDate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="preferredLanguage" class="form-label">@L["PreferredLanguage"]</label>
+                    <InputSelect id="preferredLanguage" @bind-Value="Input.PreferredLanguage" class="form-select">
+                        <option value="en">English</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="es">Español</option>
+                    </InputSelect>
                 </div>
 
                 @if (!string.IsNullOrEmpty(errorMessage))
@@ -62,8 +72,8 @@ else
                     <div class="alert alert-danger">@errorMessage</div>
                 }
 
-                <button type="submit" class="btn btn-primary">Save</button>
-                <a href="/users" class="btn btn-secondary">Back to List</a>
+                <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                <a href="/users" class="btn btn-secondary">@L["BackToList"]</a>
             </EditForm>
         </div>
     </div>
@@ -93,6 +103,7 @@ else
         Input.Role = user.Role;
         Input.StartDate = user.StartDate;
         Input.EndDate = user.EndDate;
+        Input.PreferredLanguage = user.PreferredLanguage;
     }
 
     public class InputModel : IValidatableObject
@@ -103,6 +114,7 @@ else
         public string? Role { get; set; }
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
+        public string? PreferredLanguage { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -126,6 +138,7 @@ else
             user.Role = Input.Role;
             user.StartDate = Input.StartDate;
             user.EndDate = Input.EndDate;
+            user.PreferredLanguage = Input.PreferredLanguage;
 
             var result = await UserManager.UpdateAsync(user);
 

@@ -11,8 +11,9 @@ using System.Text.Json;
 
 namespace LoreTest.Components.Account
 {
-    using global::LoreTest.Components.Account.Pages;
-    using global::LoreTest.Components.Account.Pages.Manage;
+    // Using global:: to resolve IDE namespace resolution issues
+    using ExternalLogin = global::LoreTest.Components.Account.Pages.ExternalLogin;
+    using ExternalLogins = global::LoreTest.Components.Account.Pages.Manage.ExternalLogins;
     using Microsoft.AspNetCore.Routing;
 
     internal static class IdentityComponentsEndpointRouteBuilderExtensions
@@ -32,7 +33,7 @@ namespace LoreTest.Components.Account
             {
                 IEnumerable<KeyValuePair<string, StringValues>> query = [
                     new("ReturnUrl", returnUrl),
-                    new("Action", global::LoreTest.Components.Account.Pages.ExternalLogin.LoginCallbackAction)];
+                    new("Action", ExternalLogin.LoginCallbackAction)];
 
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
@@ -103,7 +104,7 @@ namespace LoreTest.Components.Account
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
                     "/Account/Manage/ExternalLogins",
-                    QueryString.Create("Action", global::LoreTest.Components.Account.Pages.Manage.ExternalLogins.LinkLoginCallbackAction));
+                    QueryString.Create("Action", ExternalLogins.LinkLoginCallbackAction));
 
                 var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, signInManager.UserManager.GetUserId(context.User));
                 return TypedResults.Challenge(properties, [provider]);

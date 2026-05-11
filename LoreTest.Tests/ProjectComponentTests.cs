@@ -1,11 +1,13 @@
+#nullable enable
 using Bunit;
 using Bunit.TestDoubles;
-using LoreTest.Components.Pages.Projects;
 using LoreTest.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Microsoft.Extensions.Localization;
+using LoreTest.Resources;
 using System.Security.Claims;
 
 namespace LoreTest.Tests
@@ -21,6 +23,11 @@ namespace LoreTest.Tests
             _options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
+
+            // Setup common localization mock
+            var localizerMock = new Mock<IStringLocalizer<SharedResource>>();
+            localizerMock.Setup(x => x[It.IsAny<string>()]).Returns((string key) => new LocalizedString(key, key));
+            Services.AddSingleton(localizerMock.Object);
         }
 
         [TestMethod]
@@ -30,15 +37,23 @@ namespace LoreTest.Tests
             var auth = this.AddTestAuthorization();
             auth.SetAuthorized("TestUser");
 
+            var tcs = new TaskCompletionSource<ApplicationUser?>();
             var userManagerMock = CreateUserManagerMock();
+            userManagerMock.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .Returns(tcs.Task);
             Services.AddSingleton(userManagerMock.Object);
 
-            // Register a mock DbContext that returns null for TestProjects initially? 
-            // Actually, in the real component, it's initialized in OnInitializedAsync.
-            // So if we don't await, it might show loading.
+            using var context = new ApplicationDbContext(_options, new Mock<IServiceProvider>().Object);
+            Services.AddSingleton(context);
+
+            // Act
+            var cut = RenderComponent<global::LoreTest.Components.Pages.Projects.Index>();
+
+            // Assert
+            Assert.Contains("Loading", cut.Markup);
             
-            // To test "Loading...", we'd need a way to delay the data load.
-            // But let's test the main functionality instead.
+            // Cleanup to avoid hanging tasks
+            tcs.SetResult(null);
         }
 
         [TestMethod]
@@ -55,13 +70,11 @@ namespace LoreTest.Tests
             Services.AddSingleton(context);
 
             // Act
-            var cut = RenderComponent<LoreTest.Components.Pages.Projects.Index>();
+            var cut = RenderComponent<global::LoreTest.Components.Pages.Projects.Index>();
 
-            // Assert
-            cut.MarkupMatches(@"
-                <h1>Test Projects</h1>
-                <p>No projects found.</p>
-            ");
+            // assert
+            Assert.Contains("TestProjects", cut.Markup);
+            Assert.Contains("NoProjectsFound", cut.Markup);
         }
 
         [TestMethod]
@@ -81,13 +94,13 @@ namespace LoreTest.Tests
             Services.AddSingleton(context);
 
             // Act
-            var cut = RenderComponent<LoreTest.Components.Pages.Projects.Index>();
+            var cut = RenderComponent<global::LoreTest.Components.Pages.Projects.Index>();
 
             // Assert
             var rows = cut.FindAll("tbody tr");
             Assert.HasCount(2, rows);
-            StringAssert.Contains(cut.Markup, "Project 1");
-            StringAssert.Contains(cut.Markup, "Project 2");
+            Assert.Contains("Project 1", cut.Markup);
+            Assert.Contains("Project 2", cut.Markup);
         }
 
         [TestMethod]
@@ -107,13 +120,13 @@ namespace LoreTest.Tests
             Services.AddSingleton(context);
 
             // Act
-            var cut = RenderComponent<LoreTest.Components.Pages.Projects.Index>();
+            var cut = RenderComponent<global::LoreTest.Components.Pages.Projects.Index>();
 
             // Assert
-            StringAssert.Contains(cut.Markup, "Create New");
+            Assert.Contains("CreateNew", cut.Markup);
         }
 
-        private Mock<UserManager<ApplicationUser>> CreateUserManagerMock()
+        private static Mock<UserManager<ApplicationUser>> CreateUserManagerMock()
         {
             var store = new Mock<IUserStore<ApplicationUser>>();
             return new Mock<UserManager<ApplicationUser>>(

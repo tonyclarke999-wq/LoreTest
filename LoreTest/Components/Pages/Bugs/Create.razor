@@ -10,11 +10,12 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
 @inject IWebHostEnvironment Environment
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Report Bug</PageTitle>
+<PageTitle>@L["ReportBug"]</PageTitle>
 
-<h1>Report New Bug</h1>
+<h1>@L["ReportNewBug"]</h1>
 
 <hr />
 
@@ -25,69 +26,69 @@
             <ValidationSummary class="text-danger" />
 
             <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <InputText id="title" @bind-Value="bug.Title" class="form-control" placeholder="Short descriptive title" />
+                <label for="title" class="form-label">@L["Title"]</label>
+                <InputText id="title" @bind-Value="bug.Title" class="form-control" placeholder="@L["TitlePlaceholder"]" />
                 <ValidationMessage For="() => bug.Title" class="text-danger" />
             </div>
 
             <div class="mb-3">
-                <label for="description" class="form-label">Detailed Description / Reproduction Steps</label>
-                <InputTextArea id="description" @bind-Value="bug.Description" class="form-control" rows="5" placeholder="1. Go to... 2. Click on..." />
+                <label for="description" class="form-label">@L["DescriptionReproductionSteps"]</label>
+                <InputTextArea id="description" @bind-Value="bug.Description" class="form-control" rows="5" placeholder="@L["DescriptionPlaceholder"]" />
                 <ValidationMessage For="() => bug.Description" class="text-danger" />
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="expected" class="form-label">Expected Result</label>
+                    <label for="expected" class="form-label">@L["ExpectedResult"]</label>
                     <InputTextArea id="expected" @bind-Value="bug.ExpectedResult" class="form-control" rows="3" />
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="actual" class="form-label">Actual Result</label>
+                    <label for="actual" class="form-label">@L["ActualResult"]</label>
                     <InputTextArea id="actual" @bind-Value="bug.ActualResult" class="form-control" rows="3" />
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <label for="severity" class="form-label">Severity</label>
+                    <label for="severity" class="form-label">@L["Severity"]</label>
                     <InputSelect id="severity" @bind-Value="bug.Severity" class="form-select">
                         @foreach (var val in Enum.GetValues<BugSeverity>())
                         {
-                            <option value="@val">@val</option>
+                            <option value="@val">@L[val.ToString()]</option>
                         }
                     </InputSelect>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="priority" class="form-label">Priority</label>
+                    <label for="priority" class="form-label">@L["Priority"]</label>
                     <InputSelect id="priority" @bind-Value="bug.Priority" class="form-select">
                         @foreach (var val in Enum.GetValues<BugPriority>())
                         {
-                            <option value="@val">@val</option>
+                            <option value="@val">@L[val.ToString()]</option>
                         }
                     </InputSelect>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="environment" class="form-label">Environment</label>
-                    <InputText id="environment" @bind-Value="bug.Environment" class="form-control" placeholder="OS, Browser, Device..." />
+                    <label for="environment" class="form-label">@L["Environment"]</label>
+                    <InputText id="environment" @bind-Value="bug.Environment" class="form-control" placeholder="@L["EnvironmentPlaceholder"]" />
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="components" class="form-label">Components</label>
-                    <InputText id="components" @bind-Value="bug.Components" class="form-control" placeholder="UI, API, Database..." />
+                    <label for="components" class="form-label">@L["Components"]</label>
+                    <InputText id="components" @bind-Value="bug.Components" class="form-control" placeholder="@L["ComponentsPlaceholder"]" />
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="labels" class="form-label">Labels</label>
-                    <InputText id="labels" @bind-Value="bug.Labels" class="form-control" placeholder="regression, ui-glitch, etc." />
+                    <label for="labels" class="form-label">@L["Labels"]</label>
+                    <InputText id="labels" @bind-Value="bug.Labels" class="form-control" placeholder="@L["LabelsPlaceholder"]" />
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="assignee" class="form-label">Assignee</label>
+                    <label for="assignee" class="form-label">@L["Assignee"]</label>
                     <InputSelect id="assignee" @bind-Value="bug.AssigneeId" class="form-select">
-                        <option value="">-- Unassigned --</option>
+                        <option value="">-- @L["Unassigned"] --</option>
                         @foreach (var user in users)
                         {
                             <option value="@user.Id">@user.UserName</option>
@@ -95,24 +96,24 @@
                     </InputSelect>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="dueDate" class="form-label">Due Date</label>
+                    <label for="dueDate" class="form-label">@L["DueDate"]</label>
                     <InputDate id="dueDate" @bind-Value="bug.DueDate" class="form-control" />
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="affectedVersion" class="form-label">Affected Version</label>
+                    <label for="affectedVersion" class="form-label">@L["AffectedVersion"]</label>
                     <InputText id="affectedVersion" @bind-Value="bug.AffectedVersion" class="form-control" />
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="fixVersion" class="form-label">Fix Version</label>
+                    <label for="fixVersion" class="form-label">@L["FixVersion"]</label>
                     <InputText id="fixVersion" @bind-Value="bug.FixVersion" class="form-control" />
                 </div>
             </div>
 
             <div class="mb-3">
-                <label for="attachments" class="form-label">Attachments (Screenshots, Docs)</label>
+                <label for="attachments" class="form-label">@L["AttachmentsLabel"]</label>
                 <InputFile OnChange="LoadFiles" class="form-control" multiple />
                 @if (selectedFiles.Any())
                 {
@@ -126,8 +127,8 @@
             </div>
 
             <div class="mt-4 mb-5">
-                <button type="submit" class="btn btn-success me-2">Create Bug Report</button>
-                <a href="/bugs" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-success me-2">@L["CreateBugReport"]</button>
+                <a href="/bugs" class="btn btn-secondary">@L["Cancel"]</a>
             </div>
         </EditForm>
     </div>
@@ -141,6 +142,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        bug.OriginalCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
         users = await UserManager.Users.OrderBy(u => u.UserName).ToListAsync();
         
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();

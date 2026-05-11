@@ -1,0 +1,151 @@
+@page "/admin/languages"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject IStringLocalizer<SharedResource> L
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+<PageTitle>@L["ManageLanguages"]</PageTitle>
+
+<h1>@L["ManageLanguages"]</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span>@L["SupportedLanguages"]</span>
+                <button class="btn btn-sm btn-success" @onclick="ShowAddLanguageForm">@L["AddLanguage"]</button>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>@L["Code"]</th>
+                            <th>@L["Name"]</th>
+                            <th>@L["Default"]</th>
+                            <th>@L["Actions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var lang in languages)
+                        {
+                            <tr>
+                                <td>@lang.Code</td>
+                                <td>@lang.Name</td>
+                                <td>@(lang.IsDefault ? L["Yes"] : L["No"])</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteLanguage(lang)">@L["Delete"]</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @if (showAddForm)
+    {
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    @L["AddNewLanguage"]
+                </div>
+                <div class="card-body">
+                    <EditForm Model="newLanguage" OnValidSubmit="HandleAddLanguage">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">@L["Code"] (e.g. en, de)</label>
+                            <InputText @bind-Value="newLanguage.Code" class="form-control" />
+                            <ValidationMessage For="() => newLanguage.Code" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">@L["Name"]</label>
+                            <InputText @bind-Value="newLanguage.Name" class="form-control" />
+                            <ValidationMessage For="() => newLanguage.Name" />
+                        </div>
+                        <div class="mb-3 form-check">
+                            <InputCheckbox @bind-Value="newLanguage.IsDefault" class="form-check-input" id="isDefault" />
+                            <label class="form-check-label" for="isDefault">@L["SetAsDefault"]</label>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">@L["Save"]</button>
+                            <button type="button" class="btn btn-secondary" @onclick="() => showAddForm = false">@L["Cancel"]</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<SupportedLanguage> languages = new();
+    private SupportedLanguage newLanguage = new();
+    private bool showAddForm = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLanguages();
+    }
+
+    private async Task LoadLanguages()
+    {
+        using var context = DbFactory.CreateDbContext();
+        languages = await context.SupportedLanguages.ToListAsync();
+    }
+
+    private void ShowAddLanguageForm()
+    {
+        newLanguage = new SupportedLanguage();
+        showAddForm = true;
+    }
+
+    private async Task HandleAddLanguage()
+    {
+        using var context = DbFactory.CreateDbContext();
+        if (newLanguage.IsDefault)
+        {
+            var defaultLangs = await context.SupportedLanguages.Where(l => l.IsDefault).ToListAsync();
+            foreach (var dl in defaultLangs) dl.IsDefault = false;
+        }
+
+        context.SupportedLanguages.Add(newLanguage);
+        await context.SaveChangesAsync();
+
+        // Populate with English translations as template
+        var english = await context.SupportedLanguages.FirstOrDefaultAsync(l => l.Code == "en");
+        if (english != null)
+        {
+            var englishTranslations = await context.DynamicTranslations
+                .Where(t => t.LanguageId == english.Id)
+                .ToListAsync();
+
+            foreach (var et in englishTranslations)
+            {
+                context.DynamicTranslations.Add(new DynamicTranslation
+                {
+                    LanguageId = newLanguage.Id,
+                    FieldId = et.FieldId,
+                    TranslatedValue = et.TranslatedValue
+                });
+            }
+            await context.SaveChangesAsync();
+        }
+
+        await LoadLanguages();
+        showAddForm = false;
+    }
+
+    private async Task DeleteLanguage(SupportedLanguage lang)
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.SupportedLanguages.Remove(lang);
+        await context.SaveChangesAsync();
+        await LoadLanguages();
+    }
+}

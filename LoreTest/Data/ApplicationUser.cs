@@ -10,6 +10,7 @@ namespace LoreTest.Data
         public string? Role { get; set; }
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
+        public string PreferredLanguage { get; set; } = "en";
     }
 
 }

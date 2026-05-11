@@ -8,32 +8,33 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Execute Test Run</PageTitle>
+<PageTitle>@L["ExecuteTestRun"]</PageTitle>
 
 @if (testRun == null)
 {
     <div class="p-5 text-center">
         <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden">@L["Loading"]</span>
         </div>
-        <p class="mt-2">Loading Test Run #@RunId...</p>
+        <p class="mt-2">@string.Format(L["LoadingRunPrefix"], RunId)</p>
     </div>
 }
 else if (testRun.Status == "Completed")
 {
     <div class="alert alert-success">
-        <h4 class="alert-heading">Execution Completed!</h4>
-        <p>This test run was completed on @testRun.EndTime?.ToLocalTime().</p>
+        <h4 class="alert-heading">@L["ExecutionCompleted"]</h4>
+        <p>@string.Format(L["RunCompletedOn"], testRun.EndTime?.ToLocalTime())</p>
         <hr>
-        <a href="/testruns/details/@testRun.Id" class="btn btn-success">View Final Results</a>
+        <a href="/testruns/details/@testRun.Id" class="btn btn-success">@L["ViewFinalResults"]</a>
     </div>
 }
 else
 {
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>Run #@testRun.RunNumber <small class="text-muted fs-5">Execution</small></h1>
+        <h1>@string.Format(L["RunNumberPrefix"] + " {0}", testRun.RunNumber) <small class="text-muted fs-5">@L["Execution"]</small></h1>
         <div class="text-end">
             <div class="fw-bold">@testRun.Project?.Title</div>
             <div class="text-muted">@testRun.TestSuite?.Title</div>
@@ -48,7 +49,7 @@ else
         }
         <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" 
              style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">
-            @percent% Complete (@completedSteps / @totalSteps Steps)
+            @string.Format(L["ProgressSummary"], percent, completedSteps, totalSteps)
         </div>
     </div>
 
@@ -59,55 +60,55 @@ else
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                 <span>
-                    <strong>Test Case:</strong> @current.CaseResult.TestCase?.Title 
-                    <small class="ms-2 text-info">(Case @(currentCaseIndex + 1) of @testRun.CaseResults.Count)</small>
+                    <strong>@L["TestCase"]:</strong> @current.CaseResult.TestCase?.Title 
+                    <small class="ms-2 text-info">(@string.Format(L["CaseOfTotal"], currentCaseIndex + 1, testRun.CaseResults.Count))</small>
                 </span>
-                <span class="badge bg-light text-dark">Step @current.StepResult.TestStep?.StepNumber</span>
+                <span class="badge bg-light text-dark">@L["Step"] @current.StepResult.TestStep?.StepNumber</span>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6 border-end">
-                        <h6 class="text-uppercase text-muted fw-bold small mb-3">Requirements</h6>
+                        <h6 class="text-uppercase text-muted fw-bold small mb-3">@L["Requirements"]</h6>
                         <div class="mb-3">
-                            <label class="fw-bold d-block mb-1">Step Description:</label>
+                            <label class="fw-bold d-block mb-1">@L["StepDescription"]:</label>
                             <div class="p-2 bg-light border rounded">
-                                @((MarkupString)(current.StepResult.TestStep?.Description ?? "<em>No description provided.</em>"))
+                                @((MarkupString)(current.StepResult.TestStep?.Description ?? $"<em>{L["NoDescriptionProvided"]}</em>"))
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="fw-bold d-block mb-1">Expected Result:</label>
+                            <label class="fw-bold d-block mb-1">@L["ExpectedResult"]:</label>
                             <div class="p-2 bg-light border rounded">
-                                @((MarkupString)(current.StepResult.TestStep?.ExpectedResult ?? "<em>No expected result defined.</em>"))
+                                @((MarkupString)(current.StepResult.TestStep?.ExpectedResult ?? $"<em>{L["NoExpectedResultDefined"]}</em>"))
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6 ps-md-4">
-                        <h6 class="text-uppercase text-muted fw-bold small mb-3">Actual Execution</h6>
+                        <h6 class="text-uppercase text-muted fw-bold small mb-3">@L["ActualExecution"]</h6>
                         
                         <div class="mb-4">
-                            <label class="fw-bold d-block mb-2">Set Status:</label>
+                            <label class="fw-bold d-block mb-2">@L["SetStatus"]</label>
                             <div class="btn-group w-100" role="group">
                                 <button type="button" class="btn @(current.StepResult.Status == "Pass" ? "btn-success" : "btn-outline-success")"
                                         @onclick='() => SetStepStatus("Pass")'>
-                                    <i class="bi bi-check-circle me-1"></i> PASS
+                                    <i class="bi bi-check-circle me-1"></i> @L["PASS"]
                                 </button>
                                 <button type="button" class="btn @(current.StepResult.Status == "Fail" ? "btn-danger" : "btn-outline-danger")"
                                         @onclick='() => SetStepStatus("Fail")'>
-                                    <i class="bi bi-x-circle me-1"></i> FAIL
+                                    <i class="bi bi-x-circle me-1"></i> @L["FAIL"]
                                 </button>
                             </div>
                         </div>
 
                         <div class="mb-4">
                             <button type="button" class="btn btn-warning w-100" @onclick="OpenBugModal">
-                                <i class="bi bi-bug-fill me-1"></i> Report Bug
+                                <i class="bi bi-bug-fill me-1"></i> @L["ReportBug"]
                             </button>
                         </div>
 
                         <div class="mb-3">
-                            <label for="actualResult" class="fw-bold d-block mb-2">Actual Result / Notes:</label>
+                            <label for="actualResult" class="fw-bold d-block mb-2">@L["ActualResultNotes"]</label>
                             <textarea id="actualResult" class="form-control" rows="5" 
-                                      placeholder="Describe what actually happened..."
+                                      placeholder="@L["DescribeWhatHappened"]"
                                       @bind="current.StepResult.ActualResult"></textarea>
                         </div>
                     </div>
@@ -115,33 +116,33 @@ else
             </div>
             <div class="card-footer bg-white d-flex justify-content-between">
                 <button class="btn btn-outline-secondary" @onclick="PrevStep" disabled="@(currentStepIndex == 0)">
-                    <i class="bi bi-arrow-left"></i> Previous Step
+                    <i class="bi bi-arrow-left"></i> @L["PreviousStep"]
                 </button>
                 
                 @if (currentStepIndex < flattenedSteps.Count - 1)
                 {
                     <button class="btn btn-primary" @onclick="NextStep" disabled="@(current.StepResult.Status == "Not Run")">
-                        Next Step <i class="bi bi-arrow-right"></i>
+                        @L["NextStep"] <i class="bi bi-arrow-right"></i>
                     </button>
                 }
                 else
                 {
                     <button class="btn btn-success px-5" @onclick="FinishRun" disabled="@(current.StepResult.Status == "Not Run")">
-                        Complete Test Run
+                        @L["CompleteTestRun"]
                     </button>
                 }
             </div>
         </div>
 
         <div class="mt-4">
-            <h6>Run Progress Log</h6>
+            <h6>@L["RunProgressLog"]</h6>
             <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
                 <table class="table table-sm table-hover border">
                     <thead class="sticky-top bg-white border-bottom">
                         <tr>
-                            <th>Step</th>
-                            <th>Case</th>
-                            <th>Status</th>
+                            <th>@L["Step"]</th>
+                            <th>@L["Case"]</th>
+                            <th>@L["Status"]</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -171,36 +172,36 @@ else
         <div class="modal-dialog modal-lg shadow-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title"><i class="bi bi-bug-fill me-2"></i>Report Bug from Execution</h5>
+                    <h5 class="modal-title"><i class="bi bi-bug-fill me-2"></i>@L["ReportBugFromExecution"]</h5>
                     <button type="button" class="btn-close" @onclick="() => showBugModal = false" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Title</label>
+                        <label class="form-label fw-bold">@L["Title"]</label>
                         <input type="text" class="form-control" @bind="newBug.Title" />
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Description / Repro Steps</label>
+                        <label class="form-label fw-bold">@L["DescriptionReproSteps"]</label>
                         <textarea class="form-control" rows="5" @bind="newBug.Description"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Severity</label>
+                            <label class="form-label fw-bold">@L["Severity"]</label>
                             <select class="form-select" @bind="newBug.Severity">
-                                @foreach (var val in Enum.GetValues<BugSeverity>()) { <option value="@val">@val</option> }
+                                @foreach (var val in Enum.GetValues<BugSeverity>()) { <option value="@val">@L[val.ToString()]</option> }
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Priority</label>
+                            <label class="form-label fw-bold">@L["Priority"]</label>
                             <select class="form-select" @bind="newBug.Priority">
-                                @foreach (var val in Enum.GetValues<BugPriority>()) { <option value="@val">@val</option> }
+                                @foreach (var val in Enum.GetValues<BugPriority>()) { <option value="@val">@L[val.ToString()]</option> }
                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="() => showBugModal = false">Cancel</button>
-                    <button type="button" class="btn btn-warning" @onclick="SaveBugFromExecution">Save Bug & Continue Test</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => showBugModal = false">@L["Cancel"]</button>
+                    <button type="button" class="btn btn-warning" @onclick="SaveBugFromExecution">@L["SaveBugContinue"]</button>
                 </div>
             </div>
         </div>

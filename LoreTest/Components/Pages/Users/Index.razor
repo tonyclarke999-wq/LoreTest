@@ -5,31 +5,32 @@
 @using Microsoft.EntityFrameworkCore
 @using LoreTest.Data
 @inject UserManager<ApplicationUser> UserManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Users</PageTitle>
+<PageTitle>@L["Users"]</PageTitle>
 
-<h1>Users</h1>
+<h1>@L["Users"]</h1>
 
 <p>
-    <a href="/users/create" class="btn btn-primary">Create New</a>
+    <a href="/users/create" class="btn btn-primary">@L["CreateNew"]</a>
 </p>
 
 @if (users == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else
 {
     <table class="table">
         <thead>
             <tr>
-                <th>Email</th>
-                <th>Name</th>
-                <th>Job Title</th>
-                <th>Role</th>
-                <th>Start Date</th>
-                <th>End Date</th>
+                <th>@L["Email"]</th>
+                <th>@L["Name"]</th>
+                <th>@L["JobTitle"]</th>
+                <th>@L["Role"]</th>
+                <th>@L["StartDate"]</th>
+                <th>@L["EndDate"]</th>
                 <th></th>
             </tr>
         </thead>
@@ -44,8 +45,8 @@ else
                     <td>@user.StartDate?.ToString("d")</td>
                     <td>@user.EndDate?.ToString("d")</td>
                     <td>
-                        <a href="/users/edit/@user.Id">Edit</a> |
-                        <a href="/users/delete/@user.Id">Delete</a>
+                        <a href="/users/edit/@user.Id">@L["Edit"]</a> |
+                        <a href="/users/delete/@user.Id">@L["Delete"]</a>
                     </td>
                 </tr>
             }

@@ -5,21 +5,23 @@
 @using LoreTest.Data
 @inject ApplicationDbContext DbContext
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
+@inject ITranslationService TranslationService
 @attribute [Authorize]
 
-<PageTitle>Bug Details - @bug?.Title</PageTitle>
+<PageTitle>@string.Format(L["BugDetailsTitle"], translatedTitle)</PageTitle>
 
 @if (bug == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else
 {
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>Bug #@bug.Id: @bug.Title</h1>
+        <h1>@string.Format(L["BugIdPrefix"], bug.Id) @translatedTitle</h1>
         <div>
-            <a href="/bugs/edit/@bug.Id" class="btn btn-warning">Edit Bug</a>
-            <a href="/bugs" class="btn btn-secondary">Back to List</a>
+            <a href="/bugs/edit/@bug.Id" class="btn btn-warning">@L["EditBug"]</a>
+            <a href="/bugs" class="btn btn-secondary">@L["BackToList"]</a>
         </div>
     </div>
 
@@ -27,36 +29,36 @@ else
         <div class="col-md-8">
             <div class="card mb-4">
                 <div class="card-header bg-dark text-white">
-                    Description & Reproduction Steps
+                    @L["DescriptionReproductionSteps"]
                 </div>
                 <div class="card-body">
-                    <p style="white-space: pre-wrap;">@bug.Description</p>
+                    <p style="white-space: pre-wrap;">@translatedDescription</p>
                 </div>
             </div>
 
             <div class="row mb-4">
                 <div class="col-md-6">
                     <div class="card h-100">
-                        <div class="card-header bg-light">Expected Result</div>
+                        <div class="card-header bg-light">@L["ExpectedResult"]</div>
                         <div class="card-body">
-                            <p style="white-space: pre-wrap;">@(bug.ExpectedResult ?? "N/A")</p>
+                            <p style="white-space: pre-wrap;">@(translatedExpectedResult ?? L["NA"])</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="card h-100">
-                        <div class="card-header bg-light">Actual Result</div>
+                        <div class="card-header bg-light">@L["ActualResult"]</div>
                         <div class="card-body">
-                            <p style="white-space: pre-wrap;">@(bug.ActualResult ?? "N/A")</p>
+                            <p style="white-space: pre-wrap;">@(translatedActualResult ?? L["NA"])</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            @if (!string.IsNullOrEmpty(bug.Resolution))
+            @if (!string.IsNullOrEmpty(translatedResolution))
             {
                 <div class="card mb-4 border-success">
-                    <div class="card-header bg-success text-white">Resolution</div>
+                    <div class="card-header bg-success text-white">@L["Resolution"]</div>
                     <div class="card-body">
                         <p style="white-space: pre-wrap;">@bug.Resolution</p>
                     </div>
@@ -64,11 +66,11 @@ else
             }
 
             <div class="card mb-4">
-                <div class="card-header bg-light">Attachments</div>
+                <div class="card-header bg-light">@L["Attachments"]</div>
                 <div class="card-body">
                     @if (!bug.Attachments.Any())
                     {
-                        <p class="text-muted">No attachments found.</p>
+                        <p class="text-muted">@L["NoAttachmentsFound"]</p>
                     }
                     else
                     {
@@ -90,58 +92,58 @@ else
 
         <div class="col-md-4">
             <div class="card mb-4">
-                <div class="card-header bg-light">Attributes</div>
+                <div class="card-header bg-light">@L["Attributes"]</div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Status <span class="badge bg-primary">@bug.Status</span>
+                        @L["Status"] <span class="badge bg-primary">@L[bug.Status.ToString()]</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Severity <span class="badge bg-danger">@bug.Severity</span>
+                        @L["Severity"] <span class="badge bg-danger">@L[bug.Severity.ToString()]</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Priority <span class="badge bg-warning text-dark">@bug.Priority</span>
+                        @L["Priority"] <span class="badge bg-warning text-dark">@L[bug.Priority.ToString()]</span>
                     </li>
                     <li class="list-group-item">
-                        <strong>Environment:</strong><br />
-                        <span class="text-muted small">@(bug.Environment ?? "Not specified")</span>
+                        <strong>@L["Environment"]:</strong><br />
+                        <span class="text-muted small">@(bug.Environment ?? L["NotSpecified"])</span>
                     </li>
                     <li class="list-group-item">
-                        <strong>Components:</strong><br />
-                        <span class="text-muted small">@(bug.Components ?? "None")</span>
+                        <strong>@L["Components"]:</strong><br />
+                        <span class="text-muted small">@(bug.Components ?? L["None"])</span>
                     </li>
                     <li class="list-group-item">
-                        <strong>Labels:</strong><br />
-                        <span class="text-muted small">@(bug.Labels ?? "None")</span>
+                        <strong>@L["Labels"]:</strong><br />
+                        <span class="text-muted small">@(bug.Labels ?? L["None"])</span>
                     </li>
                 </ul>
             </div>
 
             <div class="card">
-                <div class="card-header bg-light">People & Dates</div>
+                <div class="card-header bg-light">@L["PeopleAndDates"]</div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
-                        <strong>Reporter:</strong><br />
-                        <span class="text-muted">@(bug.Reporter?.UserName ?? "Unknown")</span>
+                        <strong>@L["Reporter"]:</strong><br />
+                        <span class="text-muted">@(bug.Reporter?.UserName ?? L["Unknown"])</span>
                     </li>
                     <li class="list-group-item">
-                        <strong>Assignee:</strong><br />
-                        <span class="text-muted">@(bug.Assignee?.UserName ?? "Unassigned")</span>
+                        <strong>@L["Assignee"]:</strong><br />
+                        <span class="text-muted">@(bug.Assignee?.UserName ?? L["Unassigned"])</span>
                     </li>
                     <li class="list-group-item">
-                        <strong>Reported:</strong><br />
+                        <strong>@L["Reported"]:</strong><br />
                         <span class="text-muted small">@bug.ReportedDate.ToLocalTime()</span>
                     </li>
                     <li class="list-group-item">
-                        <strong>Due Date:</strong><br />
-                        <span class="text-muted small">@(bug.DueDate?.ToShortDateString() ?? "None")</span>
+                        <strong>@L["DueDate"]:</strong><br />
+                        <span class="text-muted small">@(bug.DueDate?.ToShortDateString() ?? L["None"])</span>
                     </li>
                     <li class="list-group-item">
-                        <strong>Affected Version:</strong><br />
-                        <span class="text-muted small">@(bug.AffectedVersion ?? "Unknown")</span>
+                        <strong>@L["AffectedVersion"]:</strong><br />
+                        <span class="text-muted small">@(bug.AffectedVersion ?? L["Unknown"])</span>
                     </li>
                     <li class="list-group-item">
-                        <strong>Fix Version:</strong><br />
-                        <span class="text-muted small">@(bug.FixVersion ?? "TBD")</span>
+                        <strong>@L["FixVersion"]:</strong><br />
+                        <span class="text-muted small">@(bug.FixVersion ?? L["TBD"])</span>
                     </li>
                 </ul>
             </div>
@@ -152,6 +154,11 @@ else
 @code {
     [Parameter] public int Id { get; set; }
     private Bug? bug;
+    private string translatedTitle = "";
+    private string translatedDescription = "";
+    private string? translatedExpectedResult;
+    private string? translatedActualResult;
+    private string? translatedResolution;
 
     protected override async Task OnInitializedAsync()
     {
@@ -160,5 +167,17 @@ else
             .Include(b => b.Assignee)
             .Include(b => b.Attachments)
             .FirstOrDefaultAsync(b => b.Id == Id);
+
+        if (bug != null)
+        {
+            var currentCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+            var fromCulture = bug.OriginalCulture ?? "en";
+            
+            translatedTitle = await TranslationService.TranslateAsync(bug.Title, fromCulture, currentCulture);
+            translatedDescription = await TranslationService.TranslateAsync(bug.Description, fromCulture, currentCulture);
+            translatedExpectedResult = bug.ExpectedResult != null ? await TranslationService.TranslateAsync(bug.ExpectedResult, fromCulture, currentCulture) : null;
+            translatedActualResult = bug.ActualResult != null ? await TranslationService.TranslateAsync(bug.ActualResult, fromCulture, currentCulture) : null;
+            translatedResolution = bug.Resolution != null ? await TranslationService.TranslateAsync(bug.Resolution, fromCulture, currentCulture) : null;
+        }
     }
 }

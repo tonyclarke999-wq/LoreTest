@@ -4,12 +4,18 @@ using LoreTest.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.AddSingleton<IStringLocalizerFactory, DynamicLocalizerFactory>();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
@@ -24,7 +30,7 @@ builder.Services.AddAuthentication(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString), ServiceLifetime.Scoped);
+    options.UseNpgsql(connectionString));
 builder.Services.AddScoped<ApplicationDbContext>(p =>
     p.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -36,9 +42,11 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddClaimsPrincipalFactory<AdditionalUserClaimsPrincipalFactory>();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<ITranslationService, MockTranslationService>();
 
 var app = builder.Build();
 
@@ -58,6 +66,14 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
+var supportedCultures = new[] { "en", "fr", "de", "es" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture(supportedCultures[0])
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+
+app.UseRequestLocalization(localizationOptions);
+
 app.MapStaticAssets();
 app.MapRazorComponents<global::LoreTest.Components.App>()
     .AddInteractiveServerRenderMode();
@@ -65,7 +81,21 @@ app.MapRazorComponents<global::LoreTest.Components.App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-// Apply migrations on startup with retries to wait for the database
+app.MapPost("/Culture/SetCulture", ([FromForm] string culture, [FromForm] string returnUrl, HttpContext httpContext) =>
+{
+    if (culture != null)
+    {
+        httpContext.Response.Cookies.Append(
+            CookieRequestCultureProvider.DefaultCookieName,
+            CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+            new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+        );
+    }
+
+    return Results.LocalRedirect(returnUrl ?? "/");
+});
+
+// Apply migrations and seed data on startup with retries to wait for the database
 for (int i = 0; i < 10; i++)
 {
     try
@@ -74,8 +104,9 @@ for (int i = 0; i < 10; i++)
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             dbContext.Database.Migrate();
+            await LoreTest.Utilities.LocalizationSeeder.SeedAsync(app.Services);
         }
-        Console.WriteLine("Database migrations applied successfully.");
+        Console.WriteLine("Database migrations and seeding applied successfully.");
         break;
     }
     catch (Exception ex)

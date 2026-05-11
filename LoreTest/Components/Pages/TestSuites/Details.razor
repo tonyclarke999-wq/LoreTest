@@ -8,23 +8,24 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Test Suite Details</PageTitle>
+<PageTitle>@L["TestSuiteDetails"]</PageTitle>
 
 @if (testSuite == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else
 {
     <div class="d-flex justify-content-between align-items-center">
-        <h1>Test Suite: @testSuite.Title</h1>
+        <h1>@L["TestSuiteTitlePrefix"] @testSuite.Title</h1>
         @if (canEdit)
         {
             <div>
-                <a href="/testsuites/edit/@testSuite.Id" class="btn btn-outline-primary btn-sm">Edit Suite</a>
-                <a href="/testsuites/delete/@testSuite.Id" class="btn btn-outline-danger btn-sm ms-1">Delete Suite</a>
+                <a href="/testsuites/edit/@testSuite.Id" class="btn btn-outline-primary btn-sm">@L["EditSuite"]</a>
+                <a href="/testsuites/delete/@testSuite.Id" class="btn btn-outline-danger btn-sm ms-1">@L["DeleteSuite"]</a>
             </div>
         }
     </div>
@@ -37,16 +38,16 @@ else
     <hr />
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Test Cases</h2>
+        <h2>@L["TestCases"]</h2>
         @if (canEdit)
         {
-            <a href="/testcases/create?suiteId=@testSuite.Id" class="btn btn-primary btn-sm">+ Add Test Case</a>
+            <a href="/testcases/create?suiteId=@testSuite.Id" class="btn btn-primary btn-sm">@L["AddTestCase"]</a>
         }
     </div>
 
     @if (!testSuite.TestCases.Any())
     {
-        <p>No test cases found in this suite.</p>
+        <p>@L["NoTestCasesFound"]</p>
     }
     else
     {
@@ -54,10 +55,10 @@ else
             <thead class="table-dark">
                 <tr>
                     <th style="width: 6%">ID</th>
-                    <th>Title</th>
-                    <th style="width: 10%">Priority</th>
-                    <th style="width: 10%">Status</th>
-                    <th style="width: 18%">Actions</th>
+                    <th>@L["Title"]</th>
+                    <th style="width: 10%">@L["Priority"]</th>
+                    <th style="width: 10%">@L["Status"]</th>
+                    <th style="width: 18%">@L["Actions"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -77,13 +78,13 @@ else
                             </span>
                         </td>
                         <td>
-                            <a href="/testcases/details/@tc.Id">View</a>
+                            <a href="/testcases/details/@tc.Id">@L["View"]</a>
                             @if (canEdit)
                             {
                                 <span> | </span>
-                                <a href="/testcases/edit/@tc.Id">Edit</a>
+                                <a href="/testcases/edit/@tc.Id">@L["Edit"]</a>
                                 <span> | </span>
-                                <a href="/testcases/delete/@tc.Id">Delete</a>
+                                <a href="/testcases/delete/@tc.Id">@L["Delete"]</a>
                             }
                         </td>
                     </tr>
@@ -93,7 +94,7 @@ else
     }
 
     <div class="mt-4">
-        <a href="/projects/details/@testSuite.TestProjectId" class="btn btn-secondary">Back to Project</a>
+        <a href="/projects/details/@testSuite.TestProjectId" class="btn btn-secondary">@L["BackToProject"]</a>
     </div>
 }
 

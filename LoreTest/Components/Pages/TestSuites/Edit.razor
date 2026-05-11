@@ -9,19 +9,20 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Edit Test Suite</PageTitle>
+<PageTitle>@L["EditSuite"]</PageTitle>
 
-<h1>Edit Test Suite</h1>
+<h1>@L["EditSuite"]</h1>
 
 @if (!canEdit)
 {
-    <p>You do not have permission to edit test suites.</p>
+    <p>@L["NoPermissionEditTestSuite"]</p>
 }
 else if (testSuite == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else
 {
@@ -33,24 +34,24 @@ else
                 <ValidationSummary class="text-danger" />
 
                 <div class="mb-3">
-                    <label for="title" class="form-label">Title:</label>
+                    <label for="title" class="form-label">@L["Title"]:</label>
                     <InputText id="title" @bind-Value="testSuite.Title" class="form-control" />
                     <ValidationMessage For="() => testSuite.Title" class="text-danger" />
                 </div>
 
                 <div class="mb-3" style="margin-bottom: 60px !important;">
-                    <label for="description" class="form-label">Description:</label>
+                    <label for="description" class="form-label">@L["Description"]:</label>
                     <div @ref="editorDescription" style="height: 200px;"></div>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="margin-top: 60px;">Save</button>
+                <button type="submit" class="btn btn-primary" style="margin-top: 60px;">@L["Save"]</button>
             </EditForm>
         </div>
     </div>
 }
 
 <div class="mt-3">
-    <a href="/testsuites/details/@Id">Back to Test Suite</a>
+    <a href="/testsuites/details/@Id">@L["BackToTestSuite"]</a>
 </div>
 
 @code {

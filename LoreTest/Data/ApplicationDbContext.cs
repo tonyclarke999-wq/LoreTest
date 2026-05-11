@@ -19,6 +19,19 @@ namespace LoreTest.Data
         public DbSet<TestRunStepResult> TestRunStepResults { get; set; }
         public DbSet<Bug> Bugs { get; set; }
         public DbSet<BugAttachment> BugAttachments { get; set; }
+        public DbSet<AppSettings> AppSettings { get; set; }
+        public DbSet<SupportedLanguage> SupportedLanguages { get; set; }
+        public DbSet<LocalizationField> LocalizationFields { get; set; }
+        public DbSet<DynamicTranslation> DynamicTranslations { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            
+            builder.Entity<LocalizationField>()
+                .HasIndex(f => f.Key)
+                .IsUnique();
+        }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

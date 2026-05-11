@@ -3,6 +3,7 @@
 @inject NavigationManager NavigationManager
 @using LoreTest.Data
 @using Microsoft.EntityFrameworkCore
+@inject IStringLocalizer<SharedResource> L
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -16,7 +17,7 @@
     <nav class="nav flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Home"]</span>
             </NavLink>
         </div>
 
@@ -24,39 +25,39 @@
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
+                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["AuthRequired"]</span>
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="users">
-                <span class="bi bi-people-fill-nav-menu" aria-hidden="true"></span> Users
+                <span class="bi bi-people-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Users"]</span>
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="projects">
-                <span class="bi bi-folder-fill-nav-menu" aria-hidden="true"></span> Projects
+                <span class="bi bi-folder-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Projects"]</span>
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="testruns">
-                <span class="bi bi-play-fill-nav-menu" aria-hidden="true"></span> Test Runs
+                <span class="bi bi-runner-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["TestRuns"]</span>
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="bugs">
-                <span class="bi bi-bug-fill-nav-menu" aria-hidden="true"></span> Bugs
+                <span class="bi bi-bug-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Bugs"]</span>
             </NavLink>
         </div>
 
-        <AuthorizeView>
+        <AuthorizeView Context="authContext">
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@authContext.User.Identity?.Name</span>
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
@@ -64,23 +65,31 @@
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                         <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Logout"]</span>
                         </button>
                     </form>
                 </div>
+                @if (authContext.User.IsInRole("Administrator"))
+                {
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="admin/settings">
+                            <span class="bi bi-gear-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["AdminSettings"]</span>
+                        </NavLink>
+                    </div>
+                }
             </Authorized>
             <NotAuthorized>
                 @if (!registrationDisabled)
                 {
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="Account/Register">
-                            <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                            <span class="bi bi-person-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Register"]</span>
                         </NavLink>
                     </div>
                 }
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Login"]</span>
                     </NavLink>
                 </div>
             </NotAuthorized>

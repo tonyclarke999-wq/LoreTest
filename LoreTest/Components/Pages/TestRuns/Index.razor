@@ -7,26 +7,27 @@
 @inject ApplicationDbContext DbContext
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Test Runs</PageTitle>
+<PageTitle>@L["TestRuns"]</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Test Runs</h1>
+    <h1>@L["TestRuns"]</h1>
     @if (canCreateRun)
     {
-        <a href="/projects" class="btn btn-primary">Start New Run (from Projects)</a>
+        <a href="/projects" class="btn btn-primary">@L["StartNewRunFromProjects"]</a>
     }
 </div>
 
 @if (testRuns == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else if (!testRuns.Any())
 {
     <div class="alert alert-info">
-        No test runs have been recorded yet.
+        @L["NoTestRunsRecorded"]
     </div>
 }
 else
@@ -35,14 +36,14 @@ else
         <table class="table table-striped table-hover align-middle">
             <thead class="table-light">
                 <tr>
-                    <th>Run #</th>
-                    <th>Date Started</th>
-                    <th>Project</th>
-                    <th>Suite</th>
-                    <th>Started By</th>
-                    <th>Status</th>
-                    <th>Result</th>
-                    <th>Actions</th>
+                    <th>@L["RunNumberPrefix"]</th>
+                    <th>@L["DateStarted"]</th>
+                    <th>@L["Project"]</th>
+                    <th>@L["Suite"]</th>
+                    <th>@L["StartedBy"]</th>
+                    <th>@L["Status"]</th>
+                    <th>@L["Result"]</th>
+                    <th>@L["Actions"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,11 +58,11 @@ else
                         <td>
                             @if (run.Status == "Completed")
                             {
-                                <span class="badge bg-success">Completed</span>
+                                <span class="badge bg-success">@L["Completed"]</span>
                             }
                             else
                             {
-                                <span class="badge bg-warning text-dark">@run.Status</span>
+                                <span class="badge bg-warning text-dark">@L[run.Status ?? "Pending"]</span>
                             }
                         </td>
                         <td>
@@ -77,16 +78,16 @@ else
                                         <div class="progress-bar bg-success" style="width: @(passed * 100 / total)%"></div>
                                         <div class="progress-bar bg-danger" style="width: @(failed * 100 / total)%"></div>
                                     </div>
-                                    <small class="text-muted mt-1">@passed Pass, @failed Fail</small>
+                                    <small class="text-muted mt-1">@string.Format(L["PassSummary"], passed), @string.Format(L["FailSummary"], failed)</small>
                                 </div>
                             }
                         </td>
                         <td>
                             <div class="btn-group">
-                                <a href="/testruns/details/@run.Id" class="btn btn-sm btn-outline-primary">Details</a>
+                                <a href="/testruns/details/@run.Id" class="btn btn-sm btn-outline-primary">@L["Details"]</a>
                                 @if (run.Status != "Completed" && canCreateRun)
                                 {
-                                    <a href="/testruns/execute/@run.Id" class="btn btn-sm btn-success">Resume</a>
+                                    <a href="/testruns/execute/@run.Id" class="btn btn-sm btn-success">@L["Resume"]</a>
                                 }
                             </div>
                         </td>
