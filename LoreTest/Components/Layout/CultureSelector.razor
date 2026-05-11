@@ -2,31 +2,60 @@
 @using Microsoft.AspNetCore.Localization
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<SharedResource> L
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 
-<div class="culture-selector">
-    <form action="/Culture/SetCulture" method="post" class="d-inline-flex">
-        <AntiforgeryToken />
-        <select name="culture" class="form-select form-select-sm" onchange="this.form.submit()">
-            @foreach (var culture in SupportedCultures)
-            {
-                <option value="@culture.Name" selected="@(culture.Name == CurrentCulture.Name)">
-                    @culture.NativeName
-                </option>
-            }
-        </select>
-        <input type="hidden" name="returnUrl" value="@GetLocalPath(NavigationManager.Uri)" />
-    </form>
-</div>
+@if (SupportedCultures.Count > 1)
+{
+    <div class="culture-selector">
+        <form action="/Culture/SetCulture" method="post" class="d-inline-flex">
+            <AntiforgeryToken />
+            <select name="culture" class="form-select form-select-sm" onchange="this.form.submit()">
+                @foreach (var culture in SupportedCultures)
+                {
+                    <option value="@culture.Name" selected="@(culture.Name == CurrentCulture.Name)">
+                        @culture.NativeName
+                    </option>
+                }
+            </select>
+            <input type="hidden" name="returnUrl" value="@GetLocalPath(NavigationManager.Uri)" />
+        </form>
+    </div>
+}
 
 @code {
     private CultureInfo CurrentCulture => CultureInfo.CurrentUICulture;
-    private List<CultureInfo> SupportedCultures = new List<CultureInfo>
+    private List<CultureInfo> SupportedCultures = new List<CultureInfo>();
+
+    protected override async Task OnInitializedAsync()
     {
-        new CultureInfo("en"),
-        new CultureInfo("fr"),
-        new CultureInfo("de"),
-        new CultureInfo("es")
-    };
+        using var context = DbFactory.CreateDbContext();
+        var dbLanguages = await context.SupportedLanguages.ToListAsync();
+        
+        SupportedCultures = dbLanguages
+            .Select(l => 
+            {
+                try 
+                {
+                    return new CultureInfo(l.Code);
+                }
+                catch 
+                {
+                    return null;
+                }
+            })
+            .Where(c => c != null)
+            .ToList()!;
+
+        if (!SupportedCultures.Any())
+        {
+            SupportedCultures = new List<CultureInfo>
+            {
+                new CultureInfo("en")
+            };
+        }
+    }
 
     private string GetLocalPath(string uri)
     {

@@ -14,8 +14,10 @@ namespace LoreTest.Data
         public SupportedLanguage Language { get; set; } = null!;
 
         [Required]
-        [StringLength(255)]
-        public string FieldKey { get; set; } = string.Empty;
+        public int FieldId { get; set; }
+
+        [ForeignKey("FieldId")]
+        public LocalizationField Field { get; set; } = null!;
 
         [Required]
         public string TranslatedValue { get; set; } = string.Empty;

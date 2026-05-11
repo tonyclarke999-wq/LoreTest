@@ -3,6 +3,7 @@ using System;
 using LoreTest.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LoreTest.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260509195643_AddFieldIdToTranslations")]
+    partial class AddFieldIdToTranslations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -296,6 +299,11 @@ namespace LoreTest.Data.Migrations
                     b.Property<int>("FieldId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("FieldKey")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<int>("LanguageId")
                         .HasColumnType("integer");
 
@@ -305,29 +313,9 @@ namespace LoreTest.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FieldId");
-
                     b.HasIndex("LanguageId");
 
                     b.ToTable("DynamicTranslations");
-                });
-
-            modelBuilder.Entity("LoreTest.Data.LocalizationField", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Key")
-                        .IsUnique();
-
-                    b.ToTable("LocalizationFields");
                 });
 
             modelBuilder.Entity("LoreTest.Data.SupportedLanguage", b =>
@@ -769,19 +757,11 @@ namespace LoreTest.Data.Migrations
 
             modelBuilder.Entity("LoreTest.Data.DynamicTranslation", b =>
                 {
-                    b.HasOne("LoreTest.Data.LocalizationField", "Field")
-                        .WithMany()
-                        .HasForeignKey("FieldId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("LoreTest.Data.SupportedLanguage", "Language")
                         .WithMany()
                         .HasForeignKey("LanguageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Field");
 
                     b.Navigation("Language");
                 });

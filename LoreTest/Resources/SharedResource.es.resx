@@ -949,4 +949,7 @@
   <data name="No" xml:space="preserve">
     <value>No</value>
   </data>
+  <data name="FieldID" xml:space="preserve">
+    <value>ID de campo</value>
+  </data>
 </root>

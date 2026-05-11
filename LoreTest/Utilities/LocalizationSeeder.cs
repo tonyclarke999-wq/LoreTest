@@ -295,22 +295,50 @@ namespace LoreTest.Utilities
                 { "EditTranslation", "Edit Translation" },
                 { "Translations", "Translations" },
                 { "Yes", "Yes" },
-                { "No", "No" }
+                { "No", "No" },
+                { "ExportCSV", "Export CSV" },
+                { "ImportCSV", "Import CSV" }
             };
 
-            foreach (var item in initialTranslations)
+            var keys = initialTranslations.Keys.ToList();
+            for (int i = 0; i < keys.Count; i++)
             {
+                var key = keys[i];
+                var value = initialTranslations[key];
+                var fieldId = i + 1;
+
+                // Ensure field exists in LocalizationFields
+                var field = await context.LocalizationFields.FirstOrDefaultAsync(f => f.Id == fieldId);
+                if (field == null)
+                {
+                    field = new LocalizationField { Id = fieldId, Key = key };
+                    context.LocalizationFields.Add(field);
+                }
+                else
+                {
+                    field.Key = key;
+                    context.LocalizationFields.Update(field);
+                }
+                
+                await context.SaveChangesAsync();
+
+                // Ensure English translation exists
                 var existing = await context.DynamicTranslations
-                    .FirstOrDefaultAsync(t => t.LanguageId == english.Id && t.FieldKey == item.Key);
+                    .FirstOrDefaultAsync(t => t.LanguageId == english.Id && t.FieldId == fieldId);
 
                 if (existing == null)
                 {
                     context.DynamicTranslations.Add(new DynamicTranslation
                     {
                         LanguageId = english.Id,
-                        FieldKey = item.Key,
-                        TranslatedValue = item.Value
+                        FieldId = fieldId,
+                        TranslatedValue = value
                     });
+                }
+                else
+                {
+                    existing.TranslatedValue = value;
+                    context.DynamicTranslations.Update(existing);
                 }
             }
 

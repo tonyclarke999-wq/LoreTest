@@ -44,12 +44,23 @@ namespace LoreTest.Data
 
                 var translation = context.DynamicTranslations
                     .Include(t => t.Language)
-                    .FirstOrDefault(t => t.FieldKey == key && (t.Language.Code == culture || t.Language.Code == culture.Split('-', StringSplitOptions.None)[0]));
+                    .Include(t => t.Field)
+                    .FirstOrDefault(t => t.Field.Key == key && (t.Language.Code == culture || t.Language.Code == culture.Split('-', StringSplitOptions.None)[0]));
+
+                if (translation == null)
+                {
+                    // Console.Error.WriteLine($"LOCALIZER: No DB translation for '{key}' in culture '{culture}'");
+                }
+                else
+                {
+                    // Console.Error.WriteLine($"LOCALIZER: Found DB translation for '{key}' in '{translation.Language.Code}': '{translation.TranslatedValue}'");
+                }
 
                 return translation?.TranslatedValue;
             }
-            catch
+            catch (Exception ex)
             {
+                Console.Error.WriteLine($"LOCALIZER ERROR: {ex.Message}");
                 return null;
             }
         }

@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using LoreTest.Data
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject IStringLocalizer<SharedResource> L
 @attribute [Authorize(Roles = "Administrator")]
 @rendermode InteractiveServer
@@ -95,7 +95,8 @@
 
     private async Task LoadLanguages()
     {
-        languages = await DbContext.SupportedLanguages.ToListAsync();
+        using var context = DbFactory.CreateDbContext();
+        languages = await context.SupportedLanguages.ToListAsync();
     }
 
     private void ShowAddLanguageForm()
@@ -106,22 +107,45 @@
 
     private async Task HandleAddLanguage()
     {
+        using var context = DbFactory.CreateDbContext();
         if (newLanguage.IsDefault)
         {
-            var defaultLangs = await DbContext.SupportedLanguages.Where(l => l.IsDefault).ToListAsync();
+            var defaultLangs = await context.SupportedLanguages.Where(l => l.IsDefault).ToListAsync();
             foreach (var dl in defaultLangs) dl.IsDefault = false;
         }
 
-        DbContext.SupportedLanguages.Add(newLanguage);
-        await DbContext.SaveChangesAsync();
+        context.SupportedLanguages.Add(newLanguage);
+        await context.SaveChangesAsync();
+
+        // Populate with English translations as template
+        var english = await context.SupportedLanguages.FirstOrDefaultAsync(l => l.Code == "en");
+        if (english != null)
+        {
+            var englishTranslations = await context.DynamicTranslations
+                .Where(t => t.LanguageId == english.Id)
+                .ToListAsync();
+
+            foreach (var et in englishTranslations)
+            {
+                context.DynamicTranslations.Add(new DynamicTranslation
+                {
+                    LanguageId = newLanguage.Id,
+                    FieldId = et.FieldId,
+                    TranslatedValue = et.TranslatedValue
+                });
+            }
+            await context.SaveChangesAsync();
+        }
+
         await LoadLanguages();
         showAddForm = false;
     }
 
     private async Task DeleteLanguage(SupportedLanguage lang)
     {
-        DbContext.SupportedLanguages.Remove(lang);
-        await DbContext.SaveChangesAsync();
+        using var context = DbFactory.CreateDbContext();
+        context.SupportedLanguages.Remove(lang);
+        await context.SaveChangesAsync();
         await LoadLanguages();
     }
 }
