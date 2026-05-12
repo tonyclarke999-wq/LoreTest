@@ -1,0 +1,156 @@
+@page "/admin/audit-report"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject IStringLocalizer<SharedResource> L
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+<PageTitle>@L["AuditReport"]</PageTitle>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>@L["DataAuditReport"]</h1>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body bg-light">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">@L["Table"]</label>
+                    <select class="form-select" @bind="filterTable">
+                        <option value="">@L["AllTables"]</option>
+                        @foreach (var table in tableNames)
+                        {
+                            <option value="@table">@table</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">@L["Action"]</label>
+                    <select class="form-select" @bind="filterAction">
+                        <option value="">@L["AllActions"]</option>
+                        <option value="Create">Create</option>
+                        <option value="Update">Update</option>
+                        <option value="Delete">Delete</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">@L["User"]</label>
+                    <input type="text" class="form-control" placeholder="@L["UserIdOrName"]" @bind="filterUser" @bind:event="oninput" />
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" @onclick="LoadLogs">
+                        <i class="bi bi-search me-2"></i> @L["ApplyFilters"]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (logs == null)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">@L["Loading"]</span>
+            </div>
+        </div>
+    }
+    else if (!logs.Any())
+    {
+        <div class="alert alert-info">@L["NoAuditLogsFound"]</div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>@L["Timestamp"]</th>
+                            <th>@L["User"]</th>
+                            <th>@L["Action"]</th>
+                            <th>@L["Table"]</th>
+                            <th>@L["Column"]</th>
+                            <th>@L["OldValue"]</th>
+                            <th>@L["NewValue"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in logs)
+                        {
+                            <tr>
+                                <td class="small">@log.Timestamp.ToLocalTime().ToString("g")</td>
+                                <td>@log.UserId</td>
+                                <td>
+                                    <span class="badge @GetActionClass(log.Action)">@log.Action</span>
+                                </td>
+                                <td><code class="small text-primary">@log.TableName</code></td>
+                                <td class="small">@log.ColumnName</td>
+                                <td class="small text-muted" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="@log.OldValue">
+                                    @log.OldValue
+                                </td>
+                                <td class="small" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="@log.NewValue">
+                                    @log.NewValue
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-white">
+                <div class="text-muted small">@string.Format(L["ShowingLastLogs"], logs.Count)</div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<AuditLog>? logs;
+    private List<string> tableNames = new();
+    
+    private string filterTable = "";
+    private string filterAction = "";
+    private string filterUser = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        tableNames = await DbContext.AuditLogs
+            .Select(l => l.TableName)
+            .Distinct()
+            .OrderBy(t => t)
+            .ToListAsync();
+            
+        await LoadLogs();
+    }
+
+    private async Task LoadLogs()
+    {
+        logs = null;
+        var query = DbContext.AuditLogs.AsQueryable();
+
+        if (!string.IsNullOrEmpty(filterTable))
+            query = query.Where(l => l.TableName == filterTable);
+            
+        if (!string.IsNullOrEmpty(filterAction))
+            query = query.Where(l => l.Action == filterAction);
+            
+        if (!string.IsNullOrEmpty(filterUser))
+            query = query.Where(l => l.UserId!.Contains(filterUser));
+
+        logs = await query
+            .OrderByDescending(l => l.Timestamp)
+            .Take(500)
+            .ToListAsync();
+    }
+
+    private string GetActionClass(string action) => action switch
+    {
+        "Create" => "bg-success",
+        "Update" => "bg-warning text-dark",
+        "Delete" => "bg-danger",
+        _ => "bg-secondary"
+    };
+}

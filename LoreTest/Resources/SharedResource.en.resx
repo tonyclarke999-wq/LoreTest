@@ -970,4 +970,93 @@
   <data name="JiraEmailHelp" xml:space="preserve">
     <value>Required for Jira Cloud Basic Auth.</value>
   </data>
+  <data name="MyActiveTasks" xml:space="preserve">
+    <value>My Active Tasks</value>
+  </data>
+  <data name="RunsInProgress" xml:space="preserve">
+    <value>Runs In Progress</value>
+  </data>
+  <data name="LastWeekRuns" xml:space="preserve">
+    <value>Last Week's Runs</value>
+  </data>
+  <data name="CompletedIn7Days" xml:space="preserve">
+    <value>Completed in last 7 days</value>
+  </data>
+  <data name="WeeklyPasses" xml:space="preserve">
+    <value>Weekly Passes</value>
+  </data>
+  <data name="TestCasesPassed" xml:space="preserve">
+    <value>Test cases passed</value>
+  </data>
+  <data name="WeeklyFailures" xml:space="preserve">
+    <value>Weekly Failures</value>
+  </data>
+  <data name="TestCasesFailed" xml:space="preserve">
+    <value>Test cases failed</value>
+  </data>
+  <data name="NoActiveTasks" xml:space="preserve">
+    <value>You have no active test runs at the moment.</value>
+  </data>
+
+  <data name="Suite" xml:space="preserve">
+    <value>Suite</value>
+  </data>
+  <data name="Progress" xml:space="preserve">
+    <value>Progress</value>
+  </data>
+
+  <data name="QuickLinks" xml:space="preserve">
+    <value>Quick Links</value>
+  </data>
+  <data name="StartNewRun" xml:space="preserve">
+    <value>Start New Test Run</value>
+  </data>
+
+  <data name="BrowseProjects" xml:space="preserve">
+    <value>Browse Projects</value>
+  </data>
+  <data name="SystemSummary" xml:space="preserve">
+    <value>System Summary</value>
+  </data>
+  <data name="SystemStatsMessage" xml:space="preserve">
+    <value>In the last 7 days, {0} test cases have been executed across {1} test runs.</value>
+  </data>
+  <data name="AuditReport" xml:space="preserve">
+    <value>Audit Report</value>
+  </data>
+  <data name="DataAuditReport" xml:space="preserve">
+    <value>Data Audit Report</value>
+  </data>
+
+  <data name="AllTables" xml:space="preserve">
+    <value>All Tables</value>
+  </data>
+
+  <data name="AllActions" xml:space="preserve">
+    <value>All Actions</value>
+  </data>
+  <data name="UserIdOrName" xml:space="preserve">
+    <value>User ID or Name</value>
+  </data>
+  <data name="ApplyFilters" xml:space="preserve">
+    <value>Apply Filters</value>
+  </data>
+  <data name="NoAuditLogsFound" xml:space="preserve">
+    <value>No audit logs found matching your criteria.</value>
+  </data>
+  <data name="Timestamp" xml:space="preserve">
+    <value>Timestamp</value>
+  </data>
+  <data name="Column" xml:space="preserve">
+    <value>Column</value>
+  </data>
+  <data name="OldValue" xml:space="preserve">
+    <value>Old Value</value>
+  </data>
+  <data name="NewValue" xml:space="preserve">
+    <value>New Value</value>
+  </data>
+  <data name="ShowingLastLogs" xml:space="preserve">
+    <value>Showing last {0} entries</value>
+  </data>
 </root>
