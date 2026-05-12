@@ -22,6 +22,14 @@ else
     <h1>@L["ProjectTitlePrefix"] @project.Title</h1>
     <p>@((MarkupString)(project.Description ?? ""))</p>
 
+    @if (!string.IsNullOrWhiteSpace(project.JiraReference))
+    {
+        <div class="mb-3">
+            <strong>Jira Reference:</strong> 
+            <a href="@project.JiraReference" target="_blank">@project.JiraReference</a>
+        </div>
+    }
+
     <hr />
 
     <h2>@L["TestSuites"]</h2>

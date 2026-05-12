@@ -47,6 +47,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<ITranslationService, MockTranslationService>();
+builder.Services.AddHttpClient<LoreTest.Utilities.JiraIntegrationService>();
 
 var app = builder.Build();
 

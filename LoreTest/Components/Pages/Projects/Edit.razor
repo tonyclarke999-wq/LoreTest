@@ -10,6 +10,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IJSRuntime JSRuntime
 @inject IStringLocalizer<SharedResource> L
+@inject LoreTest.Utilities.JiraIntegrationService JiraService
 @attribute [Authorize]
 
 <PageTitle>@L["EditTestProject"]</PageTitle>
@@ -33,6 +34,21 @@ else
                     <label for="title" class="form-label">@L["Title"]</label>
                     <InputText id="title" @bind-Value="Input.Title" class="form-control" />
                     <ValidationMessage For="() => Input.Title" class="text-danger" />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="jiraReference" class="form-label">Jira Reference (URL)</label>
+                    <div class="input-group">
+                        <InputText id="jiraReference" @bind-Value="Input.JiraReference" class="form-control" placeholder="e.g. https://domain.atlassian.net/browse/PROJ-123" />
+                        <button type="button" class="btn btn-outline-secondary" @onclick="FetchJiraDetails" disabled="@isFetchingJira">
+                            @if (isFetchingJira) {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            } else {
+                                <span>Fetch from Jira</span>
+                            }
+                        </button>
+                    </div>
+                    <ValidationMessage For="() => Input.JiraReference" class="text-danger" />
                 </div>
                 <div class="mb-3" style="margin-bottom: 60px !important;">
                     <label for="description" class="form-label">@L["Description"]</label>
@@ -59,6 +75,49 @@ else
 
     private ElementReference editorElement;
     private string? errorMessage;
+    private bool isFetchingJira = false;
+
+    private async Task FetchJiraDetails()
+    {
+        if (string.IsNullOrWhiteSpace(Input?.JiraReference))
+        {
+            errorMessage = "Please enter a Jira Reference URL.";
+            return;
+        }
+
+        isFetchingJira = true;
+        errorMessage = null;
+
+        try
+        {
+            var settings = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(DbContext.AppSettings);
+            var token = settings?.JiraApiToken;
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                errorMessage = "Jira API Token is not configured in Admin Settings. The reference will just be saved.";
+                isFetchingJira = false;
+                return;
+            }
+
+            var result = await JiraService.FetchIssueDetailsAsync(Input.JiraReference, token);
+            if (result.HasValue)
+            {
+                Input.Title = result.Value.Title;
+                Input.Description = result.Value.Description;
+                
+                await JSRuntime.InvokeVoidAsync("initQuill", editorElement, Input.Description);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isFetchingJira = false;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
