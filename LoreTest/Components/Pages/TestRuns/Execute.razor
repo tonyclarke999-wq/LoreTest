@@ -9,6 +9,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject IStringLocalizer<SharedResource> L
+@inject LoreTest.Utilities.JiraIntegrationService JiraService
 @attribute [Authorize]
 
 <PageTitle>@L["ExecuteTestRun"]</PageTitle>
@@ -176,32 +177,64 @@ else
                     <button type="button" class="btn-close" @onclick="() => showBugModal = false" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">@L["Title"]</label>
-                        <input type="text" class="form-control" @bind="newBug.Title" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">@L["DescriptionReproSteps"]</label>
-                        <textarea class="form-control" rows="5" @bind="newBug.Description"></textarea>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">@L["Severity"]</label>
-                            <select class="form-select" @bind="newBug.Severity">
-                                @foreach (var val in Enum.GetValues<BugSeverity>()) { <option value="@val">@L[val.ToString()]</option> }
-                            </select>
+                    @if (!isBugCreated)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">@L["Title"]</label>
+                            <input type="text" class="form-control" @bind="newBug.Title" />
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">@L["Priority"]</label>
-                            <select class="form-select" @bind="newBug.Priority">
-                                @foreach (var val in Enum.GetValues<BugPriority>()) { <option value="@val">@L[val.ToString()]</option> }
-                            </select>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">@L["DescriptionReproSteps"]</label>
+                            <textarea class="form-control" rows="5" @bind="newBug.Description"></textarea>
                         </div>
-                    </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">@L["Severity"]</label>
+                                <select class="form-select" @bind="newBug.Severity">
+                                    @foreach (var val in Enum.GetValues<BugSeverity>()) { <option value="@val">@L[val.ToString()]</option> }
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">@L["Priority"]</label>
+                                <select class="form-select" @bind="newBug.Priority">
+                                    @foreach (var val in Enum.GetValues<BugPriority>()) { <option value="@val">@L[val.ToString()]</option> }
+                                </select>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success">Bug created successfully!</div>
+                        @if (canCreateJiraBug)
+                        {
+                            <button type="button" class="btn btn-primary mb-3 w-100" @onclick="CreateJiraBug" disabled="@isCreatingJiraBug">
+                                @if (isCreatingJiraBug)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                }
+                                Create JIRA Bug
+                            </button>
+                        }
+                        @if (!string.IsNullOrEmpty(jiraBugError))
+                        {
+                            <div class="alert alert-danger">@jiraBugError</div>
+                        }
+                        @if (!string.IsNullOrEmpty(newBug.JiraBugReference))
+                        {
+                            <div class="alert alert-info">Jira Ticket Created: @newBug.JiraBugReference</div>
+                        }
+                    }
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="() => showBugModal = false">@L["Cancel"]</button>
-                    <button type="button" class="btn btn-warning" @onclick="SaveBugFromExecution">@L["SaveBugContinue"]</button>
+                    @if (!isBugCreated)
+                    {
+                        <button type="button" class="btn btn-secondary" @onclick="CloseBugModal">@L["Cancel"]</button>
+                        <button type="button" class="btn btn-warning" @onclick="SaveBugFromExecution">@L["SaveBugContinue"]</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-secondary" @onclick="CloseBugModal">Close</button>
+                    }
                 </div>
             </div>
         </div>
@@ -217,6 +250,10 @@ else
     private int currentCaseIndex => flattenedSteps.Count > currentStepIndex ? testRun!.CaseResults.ToList().IndexOf(flattenedSteps[currentStepIndex].CaseResult) : 0;
 
     private bool showBugModal = false;
+    private bool isBugCreated = false;
+    private bool canCreateJiraBug = false;
+    private bool isCreatingJiraBug = false;
+    private string? jiraBugError;
     private Bug newBug = new();
 
     private class FlatStep
@@ -339,9 +376,19 @@ else
             Status = BugStatus.Open,
             Severity = BugSeverity.Major,
             Priority = BugPriority.Medium,
-            ReportedDate = DateTime.UtcNow
+            ReportedDate = DateTime.UtcNow,
+            ProjectId = testRun?.TestProjectId,
+            Project = testRun?.Project
         };
+        isBugCreated = false;
+        canCreateJiraBug = false;
+        jiraBugError = null;
         showBugModal = true;
+    }
+
+    private void CloseBugModal()
+    {
+        showBugModal = false;
     }
 
     private async Task SaveBugFromExecution()
@@ -356,8 +403,44 @@ else
         DbContext.Bugs.Add(newBug);
         await DbContext.SaveChangesAsync();
         
-        showBugModal = false;
-        // Optionally set the step to Fail automatically
+        isBugCreated = true;
         SetStepStatus("Fail");
+
+        if (testRun?.Project != null && !string.IsNullOrWhiteSpace(testRun.Project.JiraReference))
+        {
+            var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+            if (settings != null && !string.IsNullOrWhiteSpace(settings.JiraApiToken) && !string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
+            {
+                canCreateJiraBug = true;
+            }
+        }
+    }
+
+    private async Task CreateJiraBug()
+    {
+        isCreatingJiraBug = true;
+        jiraBugError = null;
+        try
+        {
+            var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+            if (settings == null || testRun?.Project == null) return;
+
+            string newJiraKey = await JiraService.CreateBugAsync(newBug, testRun.Project.JiraReference!, settings);
+            newBug.JiraBugReference = newJiraKey;
+            
+            // Save to database
+            DbContext.Bugs.Update(newBug);
+            await DbContext.SaveChangesAsync();
+            
+            canCreateJiraBug = false;
+        }
+        catch (Exception ex)
+        {
+            jiraBugError = ex.Message;
+        }
+        finally
+        {
+            isCreatingJiraBug = false;
+        }
     }
 }

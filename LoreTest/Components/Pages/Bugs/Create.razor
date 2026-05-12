@@ -11,6 +11,7 @@
 @inject NavigationManager NavigationManager
 @inject IWebHostEnvironment Environment
 @inject IStringLocalizer<SharedResource> L
+@inject LoreTest.Utilities.JiraIntegrationService JiraService
 @attribute [Authorize]
 
 <PageTitle>@L["ReportBug"]</PageTitle>
@@ -24,6 +25,17 @@
         <EditForm Model="bug" OnValidSubmit="HandleValidSubmit" FormName="CreateBugForm">
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" />
+
+            <div class="mb-3">
+                <label for="project" class="form-label">Project</label>
+                <InputSelect id="project" @bind-Value="bug.ProjectId" class="form-select">
+                    <option value="">-- No Project --</option>
+                    @foreach (var project in projects)
+                    {
+                        <option value="@project.Id">@project.Title</option>
+                    }
+                </InputSelect>
+            </div>
 
             <div class="mb-3">
                 <label for="title" class="form-label">@L["Title"]</label>
@@ -127,8 +139,34 @@
             </div>
 
             <div class="mt-4 mb-5">
-                <button type="submit" class="btn btn-success me-2">@L["CreateBugReport"]</button>
-                <a href="/bugs" class="btn btn-secondary">@L["Cancel"]</a>
+                @if (!isCreated)
+                {
+                    <button type="submit" class="btn btn-success me-2">@L["CreateBugReport"]</button>
+                    <a href="/bugs" class="btn btn-secondary">@L["Cancel"]</a>
+                }
+                else
+                {
+                    <div class="alert alert-success">Bug created successfully!</div>
+                    @if (canCreateJiraBug)
+                    {
+                        <button type="button" class="btn btn-primary me-2" @onclick="CreateJiraBug" disabled="@isCreatingJiraBug">
+                            @if (isCreatingJiraBug)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            }
+                            Create JIRA Bug
+                        </button>
+                    }
+                    @if (!string.IsNullOrEmpty(jiraBugError))
+                    {
+                        <div class="alert alert-danger mt-2">@jiraBugError</div>
+                    }
+                    @if (!string.IsNullOrEmpty(bug.JiraBugReference))
+                    {
+                        <div class="alert alert-info mt-2">Jira Ticket Created: @bug.JiraBugReference</div>
+                    }
+                    <a href="/bugs" class="btn btn-secondary mt-2">Back to Bugs</a>
+                }
             </div>
         </EditForm>
     </div>
@@ -137,13 +175,20 @@
 @code {
     private Bug bug = new();
     private List<ApplicationUser> users = new();
+    private List<TestProject> projects = new();
     private List<IBrowserFile> selectedFiles = new();
     private long maxFileSize = 1024 * 1024 * 10; // 10MB
+    
+    private bool isCreated = false;
+    private bool canCreateJiraBug = false;
+    private bool isCreatingJiraBug = false;
+    private string? jiraBugError;
 
     protected override async Task OnInitializedAsync()
     {
         bug.OriginalCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
         users = await UserManager.Users.OrderBy(u => u.UserName).ToListAsync();
+        projects = await DbContext.TestProjects.OrderBy(p => p.Title).ToListAsync();
         
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = await UserManager.GetUserAsync(authState.User);
@@ -197,6 +242,47 @@
             await DbContext.SaveChangesAsync();
         }
 
-        NavigationManager.NavigateTo("/bugs");
+        isCreated = true;
+
+        if (bug.ProjectId.HasValue)
+        {
+            var project = await DbContext.TestProjects.FindAsync(bug.ProjectId.Value);
+            var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+            if (project != null && !string.IsNullOrWhiteSpace(project.JiraReference) && 
+                settings != null && !string.IsNullOrWhiteSpace(settings.JiraApiToken) && 
+                !string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
+            {
+                canCreateJiraBug = true;
+                bug.Project = project; // For the Jira create method
+            }
+        }
+    }
+
+    private async Task CreateJiraBug()
+    {
+        isCreatingJiraBug = true;
+        jiraBugError = null;
+        try
+        {
+            var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+            if (settings == null || bug.Project == null) return;
+
+            string newJiraKey = await JiraService.CreateBugAsync(bug, bug.Project.JiraReference!, settings);
+            bug.JiraBugReference = newJiraKey;
+            
+            // Save to database
+            DbContext.Bugs.Update(bug);
+            await DbContext.SaveChangesAsync();
+            
+            canCreateJiraBug = false; // Hide button once created
+        }
+        catch (Exception ex)
+        {
+            jiraBugError = ex.Message;
+        }
+        finally
+        {
+            isCreatingJiraBug = false;
+        }
     }
 }

@@ -77,5 +77,78 @@ namespace LoreTest.Utilities
 
             return null;
         }
+
+        public async Task<string> CreateBugAsync(LoreTest.Data.Bug bug, string parentJiraReference, LoreTest.Data.AppSettings settings)
+        {
+            string token = settings?.JiraApiToken ?? "";
+            string baseUrl = settings?.JiraBaseUrl ?? "";
+            string email = settings?.JiraEmail ?? "";
+
+            if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(baseUrl))
+                throw new ArgumentException("Jira API Token and Base URL must be configured in Admin Settings.");
+
+            // Parse the parent issue key from the reference
+            string parentKey = parentJiraReference.Trim();
+            if (Uri.TryCreate(parentJiraReference, UriKind.Absolute, out var uri))
+            {
+                var segments = uri.Segments;
+                parentKey = segments[^1].Trim('/');
+            }
+
+            // Extract the project key (everything before the hyphen)
+            var hyphenIndex = parentKey.IndexOf('-');
+            if (hyphenIndex <= 0)
+                throw new ArgumentException("Invalid Jira Reference. Could not extract project key.");
+
+            string projectKey = parentKey.Substring(0, hyphenIndex);
+
+            baseUrl = baseUrl.TrimEnd('/');
+            string apiUrl = $"{baseUrl}/rest/api/2/issue";
+
+            // Construct payload
+            var payload = new
+            {
+                fields = new
+                {
+                    project = new { key = projectKey },
+                    summary = bug.Title,
+                    description = bug.Description,
+                    issuetype = new { name = "Bug" },
+                    parent = new { key = parentKey }
+                }
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, apiUrl)
+            {
+                Content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json")
+            };
+
+            string cleanToken = token.Trim();
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                var bytes = System.Text.Encoding.UTF8.GetBytes($"{email.Trim()}:{cleanToken}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(bytes));
+            }
+            else
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+            }
+
+            var response = await _httpClient.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to create Jira bug. Status code: {response.StatusCode}. Response: {content}");
+            }
+
+            using var doc = JsonDocument.Parse(content);
+            if (doc.RootElement.TryGetProperty("key", out var keyProp))
+            {
+                return keyProp.GetString() ?? "";
+            }
+
+            throw new Exception("Jira issue was created, but no key was returned.");
+        }
     }
 }
