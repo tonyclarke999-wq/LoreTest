@@ -221,7 +221,12 @@ else
                         }
                         @if (!string.IsNullOrEmpty(newBug.JiraBugReference))
                         {
-                            <div class="alert alert-info">Jira Ticket Created: @newBug.JiraBugReference</div>
+                            <div class="alert alert-info">
+                                Jira Ticket Created: 
+                                <a href="@($"{jiraBaseUrl?.TrimEnd('/')}/browse/{newBug.JiraBugReference}")" target="_blank">
+                                    @newBug.JiraBugReference
+                                </a>
+                            </div>
                         }
                     }
                 </div>
@@ -254,6 +259,7 @@ else
     private bool canCreateJiraBug = false;
     private bool isCreatingJiraBug = false;
     private string? jiraBugError;
+    private string? jiraBaseUrl;
     private Bug newBug = new();
 
     private class FlatStep
@@ -288,6 +294,9 @@ else
             NavigationManager.NavigateTo("/projects");
             return;
         }
+
+        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+        jiraBaseUrl = settings?.JiraBaseUrl;
 
         // Flatten steps for easier iteration
         foreach (var cr in testRun.CaseResults.OrderBy(cr => cr.Id))

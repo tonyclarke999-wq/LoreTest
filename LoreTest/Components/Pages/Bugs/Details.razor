@@ -115,6 +115,19 @@ else
                         <strong>@L["Labels"]:</strong><br />
                         <span class="text-muted small">@(bug.Labels ?? L["None"])</span>
                     </li>
+                    <li class="list-group-item">
+                        <strong>Project:</strong><br />
+                        <span class="text-muted small">@(bug.Project?.Title ?? "None")</span>
+                    </li>
+                    @if (!string.IsNullOrEmpty(bug.JiraBugReference) && !string.IsNullOrEmpty(jiraBaseUrl))
+                    {
+                        <li class="list-group-item">
+                            <strong>Jira Ticket:</strong><br />
+                            <a href="@($"{jiraBaseUrl.TrimEnd('/')}/browse/{bug.JiraBugReference}")" target="_blank" class="small">
+                                @bug.JiraBugReference
+                            </a>
+                        </li>
+                    }
                 </ul>
             </div>
 
@@ -159,6 +172,7 @@ else
     private string? translatedExpectedResult;
     private string? translatedActualResult;
     private string? translatedResolution;
+    private string? jiraBaseUrl;
 
     protected override async Task OnInitializedAsync()
     {
@@ -166,7 +180,11 @@ else
             .Include(b => b.Reporter)
             .Include(b => b.Assignee)
             .Include(b => b.Attachments)
+            .Include(b => b.Project)
             .FirstOrDefaultAsync(b => b.Id == Id);
+
+        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+        jiraBaseUrl = settings?.JiraBaseUrl;
 
         if (bug != null)
         {

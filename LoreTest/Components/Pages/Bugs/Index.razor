@@ -37,6 +37,7 @@ else
                 <th>@L["Priority"]</th>
                 <th>@L["Status"]</th>
                 <th>@L["Reporter"]</th>
+                <th>Project</th>
                 <th>@L["Assignee"]</th>
                 <th>@L["Actions"]</th>
             </tr>
@@ -57,6 +58,7 @@ else
                         <span class="badge @GetStatusClass(bug.Status)">@L[bug.Status.ToString()]</span>
                     </td>
                     <td>@(bug.Reporter?.UserName ?? L["Unknown"])</td>
+                    <td>@(bug.Project?.Title ?? "None")</td>
                     <td>@(bug.Assignee?.UserName ?? L["Unassigned"])</td>
                     <td>
                         <a href="/bugs/details/@bug.Id">@L["Details"]</a> |
@@ -77,6 +79,7 @@ else
         bugs = await DbContext.Bugs
             .Include(b => b.Reporter)
             .Include(b => b.Assignee)
+            .Include(b => b.Project)
             .OrderByDescending(b => b.ReportedDate)
             .ToListAsync();
 

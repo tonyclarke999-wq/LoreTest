@@ -163,7 +163,12 @@
                     }
                     @if (!string.IsNullOrEmpty(bug.JiraBugReference))
                     {
-                        <div class="alert alert-info mt-2">Jira Ticket Created: @bug.JiraBugReference</div>
+                        <div class="alert alert-info mt-2">
+                            Jira Ticket Created: 
+                            <a href="@($"{jiraBaseUrl?.TrimEnd('/')}/browse/{bug.JiraBugReference}")" target="_blank">
+                                @bug.JiraBugReference
+                            </a>
+                        </div>
                     }
                     <a href="/bugs" class="btn btn-secondary mt-2">Back to Bugs</a>
                 }
@@ -183,12 +188,16 @@
     private bool canCreateJiraBug = false;
     private bool isCreatingJiraBug = false;
     private string? jiraBugError;
+    private string? jiraBaseUrl;
 
     protected override async Task OnInitializedAsync()
     {
         bug.OriginalCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
         users = await UserManager.Users.OrderBy(u => u.UserName).ToListAsync();
         projects = await DbContext.TestProjects.OrderBy(p => p.Title).ToListAsync();
+        
+        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+        jiraBaseUrl = settings?.JiraBaseUrl;
         
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = await UserManager.GetUserAsync(authState.User);

@@ -95,12 +95,20 @@ namespace LoreTest.Utilities
                 parentKey = segments[^1].Trim('/');
             }
 
-            // Extract the project key (everything before the hyphen)
-            var hyphenIndex = parentKey.IndexOf('-');
-            if (hyphenIndex <= 0)
-                throw new ArgumentException("Invalid Jira Reference. Could not extract project key.");
-
-            string projectKey = parentKey.Substring(0, hyphenIndex);
+            string projectKey = "";
+            try
+            {
+                var parentDetails = await FetchIssueDetailsInternalAsync(parentKey, settings);
+                projectKey = parentDetails.ProjectKey;
+            }
+            catch (Exception ex)
+            {
+                // Fallback to manual parsing if API fetch fails, but log it or handle it
+                var hyphenIndex = parentKey.IndexOf('-');
+                if (hyphenIndex <= 0)
+                    throw new Exception($"Could not determine Jira project space from '{parentKey}'. Error: {ex.Message}");
+                projectKey = parentKey.Substring(0, hyphenIndex);
+            }
 
             baseUrl = baseUrl.TrimEnd('/');
             string apiUrl = $"{baseUrl}/rest/api/2/issue";
@@ -149,6 +157,50 @@ namespace LoreTest.Utilities
             }
 
             throw new Exception("Jira issue was created, but no key was returned.");
+        }
+
+        private async Task<(string Title, string Description, string ProjectKey)> FetchIssueDetailsInternalAsync(string issueKey, LoreTest.Data.AppSettings settings)
+        {
+            string token = settings.JiraApiToken ?? "";
+            string baseUrl = settings.JiraBaseUrl ?? "";
+            string email = settings.JiraEmail ?? "";
+
+            baseUrl = baseUrl.TrimEnd('/');
+            string apiUrl = $"{baseUrl}/rest/api/2/issue/{issueKey}";
+
+            var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
+
+            string cleanToken = token.Trim();
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                var bytes = System.Text.Encoding.UTF8.GetBytes($"{email.Trim()}:{cleanToken}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(bytes));
+            }
+            else
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+            }
+
+            var response = await _httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to fetch Jira parent details. Status: {response.StatusCode}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(content);
+            var root = doc.RootElement;
+
+            if (root.TryGetProperty("fields", out var fields))
+            {
+                string title = fields.TryGetProperty("summary", out var summaryProp) ? summaryProp.GetString() ?? "" : "";
+                string description = fields.TryGetProperty("description", out var descProp) ? descProp.GetString() ?? "" : "";
+                string projectKey = fields.TryGetProperty("project", out var projectProp) && projectProp.TryGetProperty("key", out var keyProp) ? keyProp.GetString() ?? "" : "";
+
+                return (title, description, projectKey);
+            }
+
+            throw new Exception("Invalid Jira API response.");
         }
     }
 }
