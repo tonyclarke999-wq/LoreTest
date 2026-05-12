@@ -4,6 +4,7 @@
 @using LoreTest.Data
 @inject ApplicationDbContext DbContext
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 @inject IStringLocalizer<SharedResource> L
 @attribute [Authorize(Roles = "Administrator")]
 @rendermode InteractiveServer
@@ -68,6 +69,28 @@ else
                     </div>
                 </div>
 
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        @L["JiraIntegration"]
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="jiraBaseUrl" class="form-label">@L["JiraBaseUrl"]</label>
+                            <InputText id="jiraBaseUrl" @bind-Value="settings.JiraBaseUrl" class="form-control" placeholder="https://your-domain.atlassian.net" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="jiraEmail" class="form-label">@L["JiraEmail"]</label>
+                            <InputText id="jiraEmail" @bind-Value="settings.JiraEmail" class="form-control" type="email" placeholder="user@domain.com" />
+                            <div class="form-text">@L["JiraEmailHelp"]</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jiraApiToken" class="form-label">@L["JiraApiToken"]</label>
+                            <InputText id="jiraApiToken" @bind-Value="settings.JiraApiToken" class="form-control" type="password" />
+                            <div class="form-text">@L["JiraApiTokenHelp"]</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary">@L["SaveSettings"]</button>
                 </div>
@@ -100,11 +123,6 @@ else
         DbContext.AppSettings.Update(settings);
         await DbContext.SaveChangesAsync();
         
-        successMessage = L["SettingsSavedSuccessfully"];
-        StateHasChanged();
-        
-        await Task.Delay(3000);
-        successMessage = null;
-        StateHasChanged();
+        NavigationManager.NavigateTo("/");
     }
 }

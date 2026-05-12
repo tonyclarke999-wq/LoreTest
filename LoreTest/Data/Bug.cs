@@ -67,6 +67,12 @@ namespace LoreTest.Data
         public string? FixVersion { get; set; }
         public string? Resolution { get; set; }
 
+        public int? ProjectId { get; set; }
+        public TestProject? Project { get; set; }
+
+        [StringLength(200)]
+        public string? JiraBugReference { get; set; }
+
         public ICollection<BugAttachment> Attachments { get; set; } = [];
     }
 

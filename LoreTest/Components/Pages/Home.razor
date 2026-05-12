@@ -1,12 +1,212 @@
 @page "/"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
 @inject IStringLocalizer<SharedResource> L
+@attribute [Authorize]
+@rendermode InteractiveServer
 
-<PageTitle>@L["Home"]</PageTitle>
+<PageTitle>@L["Home"] - Dashboard</PageTitle>
 
-<h1>@L["WelcomeTitle"]</h1>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>@L["WelcomeTitle"]</h1>
+        <div class="text-muted">@DateTime.Today.ToLongDateString()</div>
+    </div>
 
-@L["WelcomeMessage"]
+    @if (isLoading)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">@L["Loading"]</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row mb-4">
+            <!-- Stats Cards -->
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 bg-primary text-white h-100">
+                    <div class="card-body">
+                        <h6 class="text-uppercase small fw-bold">@L["MyActiveTasks"]</h6>
+                        <div class="display-5 fw-bold">@myActiveRuns.Count</div>
+                        <div class="mt-2 small">@L["RunsInProgress"]</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 bg-info text-white h-100">
+                    <div class="card-body">
+                        <h6 class="text-uppercase small fw-bold">@L["LastWeekRuns"]</h6>
+                        <div class="display-5 fw-bold">@lastWeekRunsCount</div>
+                        <div class="mt-2 small">@L["CompletedIn7Days"]</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 bg-success text-white h-100">
+                    <div class="card-body">
+                        <h6 class="text-uppercase small fw-bold">@L["WeeklyPasses"]</h6>
+                        <div class="display-5 fw-bold">@weeklyPassCount</div>
+                        <div class="mt-2 small">@L["TestCasesPassed"]</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 bg-danger text-white h-100">
+                    <div class="card-body">
+                        <h6 class="text-uppercase small fw-bold">@L["WeeklyFailures"]</h6>
+                        <div class="display-5 fw-bold">@weeklyFailCount</div>
+                        <div class="mt-2 small">@L["TestCasesFailed"]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<p class="mt-4">
-    <a href="/users" class="btn btn-primary">@L["ManageUsers"]</a>
-</p>
+        <div class="row">
+            <!-- Left Column: Active Tasks -->
+            <div class="col-md-7 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-list-task me-2 text-primary"></i>@L["MyActiveTasks"]</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (!myActiveRuns.Any())
+                        {
+                            <div class="p-4 text-center text-muted">
+                                <i class="bi bi-check2-circle display-4 d-block mb-2"></i>
+                                @L["NoActiveTasks"]
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>@L["Project"]</th>
+                                            <th>@L["Suite"]</th>
+                                            <th>@L["Progress"]</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var run in myActiveRuns)
+                                        {
+                                            <tr>
+                                                <td class="fw-bold">@run.RunNumber</td>
+                                                <td>@run.Project?.Title</td>
+                                                <td>@run.TestSuite?.Title</td>
+                                                <td style="min-width: 120px;">
+                                                    @{
+                                                        var total = run.CaseResults.Count;
+                                                        var completed = run.CaseResults.Count(cr => cr.Status != "Pending");
+                                                        var percent = total > 0 ? (int)((double)completed / total * 100) : 0;
+                                                    }
+                                                    <div class="progress" style="height: 8px;">
+                                                        <div class="progress-bar bg-success" style="width: @percent%"></div>
+                                                    </div>
+                                                    <div class="small text-muted mt-1">@percent% (@completed/@total)</div>
+                                                </td>
+                                                <td class="text-end pe-3">
+                                                    <a href="/testruns/execute/@run.Id" class="btn btn-sm btn-outline-primary">@L["Resume"]</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Recent Activity / Shortcuts -->
+            <div class="col-md-5 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-lightning-charge me-2 text-warning"></i>@L["QuickLinks"]</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <a href="/testruns/create" class="list-group-item list-group-item-action py-3 border-0 rounded mb-2 bg-light">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <span><i class="bi bi-play-circle me-3 text-success fs-4"></i> @L["StartNewRun"]</span>
+                                    <i class="bi bi-chevron-right small text-muted"></i>
+                                </div>
+                            </a>
+                            <a href="/bugs/create" class="list-group-item list-group-item-action py-3 border-0 rounded mb-2 bg-light">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <span><i class="bi bi-bug me-3 text-danger fs-4"></i> @L["ReportBug"]</span>
+                                    <i class="bi bi-chevron-right small text-muted"></i>
+                                </div>
+                            </a>
+                            <a href="/projects" class="list-group-item list-group-item-action py-3 border-0 rounded mb-2 bg-light">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <span><i class="bi bi-folder me-3 text-primary fs-4"></i> @L["BrowseProjects"]</span>
+                                    <i class="bi bi-chevron-right small text-muted"></i>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6 class="fw-bold mb-3">@L["SystemSummary"]</h6>
+                            <div class="alert alert-secondary small border-0 py-2">
+                                <i class="bi bi-info-circle me-2"></i> @string.Format(L["SystemStatsMessage"], weeklyPassCount + weeklyFailCount, lastWeekRunsCount)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private List<TestRun> myActiveRuns = new();
+    private int lastWeekRunsCount = 0;
+    private int weeklyPassCount = 0;
+    private int weeklyFailCount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+        
+        if (user != null)
+        {
+            myActiveRuns = await DbContext.TestRuns
+                .Include(r => r.Project)
+                .Include(r => r.TestSuite)
+                .Include(r => r.CaseResults)
+                .Where(r => r.StartedByUserId == user.Id && r.Status == "In Progress")
+                .OrderByDescending(r => r.StartTime)
+                .ToListAsync();
+        }
+
+        var lastWeek = DateTime.UtcNow.AddDays(-7);
+        
+        lastWeekRunsCount = await DbContext.TestRuns
+            .Where(r => r.StartTime >= lastWeek && r.Status == "Completed")
+            .CountAsync();
+
+        var weeklyCaseResults = await DbContext.TestRunCaseResults
+            .Include(cr => cr.TestRun)
+            .Where(cr => cr.TestRun!.StartTime >= lastWeek && cr.Status != "Pending")
+            .ToListAsync();
+
+        weeklyPassCount = weeklyCaseResults.Count(cr => cr.Status == "Pass");
+        weeklyFailCount = weeklyCaseResults.Count(cr => cr.Status == "Fail");
+
+        isLoading = false;
+    }
+}
+

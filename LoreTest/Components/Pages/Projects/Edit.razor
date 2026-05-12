@@ -10,6 +10,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IJSRuntime JSRuntime
 @inject IStringLocalizer<SharedResource> L
+@inject LoreTest.Utilities.JiraIntegrationService JiraService
 @attribute [Authorize]
 
 <PageTitle>@L["EditTestProject"]</PageTitle>
@@ -33,6 +34,27 @@ else
                     <label for="title" class="form-label">@L["Title"]</label>
                     <InputText id="title" @bind-Value="Input.Title" class="form-control" />
                     <ValidationMessage For="() => Input.Title" class="text-danger" />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="jiraReference" class="form-label">Jira Reference (e.g. PROJ-123)</label>
+                    <div class="input-group">
+                        <InputText id="jiraReference" @bind-Value="Input.JiraReference" class="form-control" placeholder="PROJ-123" />
+                        <button type="button" class="btn btn-outline-secondary" @onclick="FetchJiraDetails" disabled="@isFetchingJira">
+                            @if (isFetchingJira) {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            } else {
+                                <span>Fetch from Jira</span>
+                            }
+                        </button>
+                    </div>
+                    <ValidationMessage For="() => Input.JiraReference" class="text-danger" />
+                    @if (!string.IsNullOrWhiteSpace(jiraUrl))
+                    {
+                        <div class="mt-2">
+                            <a href="@jiraUrl" target="_blank">Open Jira Ticket</a>
+                        </div>
+                    }
                 </div>
                 <div class="mb-3" style="margin-bottom: 60px !important;">
                     <label for="description" class="form-label">@L["Description"]</label>
@@ -59,6 +81,55 @@ else
 
     private ElementReference editorElement;
     private string? errorMessage;
+    private bool isFetchingJira = false;
+    private string? jiraUrl;
+
+    private async Task FetchJiraDetails()
+    {
+        if (string.IsNullOrWhiteSpace(Input?.JiraReference))
+        {
+            errorMessage = "Please enter a Jira Reference.";
+            return;
+        }
+
+        isFetchingJira = true;
+        errorMessage = null;
+
+        try
+        {
+            var settings = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(DbContext.AppSettings);
+
+            if (settings == null || string.IsNullOrWhiteSpace(settings.JiraApiToken) || string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
+            {
+                errorMessage = "Jira API Token and Base URL are not configured in Admin Settings. The reference will just be saved.";
+                isFetchingJira = false;
+                return;
+            }
+
+            var result = await JiraService.FetchIssueDetailsAsync(Input.JiraReference, settings);
+            if (result.HasValue)
+            {
+                Input.Title = result.Value.Title;
+                Input.Description = result.Value.Description;
+                
+                if (!string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
+                {
+                    var baseUrl = settings.JiraBaseUrl.TrimEnd('/');
+                    jiraUrl = $"{baseUrl}/browse/{Input.JiraReference}";
+                }
+
+                await JSRuntime.InvokeVoidAsync("updateQuillContent", editorElement, Input.Description);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isFetchingJira = false;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -102,6 +173,11 @@ else
                     };
                     window.getQuillContent = function(element) {
                         return element.quill ? element.quill.root.innerHTML : '';
+                    };
+                    window.updateQuillContent = function(element, newContent) {
+                        if (element.quill) {
+                            element.quill.root.innerHTML = newContent || '';
+                        }
                     };
                     window.quillInitialized = true;
                 }

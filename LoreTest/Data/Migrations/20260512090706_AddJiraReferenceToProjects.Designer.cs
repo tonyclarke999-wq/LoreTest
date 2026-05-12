@@ -3,6 +3,7 @@ using System;
 using LoreTest.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LoreTest.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260512090706_AddJiraReferenceToProjects")]
+    partial class AddJiraReferenceToProjects
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,14 +36,6 @@ namespace LoreTest.Data.Migrations
                     b.Property<string>("JiraApiToken")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
-
-                    b.Property<string>("JiraBaseUrl")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("JiraEmail")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("timestamp with time zone");
@@ -222,10 +217,6 @@ namespace LoreTest.Data.Migrations
                     b.Property<string>("FixVersion")
                         .HasColumnType("text");
 
-                    b.Property<string>("JiraBugReference")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
                     b.Property<string>("Labels")
                         .HasColumnType("text");
 
@@ -235,9 +226,6 @@ namespace LoreTest.Data.Migrations
                         .HasColumnType("character varying(10)");
 
                     b.Property<int>("Priority")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("ProjectId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("ReportedDate")
@@ -263,8 +251,6 @@ namespace LoreTest.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AssigneeId");
-
-                    b.HasIndex("ProjectId");
 
                     b.HasIndex("ReporterId");
 
@@ -772,17 +758,11 @@ namespace LoreTest.Data.Migrations
                         .WithMany()
                         .HasForeignKey("AssigneeId");
 
-                    b.HasOne("LoreTest.Data.TestProject", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId");
-
                     b.HasOne("LoreTest.Data.ApplicationUser", "Reporter")
                         .WithMany()
                         .HasForeignKey("ReporterId");
 
                     b.Navigation("Assignee");
-
-                    b.Navigation("Project");
 
                     b.Navigation("Reporter");
                 });
