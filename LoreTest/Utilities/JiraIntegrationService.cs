@@ -80,9 +80,11 @@ namespace LoreTest.Utilities
 
         public async Task<string> CreateBugAsync(LoreTest.Data.Bug bug, string parentJiraReference, LoreTest.Data.AppSettings settings)
         {
-            string token = settings?.JiraApiToken ?? "";
-            string baseUrl = settings?.JiraBaseUrl ?? "";
-            string email = settings?.JiraEmail ?? "";
+            ArgumentNullException.ThrowIfNull(settings);
+
+            string token = settings.JiraApiToken ?? "";
+            string baseUrl = settings.JiraBaseUrl ?? "";
+            string email = settings.JiraEmail ?? "";
 
             if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(baseUrl))
                 throw new ArgumentException("Jira API Token and Base URL must be configured in Admin Settings.");
@@ -98,8 +100,8 @@ namespace LoreTest.Utilities
             string projectKey = "";
             try
             {
-                var parentDetails = await FetchIssueDetailsInternalAsync(parentKey, settings);
-                projectKey = parentDetails.ProjectKey;
+                var (_, _, parentProjectKey) = await FetchIssueDetailsInternalAsync(parentKey, settings);
+                projectKey = parentProjectKey;
             }
             catch (Exception ex)
             {
@@ -107,7 +109,7 @@ namespace LoreTest.Utilities
                 var hyphenIndex = parentKey.IndexOf('-');
                 if (hyphenIndex <= 0)
                     throw new Exception($"Could not determine Jira project space from '{parentKey}'. Error: {ex.Message}");
-                projectKey = parentKey.Substring(0, hyphenIndex);
+                projectKey = parentKey[..hyphenIndex];
             }
 
             baseUrl = baseUrl.TrimEnd('/');
@@ -157,7 +159,7 @@ namespace LoreTest.Utilities
             {
                 throw new Exception("Jira issue was created, but no key was returned.");
             }
-            
+
             string newIssueKey = keyProp.GetString() ?? "";
 
             // Create "Relates to" link
