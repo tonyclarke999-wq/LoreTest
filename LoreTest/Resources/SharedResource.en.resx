@@ -952,4 +952,13 @@
   <data name="FieldID" xml:space="preserve">
     <value>Field ID</value>
   </data>
+  <data name="JiraIntegration" xml:space="preserve">
+    <value>Jira Integration</value>
+  </data>
+  <data name="JiraApiToken" xml:space="preserve">
+    <value>Jira API Token</value>
+  </data>
+  <data name="JiraApiTokenHelp" xml:space="preserve">
+    <value>Optional. Used to automatically create or update issues in Jira.</value>
+  </data>
 </root>
