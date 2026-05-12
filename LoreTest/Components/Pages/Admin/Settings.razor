@@ -74,6 +74,15 @@ else
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
+                            <label for="jiraBaseUrl" class="form-label">@L["JiraBaseUrl"]</label>
+                            <InputText id="jiraBaseUrl" @bind-Value="settings.JiraBaseUrl" class="form-control" placeholder="https://your-domain.atlassian.net" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="jiraEmail" class="form-label">@L["JiraEmail"]</label>
+                            <InputText id="jiraEmail" @bind-Value="settings.JiraEmail" class="form-control" type="email" placeholder="user@domain.com" />
+                            <div class="form-text">@L["JiraEmailHelp"]</div>
+                        </div>
+                        <div class="mb-3">
                             <label for="jiraApiToken" class="form-label">@L["JiraApiToken"]</label>
                             <InputText id="jiraApiToken" @bind-Value="settings.JiraApiToken" class="form-control" type="password" />
                             <div class="form-text">@L["JiraApiTokenHelp"]</div>

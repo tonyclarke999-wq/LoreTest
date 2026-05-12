@@ -15,41 +15,42 @@ namespace LoreTest.Utilities
             _httpClient = httpClient;
         }
 
-        public async Task<(string Title, string Description)?> FetchIssueDetailsAsync(string jiraReference, string token)
+        public async Task<(string Title, string Description)?> FetchIssueDetailsAsync(string jiraReference, LoreTest.Data.AppSettings settings)
         {
-            if (string.IsNullOrWhiteSpace(jiraReference) || string.IsNullOrWhiteSpace(token))
+            if (string.IsNullOrWhiteSpace(jiraReference))
                 return null;
 
-            if (!Uri.TryCreate(jiraReference, UriKind.Absolute, out var uri))
-                throw new ArgumentException("Jira Reference must be a valid full URL (e.g., https://your-domain.atlassian.net/browse/PROJ-123).");
+            string token = settings?.JiraApiToken ?? "";
+            string baseUrl = settings?.JiraBaseUrl ?? "";
+            string email = settings?.JiraEmail ?? "";
 
-            var segments = uri.Segments;
-            string issueKey = segments[segments.Length - 1].Trim('/');
-            
-            string baseUrl = $"{uri.Scheme}://{uri.Authority}";
+            if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(baseUrl))
+                throw new ArgumentException("Jira API Token and Base URL must be configured in Admin Settings.");
+
+            // Parse the issue key from the reference
+            string issueKey = jiraReference.Trim();
+            if (Uri.TryCreate(jiraReference, UriKind.Absolute, out var uri))
+            {
+                var segments = uri.Segments;
+                issueKey = segments[segments.Length - 1].Trim('/');
+            }
+
+            baseUrl = baseUrl.TrimEnd('/');
             string apiUrl = $"{baseUrl}/rest/api/2/issue/{issueKey}";
 
             var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
             
             string cleanToken = token.Trim();
-            if (cleanToken.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
+            
+            if (!string.IsNullOrWhiteSpace(email))
             {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Basic", cleanToken.Substring(6).Trim());
-            }
-            else if (cleanToken.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-            {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken.Substring(7).Trim());
-            }
-            else if (cleanToken.Contains(":"))
-            {
-                var bytes = System.Text.Encoding.UTF8.GetBytes(cleanToken);
+                // Basic auth for Jira Cloud
+                var bytes = System.Text.Encoding.UTF8.GetBytes($"{email.Trim()}:{cleanToken}");
                 request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(bytes));
             }
             else
             {
-                // Default to Basic auth for Atlassian cloud tokens if email is not provided, 
-                // though it typically requires email:token. If it's a PAT, it needs Bearer.
-                // Let's default to Bearer which works for PAT on Jira Data Center.
+                // Fallback to Bearer token (PAT)
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
             }
 

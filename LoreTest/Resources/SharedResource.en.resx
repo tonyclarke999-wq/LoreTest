@@ -961,4 +961,13 @@
   <data name="JiraApiTokenHelp" xml:space="preserve">
     <value>Optional. Used to automatically create or update issues in Jira.</value>
   </data>
+  <data name="JiraBaseUrl" xml:space="preserve">
+    <value>Jira Base URL</value>
+  </data>
+  <data name="JiraEmail" xml:space="preserve">
+    <value>Jira Email Address</value>
+  </data>
+  <data name="JiraEmailHelp" xml:space="preserve">
+    <value>Required for Jira Cloud Basic Auth.</value>
+  </data>
 </root>

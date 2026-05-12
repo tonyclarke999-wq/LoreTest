@@ -26,7 +26,14 @@ else
     {
         <div class="mb-3">
             <strong>Jira Reference:</strong> 
-            <a href="@project.JiraReference" target="_blank">@project.JiraReference</a>
+            @if (!string.IsNullOrWhiteSpace(jiraUrl))
+            {
+                <a href="@jiraUrl" target="_blank">@project.JiraReference</a>
+            }
+            else
+            {
+                <span>@project.JiraReference</span>
+            }
         </div>
     }
 
@@ -96,6 +103,7 @@ else
     private TestProject? project;
     private bool canEdit = false;
     private bool canCreateRun = false;
+    private string? jiraUrl;
 
     [Inject]
     private IDbContextFactory<ApplicationDbContext> DbFactory { get; set; } = default!;
@@ -125,6 +133,26 @@ else
         if (project == null)
         {
             NavigationManager.NavigateTo("/projects");
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(project.JiraReference))
+        {
+            var settings = await dbContext.AppSettings.FirstOrDefaultAsync();
+            if (settings != null && !string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
+            {
+                var baseUrl = settings.JiraBaseUrl.TrimEnd('/');
+                
+                // If the user already pasted a full URL, use it as is.
+                if (Uri.TryCreate(project.JiraReference, UriKind.Absolute, out _))
+                {
+                    jiraUrl = project.JiraReference;
+                }
+                else
+                {
+                    jiraUrl = $"{baseUrl}/browse/{project.JiraReference}";
+                }
+            }
         }
     }
 }

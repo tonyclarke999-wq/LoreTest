@@ -17,6 +17,12 @@ namespace LoreTest.Data
         [StringLength(500)]
         public string? JiraApiToken { get; set; }
 
+        [StringLength(200)]
+        public string? JiraBaseUrl { get; set; }
+
+        [StringLength(200)]
+        public string? JiraEmail { get; set; }
+
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
         public string? UpdatedBy { get; set; }
     }
