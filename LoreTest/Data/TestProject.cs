@@ -16,6 +16,6 @@ namespace LoreTest.Data
         [StringLength(500)]
         public string? JiraReference { get; set; }
 
-        public ICollection<TestSuite> TestSuites { get; set; } = new List<TestSuite>();
+        public ICollection<TestSuite> TestSuites { get; set; } = [];
     }
 }

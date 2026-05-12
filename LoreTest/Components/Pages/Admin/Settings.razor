@@ -4,6 +4,7 @@
 @using LoreTest.Data
 @inject ApplicationDbContext DbContext
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 @inject IStringLocalizer<SharedResource> L
 @attribute [Authorize(Roles = "Administrator")]
 @rendermode InteractiveServer
@@ -122,11 +123,6 @@ else
         DbContext.AppSettings.Update(settings);
         await DbContext.SaveChangesAsync();
         
-        successMessage = L["SettingsSavedSuccessfully"];
-        StateHasChanged();
-        
-        await Task.Delay(3000);
-        successMessage = null;
-        StateHasChanged();
+        NavigationManager.NavigateTo("/");
     }
 }

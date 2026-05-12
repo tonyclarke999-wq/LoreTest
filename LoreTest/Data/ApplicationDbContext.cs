@@ -27,7 +27,7 @@ namespace LoreTest.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            
+
             builder.Entity<LocalizationField>()
                 .HasIndex(f => f.Key)
                 .IsUnique();

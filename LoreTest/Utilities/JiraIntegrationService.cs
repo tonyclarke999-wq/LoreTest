@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 
 namespace LoreTest.Utilities
 {
-    public class JiraIntegrationService
+    public class JiraIntegrationService(HttpClient httpClient)
     {
-        private readonly HttpClient _httpClient;
-
-        public JiraIntegrationService(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
+        private readonly HttpClient _httpClient = httpClient;
 
         public async Task<(string Title, string Description)?> FetchIssueDetailsAsync(string jiraReference, LoreTest.Data.AppSettings settings)
         {
@@ -32,16 +27,15 @@ namespace LoreTest.Utilities
             if (Uri.TryCreate(jiraReference, UriKind.Absolute, out var uri))
             {
                 var segments = uri.Segments;
-                issueKey = segments[segments.Length - 1].Trim('/');
+                issueKey = segments[^1].Trim('/');
             }
 
             baseUrl = baseUrl.TrimEnd('/');
             string apiUrl = $"{baseUrl}/rest/api/2/issue/{issueKey}";
 
             var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
-            
+
             string cleanToken = token.Trim();
-            
             if (!string.IsNullOrWhiteSpace(email))
             {
                 // Basic auth for Jira Cloud
@@ -61,7 +55,6 @@ namespace LoreTest.Utilities
                     throw new Exception("Jira issue not found.");
                 if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized || response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                     throw new Exception("Authentication failed. Please check the Jira API token in Settings.");
-                    
                 throw new Exception($"Failed to fetch Jira details. Status code: {response.StatusCode}");
             }
 
@@ -72,14 +65,13 @@ namespace LoreTest.Utilities
             if (root.TryGetProperty("fields", out var fields))
             {
                 string title = fields.TryGetProperty("summary", out var summaryProp) ? summaryProp.GetString() ?? "" : "";
-                
                 string description = "";
                 if (fields.TryGetProperty("description", out var descProp) && descProp.ValueKind == JsonValueKind.String)
                 {
                     description = descProp.GetString() ?? "";
                     description = description.Replace("\r\n", "<br>").Replace("\n", "<br>");
                 }
-                
+
                 return (title, description);
             }
 

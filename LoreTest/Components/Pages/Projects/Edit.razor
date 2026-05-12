@@ -49,6 +49,12 @@ else
                         </button>
                     </div>
                     <ValidationMessage For="() => Input.JiraReference" class="text-danger" />
+                    @if (!string.IsNullOrWhiteSpace(jiraUrl))
+                    {
+                        <div class="mt-2">
+                            <a href="@jiraUrl" target="_blank">Open Jira Ticket</a>
+                        </div>
+                    }
                 </div>
                 <div class="mb-3" style="margin-bottom: 60px !important;">
                     <label for="description" class="form-label">@L["Description"]</label>
@@ -76,6 +82,7 @@ else
     private ElementReference editorElement;
     private string? errorMessage;
     private bool isFetchingJira = false;
+    private string? jiraUrl;
 
     private async Task FetchJiraDetails()
     {
@@ -105,7 +112,13 @@ else
                 Input.Title = result.Value.Title;
                 Input.Description = result.Value.Description;
                 
-                await JSRuntime.InvokeVoidAsync("initQuill", editorElement, Input.Description);
+                if (!string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
+                {
+                    var baseUrl = settings.JiraBaseUrl.TrimEnd('/');
+                    jiraUrl = $"{baseUrl}/browse/{Input.JiraReference}";
+                }
+
+                await JSRuntime.InvokeVoidAsync("updateQuillContent", editorElement, Input.Description);
             }
         }
         catch (Exception ex)
@@ -160,6 +173,11 @@ else
                     };
                     window.getQuillContent = function(element) {
                         return element.quill ? element.quill.root.innerHTML : '';
+                    };
+                    window.updateQuillContent = function(element, newContent) {
+                        if (element.quill) {
+                            element.quill.root.innerHTML = newContent || '';
+                        }
                     };
                     window.quillInitialized = true;
                 }
