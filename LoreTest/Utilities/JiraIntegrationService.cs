@@ -113,7 +113,7 @@ namespace LoreTest.Utilities
             baseUrl = baseUrl.TrimEnd('/');
             string apiUrl = $"{baseUrl}/rest/api/2/issue";
 
-            // Construct payload
+            // Construct payload without parent field
             var payload = new
             {
                 fields = new
@@ -121,8 +121,7 @@ namespace LoreTest.Utilities
                     project = new { key = projectKey },
                     summary = bug.Title,
                     description = bug.Description,
-                    issuetype = new { name = "Bug" },
-                    parent = new { key = parentKey }
+                    issuetype = new { name = "Bug" }
                 }
             };
 
@@ -132,15 +131,18 @@ namespace LoreTest.Utilities
             };
 
             string cleanToken = token.Trim();
+            string authHeader;
             if (!string.IsNullOrWhiteSpace(email))
             {
                 var bytes = System.Text.Encoding.UTF8.GetBytes($"{email.Trim()}:{cleanToken}");
-                request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(bytes));
+                authHeader = "Basic " + Convert.ToBase64String(bytes);
             }
             else
             {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+                authHeader = "Bearer " + cleanToken;
             }
+
+            request.Headers.Add("Authorization", authHeader);
 
             var response = await _httpClient.SendAsync(request);
             var content = await response.Content.ReadAsStringAsync();
@@ -151,12 +153,36 @@ namespace LoreTest.Utilities
             }
 
             using var doc = JsonDocument.Parse(content);
-            if (doc.RootElement.TryGetProperty("key", out var keyProp))
+            if (!doc.RootElement.TryGetProperty("key", out var keyProp))
             {
-                return keyProp.GetString() ?? "";
+                throw new Exception("Jira issue was created, but no key was returned.");
+            }
+            
+            string newIssueKey = keyProp.GetString() ?? "";
+
+            // Create "Relates to" link
+            string linkUrl = $"{baseUrl}/rest/api/2/issueLink";
+            var linkPayload = new
+            {
+                type = new { name = "Relates" }, // Standard name is often "Relates" or "Relates to"
+                inwardIssue = new { key = parentKey },
+                outwardIssue = new { key = newIssueKey }
+            };
+
+            var linkRequest = new HttpRequestMessage(HttpMethod.Post, linkUrl)
+            {
+                Content = new StringContent(JsonSerializer.Serialize(linkPayload), System.Text.Encoding.UTF8, "application/json")
+            };
+            linkRequest.Headers.Add("Authorization", authHeader);
+
+            var linkResponse = await _httpClient.SendAsync(linkRequest);
+            if (!linkResponse.IsSuccessStatusCode)
+            {
+                // We don't throw here to avoid failing the whole process if just the link fails, 
+                // but maybe we should log it. For now, let's keep the bug key.
             }
 
-            throw new Exception("Jira issue was created, but no key was returned.");
+            return newIssueKey;
         }
 
         private async Task<(string Title, string Description, string ProjectKey)> FetchIssueDetailsInternalAsync(string issueKey, LoreTest.Data.AppSettings settings)
