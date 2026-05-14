@@ -1,4 +1,4 @@
-# LoreTest - Collaborative QA Testing Platform
+# LoreTest - Collaborative QA Testing Platform (v0.4)
 
 LoreTest is a modern, web-based platform designed for managing test projects, suites, and cases with integrated bug tracking and Jira support.
 
