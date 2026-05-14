@@ -1,0 +1,265 @@
+@page "/testsuites/import/{ProjectId:int}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@using System.Text
+@using System.IO
+@using Microsoft.Extensions.Localization
+
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
+@attribute [Authorize]
+
+<PageTitle>@L["ImportCSV"]</PageTitle>
+
+<div class="container-fluid">
+    <h1>@L["ImportCSV"]</h1>
+
+    @if (project == null)
+    {
+        <div class="d-flex align-items-center">
+            <div class="spinner-border text-primary me-2" role="status">
+                <span class="visually-hidden">@L["Loading"]</span>
+            </div>
+            <span>@L["Loading"]</span>
+        </div>
+    }
+    else
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">@L["Project"]: @project.Title</h5>
+                <p class="card-text text-muted">@L["ImportInstructions"]</p>
+                
+                <div class="mb-4">
+                    <label for="csvFile" class="form-label font-weight-bold">@L["SelectCSVFile"]</label>
+                    <InputFile OnChange="HandleFileSelected" class="form-control" id="csvFile" accept=".csv" />
+                </div>
+
+                @if (isImporting)
+                {
+                    <div class="alert alert-info d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        @L["Importing"]
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(statusMessage))
+                {
+                    <div class="alert @(isError ? "alert-danger" : "alert-success") shadow-sm">
+                        <i class="bi @(isError ? "bi-exclamation-triangle-fill" : "bi-check-circle-fill") me-2"></i>
+                        @statusMessage
+                    </div>
+                }
+
+                <div class="mt-3">
+                    <a href="/projects/details/@ProjectId" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> @L["BackToProject"]
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int ProjectId { get; set; }
+
+    private TestProject? project;
+    private bool isImporting = false;
+    private string statusMessage = "";
+    private bool isError = false;
+
+    [Inject]
+    private IDbContextFactory<ApplicationDbContext> DbFactory { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        project = await dbContext.TestProjects.FindAsync(ProjectId);
+
+        if (project == null)
+        {
+            NavigationManager.NavigateTo("/projects");
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+
+        isImporting = true;
+        statusMessage = "";
+        isError = false;
+        StateHasChanged();
+
+        try
+        {
+            // Set a reasonable timeout for large file processing if needed, 
+            // but for typical test suites 10MB is plenty and shouldn't timeout.
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            using var reader = new StreamReader(stream);
+            
+            var lines = new List<string>();
+            while (!reader.EndOfStream)
+            {
+                var line = await reader.ReadLineAsync();
+                if (!string.IsNullOrWhiteSpace(line))
+                {
+                    lines.Add(line);
+                }
+            }
+
+            if (lines.Count <= 1)
+            {
+                isError = true;
+                statusMessage = "CSV file is empty or only contains header.";
+                isImporting = false;
+                return;
+            }
+
+            using var dbContext = await DbFactory.CreateDbContextAsync();
+            
+            TestSuite? currentSuite = null;
+            TestCase? currentCase = null;
+            int stepCounter = 0;
+
+            // Skip header (top line is description)
+            foreach (var line in lines.Skip(1))
+            {
+                var parts = ParseCsvLine(line);
+                if (parts.Length < 6) continue;
+
+                string suiteTitle = parts[0].Trim();
+                string suiteDesc = parts[1].Trim();
+                string caseTitle = parts[2].Trim();
+                string caseDesc = parts[3].Trim();
+                string stepAction = parts[4].Trim();
+                string stepExpected = parts[5].Trim();
+
+                // If Suite Title is provided, create a new suite
+                if (!string.IsNullOrWhiteSpace(suiteTitle))
+                {
+                    currentSuite = new TestSuite
+                    {
+                        Title = suiteTitle,
+                        Description = suiteDesc,
+                        TestProjectId = ProjectId
+                    };
+                    dbContext.TestSuites.Add(currentSuite);
+                    await dbContext.SaveChangesAsync();
+                    currentCase = null; // New suite, reset current case
+                }
+
+                // If Case Title is provided, create a new case in the current suite
+                if (!string.IsNullOrWhiteSpace(caseTitle))
+                {
+                    if (currentSuite == null)
+                    {
+                        currentSuite = new TestSuite { Title = "Imported Suite", TestProjectId = ProjectId };
+                        dbContext.TestSuites.Add(currentSuite);
+                        await dbContext.SaveChangesAsync();
+                    }
+
+                    currentCase = new TestCase
+                    {
+                        Title = caseTitle,
+                        Description = caseDesc,
+                        TestSuiteId = currentSuite.Id
+                    };
+                    dbContext.TestCases.Add(currentCase);
+                    await dbContext.SaveChangesAsync();
+                    stepCounter = 0; // New case, reset step counter
+                }
+
+                // If Step Action is provided, add it to the current case
+                if (!string.IsNullOrWhiteSpace(stepAction))
+                {
+                    if (currentCase == null)
+                    {
+                        // Fallback: create a generic case if step appears without a case title
+                        currentCase = new TestCase 
+                        { 
+                            Title = "Imported Case", 
+                            TestSuiteId = currentSuite?.Id ?? 0 
+                        };
+                        
+                        if (currentCase.TestSuiteId == 0)
+                        {
+                             currentSuite = new TestSuite { Title = "Imported Suite", TestProjectId = ProjectId };
+                             dbContext.TestSuites.Add(currentSuite);
+                             await dbContext.SaveChangesAsync();
+                             currentCase.TestSuiteId = currentSuite.Id;
+                        }
+                        
+                        dbContext.TestCases.Add(currentCase);
+                        await dbContext.SaveChangesAsync();
+                        stepCounter = 0;
+                    }
+
+                    stepCounter++;
+                    var step = new TestStep
+                    {
+                        Description = stepAction,
+                        ExpectedResult = stepExpected,
+                        TestCaseId = currentCase.Id,
+                        StepNumber = stepCounter
+                    };
+                    dbContext.TestSteps.Add(step);
+                }
+            }
+
+            await dbContext.SaveChangesAsync();
+            statusMessage = L["ImportSuccessful"];
+        }
+        catch (Exception ex)
+        {
+            isError = true;
+            statusMessage = $"{L["ImportError"]}: {ex.Message}";
+        }
+        finally
+        {
+            isImporting = false;
+            StateHasChanged();
+        }
+    }
+
+    private string[] ParseCsvLine(string line)
+    {
+        var fields = new List<string>();
+        bool inQuotes = false;
+        var currentField = new StringBuilder();
+
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (c == '\"')
+            {
+                // Check for escaped quotes
+                if (inQuotes && i + 1 < line.Length && line[i + 1] == '\"')
+                {
+                    currentField.Append('\"');
+                    i++;
+                }
+                else
+                {
+                    inQuotes = !inQuotes;
+                }
+            }
+            else if (c == ',' && !inQuotes)
+            {
+                fields.Add(currentField.ToString());
+                currentField.Clear();
+            }
+            else
+            {
+                currentField.Append(c);
+            }
+        }
+        fields.Add(currentField.ToString());
+        return fields.ToArray();
+    }
+}

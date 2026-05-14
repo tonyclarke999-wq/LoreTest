@@ -46,6 +46,7 @@ else
             @if (canEdit)
             {
                 <a href="/testsuites/create?projectId=@project.Id" class="btn btn-primary">@L["CreateNewTestSuite"]</a>
+                <a href="/testsuites/import/@project.Id" class="btn btn-outline-primary ms-2">@L["ImportCSV"]</a>
             }
             @if (canCreateRun)
             {

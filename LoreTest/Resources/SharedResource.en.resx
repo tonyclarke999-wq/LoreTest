@@ -1059,4 +1059,22 @@
   <data name="ShowingLastLogs" xml:space="preserve">
     <value>Showing last {0} entries</value>
   </data>
+  <data name="ImportCSV" xml:space="preserve">
+    <value>Import CSV</value>
+  </data>
+  <data name="SelectCSVFile" xml:space="preserve">
+    <value>Select CSV File</value>
+  </data>
+  <data name="Importing" xml:space="preserve">
+    <value>Importing...</value>
+  </data>
+  <data name="ImportSuccessful" xml:space="preserve">
+    <value>Import successful!</value>
+  </data>
+  <data name="ImportError" xml:space="preserve">
+    <value>An error occurred during import.</value>
+  </data>
+  <data name="ImportInstructions" xml:space="preserve">
+    <value>The CSV should have columns: Test Suite Title, Test Suite Description, Test Case Title, Test Case Description, Test Step, Test Step Expected Result.</value>
+  </data>
 </root>
