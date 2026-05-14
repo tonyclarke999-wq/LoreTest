@@ -9,6 +9,8 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<SharedResource> L
+@inject IJSRuntime JS
+@using System.Text
 @attribute [Authorize]
 
 <PageTitle>@L["ProjectDetails"]</PageTitle>
@@ -46,6 +48,8 @@ else
             @if (canEdit)
             {
                 <a href="/testsuites/create?projectId=@project.Id" class="btn btn-primary">@L["CreateNewTestSuite"]</a>
+                <a href="/testsuites/import/@project.Id" class="btn btn-outline-primary ms-2">@L["ImportCSV"]</a>
+                <button class="btn btn-outline-success ms-2" @onclick="ExportToCsv">@L["ExportCSV"]</button>
             }
             @if (canCreateRun)
             {
@@ -154,5 +158,93 @@ else
                 }
             }
         }
+    }
+
+    private async Task ExportToCsv()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("Test Suite Title,Test Suite Description,Test Case Title,Test Case Description,Test Step,Test Step Expected Result");
+
+        if (project == null) return;
+
+        // Reload with full hierarchy for export
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        var fullProject = await dbContext.TestProjects
+            .Include(p => p.TestSuites)
+                .ThenInclude(s => s.TestCases)
+                    .ThenInclude(c => c.TestSteps)
+            .FirstOrDefaultAsync(p => p.Id == project.Id);
+
+        if (fullProject == null) return;
+
+        if (!fullProject.TestSuites.Any())
+        {
+            // Export demo CSV as per user request
+            sb.AppendLine("Suite 1 title,Suite 1 Description,Case 1 Title,Case 1 Description,Test step 1,Test Step 1 expected result");
+            sb.AppendLine(",,,,Test Step 2,Test step 2 expected result");
+            sb.AppendLine(",,Case 2 title,Case 2 description,Step1a action,Step 1a expected result");
+            sb.AppendLine(",,,,Step 2a,Step 2a expected result");
+            sb.AppendLine("Suite 2 title,Suite 2 description,Case 3 title,Case 3 desc,Step 1b,Step 1b expected result");
+            sb.AppendLine(",,,,Step2b,Step 2b expected result");
+        }
+        else
+        {
+            foreach (var suite in fullProject.TestSuites)
+            {
+                bool suiteHeaderAdded = false;
+                foreach (var testCase in suite.TestCases)
+                {
+                    bool caseHeaderAdded = false;
+                    foreach (var step in testCase.TestSteps.OrderBy(s => s.StepNumber))
+                    {
+                        string suiteTitle = !suiteHeaderAdded ? EscapeCsv(suite.Title) : "";
+                        string suiteDesc = !suiteHeaderAdded ? EscapeCsv(suite.Description ?? "") : "";
+                        string caseTitle = !caseHeaderAdded ? EscapeCsv(testCase.Title) : "";
+                        string caseDesc = !caseHeaderAdded ? EscapeCsv(testCase.Description ?? "") : "";
+                        string stepAction = EscapeCsv(step.Description ?? "");
+                        string stepExpected = EscapeCsv(step.ExpectedResult ?? "");
+
+                        sb.AppendLine($"{suiteTitle},{suiteDesc},{caseTitle},{caseDesc},{stepAction},{stepExpected}");
+                        
+                        suiteHeaderAdded = true;
+                        caseHeaderAdded = true;
+                    }
+                    
+                    // If case has no steps, still add it
+                    if (!testCase.TestSteps.Any())
+                    {
+                        string suiteTitle = !suiteHeaderAdded ? EscapeCsv(suite.Title) : "";
+                        string suiteDesc = !suiteHeaderAdded ? EscapeCsv(suite.Description ?? "") : "";
+                        string caseTitle = !caseHeaderAdded ? EscapeCsv(testCase.Title) : "";
+                        string caseDesc = !caseHeaderAdded ? EscapeCsv(testCase.Description ?? "") : "";
+                        
+                        sb.AppendLine($"{suiteTitle},{suiteDesc},{caseTitle},{caseDesc},,");
+                        suiteHeaderAdded = true;
+                    }
+                }
+                
+                // If suite has no cases, still add it
+                if (!suite.TestCases.Any())
+                {
+                     string suiteTitle = !suiteHeaderAdded ? EscapeCsv(suite.Title) : "";
+                     string suiteDesc = !suiteHeaderAdded ? EscapeCsv(suite.Description ?? "") : "";
+                     sb.AppendLine($"{suiteTitle},{suiteDesc},,,,");
+                }
+            }
+        }
+
+        var fileName = $"project_{fullProject.Title.Replace(" ", "_")}_export_{DateTime.Now:yyyyMMdd}.csv";
+        var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+        await JS.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(bytes));
+    }
+
+    private string EscapeCsv(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        if (text.Contains(",") || text.Contains("\"") || text.Contains("\n") || text.Contains("\r"))
+        {
+            return $"\"{text.Replace("\"", "\"\"")}\"";
+        }
+        return text;
     }
 }
