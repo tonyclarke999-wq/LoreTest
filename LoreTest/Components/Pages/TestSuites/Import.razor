@@ -98,10 +98,12 @@
 
         try
         {
-            // Set a reasonable timeout for large file processing if needed, 
-            // but for typical test suites 10MB is plenty and shouldn't timeout.
+            // Use a MemoryStream to avoid "Synchronous reads are not supported" error in Blazor Server
             using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-            using var reader = new StreamReader(stream);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+            using var reader = new StreamReader(memoryStream);
             
             var lines = new List<string>();
             while (!reader.EndOfStream)
