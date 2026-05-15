@@ -22,7 +22,7 @@ namespace LoreTest.Utilities
             // List of initial translations from SharedResource.en.resx
             var initialTranslations = new Dictionary<string, string>
             {
-                { "Home", "Home" },
+                { "Home", "Dashboard" },
                 { "Users", "Users" },
                 { "Projects", "Projects" },
                 { "TestRuns", "Test Runs" },
@@ -355,7 +355,7 @@ namespace LoreTest.Utilities
                     field.Key = key;
                     context.LocalizationFields.Update(field);
                 }
-                
+
                 await context.SaveChangesAsync();
 
                 // Ensure English translation exists
