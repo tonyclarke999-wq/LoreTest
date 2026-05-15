@@ -12,75 +12,131 @@
 
 <PageTitle>@string.Format(L["EditBugTitle"], Id)</PageTitle>
 
-<h1>@string.Format(L["EditBugTitle"], Id)</h1>
+@inject LoreTest.Utilities.JiraIntegrationService JiraService
+
+<PageTitle>@string.Format(L["EditBugTitle"], Id)</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="headline-md">@string.Format(L["EditBugTitle"], Id)</div>
+    <a href="/bugs/details/@Id" class="btn btn-sm btn-outline-primary d-flex align-items-center">
+        <span class="material-symbols-outlined small me-1">arrow_back</span> @L["BackToDetails"]
+    </a>
+</div>
 
 @if (bug == null)
 {
-    <p><em>@L["Loading"]</em></p>
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">@L["Loading"]</span>
+        </div>
+    </div>
 }
 else
 {
     <div class="row">
-        <div class="col-md-8">
-            <EditForm Model="bug" OnValidSubmit="HandleValidSubmit">
-                <DataAnnotationsValidator />
-                <ValidationSummary class="text-danger" />
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    @if (canCreateJiraBug && string.IsNullOrEmpty(bug.JiraBugReference))
+                    {
+                        <div class="card bg-light border-0 mb-4">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="body-md fw-bold">Sync with Jira</div>
+                                    <div class="body-sm text-muted">This bug is not yet synced with Jira. Create a ticket now?</div>
+                                </div>
+                                <button type="button" class="btn btn-primary d-flex align-items-center" @onclick="CreateJiraBug" disabled="@isCreatingJiraBug">
+                                    @if (isCreatingJiraBug)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="material-symbols-outlined small me-1">sync</span>
+                                    }
+                                    @L["CreateJiraBug"]
+                                </button>
+                            </div>
+                        </div>
+                    }
 
-                <div class="mb-3">
-                    <label for="title" class="form-label">@L["Title"]</label>
-                    <InputText id="title" @bind-Value="bug.Title" class="form-control" />
-                </div>
+                    @if (!string.IsNullOrEmpty(jiraBugError))
+                    {
+                        <div class="alert alert-danger mb-4">@jiraBugError</div>
+                    }
 
-                <div class="mb-3">
-                    <label for="description" class="form-label">@L["DescriptionReproductionSteps"]</label>
-                    <InputTextArea id="description" @bind-Value="bug.Description" class="form-control" rows="5" />
-                </div>
+                    @if (!string.IsNullOrEmpty(bug.JiraBugReference))
+                    {
+                        <div class="card border-primary mb-4">
+                            <div class="card-body py-2 px-3 d-flex align-items-center">
+                                <span class="material-symbols-outlined text-primary me-2">link</span>
+                                <span class="body-md fw-bold me-2">Jira Ticket:</span>
+                                <a href="@($"{jiraBaseUrl?.TrimEnd('/')}/browse/{bug.JiraBugReference}")" target="_blank" class="text-decoration-none">
+                                    @bug.JiraBugReference
+                                </a>
+                            </div>
+                        </div>
+                    }
 
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="status" class="form-label text-primary fw-bold">@L["Status"]</label>
-                        <InputSelect id="status" @bind-Value="bug.Status" class="form-select border-primary">
-                            @foreach (var val in Enum.GetValues<BugStatus>()) { <option value="@val">@L[val.ToString()]</option> }
-                        </InputSelect>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="severity" class="form-label">@L["Severity"]</label>
-                        <InputSelect id="severity" @bind-Value="bug.Severity" class="form-select">
-                            @foreach (var val in Enum.GetValues<BugSeverity>()) { <option value="@val">@L[val.ToString()]</option> }
-                        </InputSelect>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="priority" class="form-label">@L["Priority"]</label>
-                        <InputSelect id="priority" @bind-Value="bug.Priority" class="form-select">
-                            @foreach (var val in Enum.GetValues<BugPriority>()) { <option value="@val">@L[val.ToString()]</option> }
-                        </InputSelect>
-                    </div>
-                </div>
+                    <EditForm Model="bug" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger mb-4" />
 
-                <div class="mb-3">
-                    <label for="resolution" class="form-label fw-bold">@L["ResolutionNotes"]</label>
-                    <InputTextArea id="resolution" @bind-Value="bug.Resolution" class="form-control" rows="3" placeholder="@L["ResolutionPlaceholder"]" />
-                </div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="title" class="form-label label-caps text-muted">@L["Title"]</label>
+                                <InputText id="title" @bind-Value="bug.Title" class="form-control" />
+                            </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="assignee" class="form-label">@L["Assignee"]</label>
-                        <InputSelect id="assignee" @bind-Value="bug.AssigneeId" class="form-select">
-                            <option value="">-- @L["Unassigned"] --</option>
-                            @foreach (var user in users) { <option value="@user.Id">@user.UserName</option> }
-                        </InputSelect>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="fixVersion" class="form-label">@L["FixVersion"]</label>
-                        <InputText id="fixVersion" @bind-Value="bug.FixVersion" class="form-control" />
-                    </div>
-                </div>
+                            <div class="col-md-12">
+                                <label for="description" class="form-label label-caps text-muted">@L["DescriptionReproductionSteps"]</label>
+                                <InputTextArea id="description" @bind-Value="bug.Description" class="form-control" rows="5" />
+                            </div>
 
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary me-2">@L["SaveChanges"]</button>
-                    <a href="/bugs/details/@Id" class="btn btn-secondary">@L["Cancel"]</a>
+                            <div class="col-md-4">
+                                <label for="status" class="form-label label-caps text-primary fw-bold">@L["Status"]</label>
+                                <InputSelect id="status" @bind-Value="bug.Status" class="form-select border-primary shadow-sm">
+                                    @foreach (var val in Enum.GetValues<BugStatus>()) { <option value="@val">@L[val.ToString()]</option> }
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="severity" class="form-label label-caps text-muted">@L["Severity"]</label>
+                                <InputSelect id="severity" @bind-Value="bug.Severity" class="form-select">
+                                    @foreach (var val in Enum.GetValues<BugSeverity>()) { <option value="@val">@L[val.ToString()]</option> }
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="priority" class="form-label label-caps text-muted">@L["Priority"]</label>
+                                <InputSelect id="priority" @bind-Value="bug.Priority" class="form-select">
+                                    @foreach (var val in Enum.GetValues<BugPriority>()) { <option value="@val">@L[val.ToString()]</option> }
+                                </InputSelect>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label for="resolution" class="form-label label-caps text-muted">@L["ResolutionNotes"]</label>
+                                <InputTextArea id="resolution" @bind-Value="bug.Resolution" class="form-control" rows="3" placeholder="@L["ResolutionPlaceholder"]" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="assignee" class="form-label label-caps text-muted">@L["Assignee"]</label>
+                                <InputSelect id="assignee" @bind-Value="bug.AssigneeId" class="form-select">
+                                    <option value="">-- @L["Unassigned"] --</option>
+                                    @foreach (var user in users) { <option value="@user.Id">@user.UserName</option> }
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fixVersion" class="form-label label-caps text-muted">@L["FixVersion"]</label>
+                                <InputText id="fixVersion" @bind-Value="bug.FixVersion" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="mt-5 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-4 py-2 fw-bold">@L["SaveChanges"]</button>
+                            <a href="/bugs/details/@Id" class="btn btn-outline-primary px-4 py-2">@L["Cancel"]</a>
+                        </div>
+                    </EditForm>
                 </div>
-            </EditForm>
+            </div>
         </div>
     </div>
 }
@@ -89,16 +145,63 @@ else
     [Parameter] public int Id { get; set; }
     private Bug? bug;
     private List<ApplicationUser> users = new();
+    
+    private bool canCreateJiraBug = false;
+    private bool isCreatingJiraBug = false;
+    private string? jiraBugError;
+    private string? jiraBaseUrl;
 
     protected override async Task OnInitializedAsync()
     {
-        bug = await DbContext.Bugs.FindAsync(Id);
+        bug = await DbContext.Bugs.Include(b => b.Project).FirstOrDefaultAsync(b => b.Id == Id);
         users = await UserManager.Users.OrderBy(u => u.UserName).ToListAsync();
+        
+        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+        jiraBaseUrl = settings?.JiraBaseUrl;
+
+        if (bug?.ProjectId != null)
+        {
+            var project = bug.Project;
+            if (project != null && !string.IsNullOrWhiteSpace(project.JiraReference) && 
+                settings != null && !string.IsNullOrWhiteSpace(settings.JiraApiToken) && 
+                !string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
+            {
+                canCreateJiraBug = true;
+            }
+        }
     }
 
     private async Task HandleValidSubmit()
     {
         await DbContext.SaveChangesAsync();
         NavigationManager.NavigateTo($"/bugs/details/{Id}");
+    }
+
+    private async Task CreateJiraBug()
+    {
+        if (bug == null) return;
+        isCreatingJiraBug = true;
+        jiraBugError = null;
+        try
+        {
+            var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+            if (settings == null || bug.Project == null) return;
+
+            string newJiraKey = await JiraService.CreateBugAsync(bug, bug.Project.JiraReference!, settings);
+            bug.JiraBugReference = newJiraKey;
+            
+            DbContext.Bugs.Update(bug);
+            await DbContext.SaveChangesAsync();
+            
+            canCreateJiraBug = false;
+        }
+        catch (Exception ex)
+        {
+            jiraBugError = ex.Message;
+        }
+        finally
+        {
+            isCreatingJiraBug = false;
+        }
     }
 }
