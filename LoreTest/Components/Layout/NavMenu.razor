@@ -5,100 +5,61 @@
 @using Microsoft.EntityFrameworkCore
 @inject IStringLocalizer<SharedResource> L
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">LoreTest</a>
-    </div>
-</div>
+<div class="sidebar">
+    <a class="navbar-brand" href="">LoreTest</a>
+    
+    <nav class="flex-column mt-3 h-100 d-flex">
+        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+            <span class="material-symbols-outlined">dashboard</span> <span class="nav-text">@L["Home"]</span>
+        </NavLink>
+        
+        <NavLink class="nav-link" href="projects">
+            <span class="material-symbols-outlined">folder</span> <span class="nav-text">@L["Projects"]</span>
+        </NavLink>
+        
+        <NavLink class="nav-link" href="testruns">
+            <span class="material-symbols-outlined">play_circle</span> <span class="nav-text">@L["TestRuns"]</span>
+        </NavLink>
+        
+        <NavLink class="nav-link" href="bugs">
+            <span class="material-symbols-outlined">bug_report</span> <span class="nav-text">@L["Bugs"]</span>
+        </NavLink>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Home"]</span>
-            </NavLink>
-        </div>
-
-
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["AuthRequired"]</span>
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="users">
-                <span class="bi bi-people-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Users"]</span>
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="projects">
-                <span class="bi bi-folder-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Projects"]</span>
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="testruns">
-                <span class="bi bi-runner-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["TestRuns"]</span>
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="bugs">
-                <span class="bi bi-bug-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Bugs"]</span>
-            </NavLink>
-        </div>
-
-        <AuthorizeView Context="authContext">
-            <Authorized>
-                <div class="nav-item px-3">
+        <div class="mt-auto pb-4">
+            <AuthorizeView Context="authContext">
+                <Authorized>
+                    @if (authContext.User.IsInRole("Administrator"))
+                    {
+                        <NavLink class="nav-link" href="users">
+                            <span class="material-symbols-outlined">group</span> <span class="nav-text">@L["Users"]</span>
+                        </NavLink>
+                        <NavLink class="nav-link" href="admin/audit-report">
+                            <span class="material-symbols-outlined">shield_person</span> <span class="nav-text">@L["AuditReport"]</span>
+                        </NavLink>
+                        <NavLink class="nav-link" href="admin/settings">
+                            <span class="material-symbols-outlined">settings</span> <span class="nav-text">@L["AdminSettings"]</span>
+                        </NavLink>
+                    }
+                    
                     <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@authContext.User.Identity?.Name</span>
+                        <span class="material-symbols-outlined">account_circle</span> <span class="nav-text">@authContext.User.Identity?.Name</span>
                     </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
+
+                    <form action="Account/Logout" method="post" class="mt-1">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Logout"]</span>
+                        <button type="submit" class="nav-link border-0 bg-transparent w-100 text-start">
+                            <span class="material-symbols-outlined">logout</span> <span class="nav-text">@L["Logout"]</span>
                         </button>
                     </form>
-                </div>
-                @if (authContext.User.IsInRole("Administrator"))
-                {
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="admin/audit-report">
-                            <span class="bi bi-shield-lock-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["AuditReport"]</span>
-                        </NavLink>
-                    </div>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="admin/settings">
-                            <span class="bi bi-gear-fill-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["AdminSettings"]</span>
-                        </NavLink>
-                    </div>
-                }
-            </Authorized>
-            <NotAuthorized>
-                @if (!registrationDisabled)
-                {
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="Account/Register">
-                            <span class="bi bi-person-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Register"]</span>
-                        </NavLink>
-                    </div>
-                }
-                <div class="nav-item px-3">
+                </Authorized>
+                <NotAuthorized>
                     <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> <span class="nav-text">@L["Login"]</span>
+                        <span class="material-symbols-outlined">login</span> <span class="nav-text">@L["Login"]</span>
                     </NavLink>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
     </nav>
 </div>
 

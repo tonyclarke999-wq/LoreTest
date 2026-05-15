@@ -12,54 +12,73 @@
 
 <PageTitle>@L["TestProjects"]</PageTitle>
 
-<h1>@L["TestProjects"]</h1>
-
-@if (canEdit)
-{
-    <p>
-        <a href="/projects/create" class="btn btn-primary">@L["CreateNew"]</a>
-    </p>
-}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="headline-md">@L["TestProjects"]</div>
+    @if (canEdit)
+    {
+        <a href="/projects/create" class="btn btn-primary d-flex align-items-center">
+            <span class="material-symbols-outlined small me-1">add</span> @L["CreateNew"]
+        </a>
+    }
+</div>
 
 @if (projects == null)
 {
-    <p><em>@L["Loading"]</em></p>
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">@L["Loading"]</span>
+        </div>
+    </div>
 }
 else if (!projects.Any())
 {
-    <p>@L["NoProjectsFound"]</p>
+    <div class="card p-5 text-center text-muted">
+        <span class="material-symbols-outlined display-lg d-block mb-2 opacity-25">folder_off</span>
+        <div class="body-md">@L["NoProjectsFound"]</div>
+    </div>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>@L["ReferenceNo"]</th>
-                <th>@L["Title"]</th>
-                <th>@L["Description"]</th>
-                <th>@L["Actions"]</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var project in projects)
-            {
-                <tr>
-                    <td>@project.Id</td>
-                    <td>@project.Title</td>
-                    <td>@((MarkupString)(project.Description ?? ""))</td>
-                    <td>
-                        <a href="/projects/details/@project.Id">@L["Details"]</a>
-                        @if (canEdit)
-                        {
-                            <span> | </span>
-                            <a href="/projects/edit/@project.Id">@L["Edit"]</a> <span> | </span>
-                            <a href="/projects/delete/@project.Id">@L["Delete"]</a>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="card p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>@L["ReferenceNo"]</th>
+                        <th>@L["Title"]</th>
+                        <th>@L["Description"]</th>
+                        <th class="text-end">@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var project in projects)
+                    {
+                        <tr>
+                            <td class="data-mono">@project.Id</td>
+                            <td class="body-md fw-bold">@project.Title</td>
+                            <td class="body-md text-muted">@((MarkupString)(project.Description ?? ""))</td>
+                            <td class="text-end pe-3">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="/projects/details/@project.Id" class="btn btn-sm btn-outline-primary" title="@L["Details"]">
+                                        <span class="material-symbols-outlined small">visibility</span>
+                                    </a>
+                                    @if (canEdit)
+                                    {
+                                        <a href="/projects/edit/@project.Id" class="btn btn-sm btn-outline-primary" title="@L["Edit"]">
+                                            <span class="material-symbols-outlined small">edit</span>
+                                        </a>
+                                        <a href="/projects/delete/@project.Id" class="btn btn-sm btn-outline-primary text-danger" title="@L["Delete"]">
+                                            <span class="material-symbols-outlined small">delete</span>
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
 
 @code {

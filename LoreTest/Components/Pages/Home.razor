@@ -12,161 +12,159 @@
 
 <PageTitle>@L["Home"] - Dashboard</PageTitle>
 
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>@L["WelcomeTitle"]</h1>
-        <div class="text-muted">@DateTime.Today.ToLongDateString()</div>
+<div class="headline-md mb-2">@L["WelcomeTitle"]</div>
+<div class="body-md text-muted mb-4">@DateTime.Today.ToLongDateString()</div>
+
+@if (isLoading)
+{
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">@L["Loading"]</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4 mb-4">
+        <!-- Stats Cards -->
+        <div class="col-md-3">
+            <div class="card h-100 border-0" style="background-color: var(--primary); color: white;">
+                <div class="card-body">
+                    <div class="label-caps mb-2 opacity-75">@L["MyActiveTasks"]</div>
+                    <div class="display-lg">@myActiveRuns.Count</div>
+                    <div class="body-sm mt-2 opacity-75">@L["RunsInProgress"]</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0" style="background-color: var(--secondary); color: white;">
+                <div class="card-body">
+                    <div class="label-caps mb-2 opacity-75">@L["LastWeekRuns"]</div>
+                    <div class="display-lg">@lastWeekRunsCount</div>
+                    <div class="body-sm mt-2 opacity-75">@L["CompletedIn7Days"]</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0" style="background-color: var(--success); color: white;">
+                <div class="card-body">
+                    <div class="label-caps mb-2 opacity-75">@L["WeeklyPasses"]</div>
+                    <div class="display-lg">@weeklyPassCount</div>
+                    <div class="body-sm mt-2 opacity-75">@L["TestCasesPassed"]</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0" style="background-color: var(--error); color: white;">
+                <div class="card-body">
+                    <div class="label-caps mb-2 opacity-75">@L["WeeklyFailures"]</div>
+                    <div class="display-lg">@weeklyFailCount</div>
+                    <div class="body-sm mt-2 opacity-75">@L["TestCasesFailed"]</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    @if (isLoading)
-    {
-        <div class="text-center p-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">@L["Loading"]</span>
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="row mb-4">
-            <!-- Stats Cards -->
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 bg-primary text-white h-100">
-                    <div class="card-body">
-                        <h6 class="text-uppercase small fw-bold">@L["MyActiveTasks"]</h6>
-                        <div class="display-5 fw-bold">@myActiveRuns.Count</div>
-                        <div class="mt-2 small">@L["RunsInProgress"]</div>
-                    </div>
+    <div class="row g-4">
+        <!-- Left Column: Active Tasks -->
+        <div class="col-md-7">
+            <div class="card h-100">
+                <div class="card-header py-3 d-flex align-items-center">
+                    <span class="material-symbols-outlined me-2">list_alt</span>
+                    <span class="title-sm mb-0">@L["MyActiveTasks"]</span>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 bg-info text-white h-100">
-                    <div class="card-body">
-                        <h6 class="text-uppercase small fw-bold">@L["LastWeekRuns"]</h6>
-                        <div class="display-5 fw-bold">@lastWeekRunsCount</div>
-                        <div class="mt-2 small">@L["CompletedIn7Days"]</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 bg-success text-white h-100">
-                    <div class="card-body">
-                        <h6 class="text-uppercase small fw-bold">@L["WeeklyPasses"]</h6>
-                        <div class="display-5 fw-bold">@weeklyPassCount</div>
-                        <div class="mt-2 small">@L["TestCasesPassed"]</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 bg-danger text-white h-100">
-                    <div class="card-body">
-                        <h6 class="text-uppercase small fw-bold">@L["WeeklyFailures"]</h6>
-                        <div class="display-5 fw-bold">@weeklyFailCount</div>
-                        <div class="mt-2 small">@L["TestCasesFailed"]</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <!-- Left Column: Active Tasks -->
-            <div class="col-md-7 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0 fw-bold"><i class="bi bi-list-task me-2 text-primary"></i>@L["MyActiveTasks"]</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        @if (!myActiveRuns.Any())
-                        {
-                            <div class="p-4 text-center text-muted">
-                                <i class="bi bi-check2-circle display-4 d-block mb-2"></i>
-                                @L["NoActiveTasks"]
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead class="bg-light">
+                <div class="card-body p-0">
+                    @if (!myActiveRuns.Any())
+                    {
+                        <div class="p-5 text-center text-muted">
+                            <span class="material-symbols-outlined display-lg d-block mb-2 opacity-25">check_circle</span>
+                            <div class="body-md">@L["NoActiveTasks"]</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>@L["Project"]</th>
+                                        <th>@L["Suite"]</th>
+                                        <th>@L["Progress"]</th>
+                                        <th class="text-end">@L["Actions"]</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var run in myActiveRuns)
+                                    {
                                         <tr>
-                                            <th>#</th>
-                                            <th>@L["Project"]</th>
-                                            <th>@L["Suite"]</th>
-                                            <th>@L["Progress"]</th>
-                                            <th></th>
+                                            <td class="data-mono fw-bold">@run.RunNumber</td>
+                                            <td class="body-md">@run.Project?.Title</td>
+                                            <td class="body-md">@run.TestSuite?.Title</td>
+                                            <td style="min-width: 140px;">
+                                                @{
+                                                    var total = run.CaseResults.Count;
+                                                    var completed = run.CaseResults.Count(cr => cr.Status != "Pending");
+                                                    var percent = total > 0 ? (int)((double)completed / total * 100) : 0;
+                                                }
+                                                <div class="progress mb-1" style="height: 4px; background-color: var(--surface-container-high);">
+                                                    <div class="progress-bar" style="width: @percent%; background-color: var(--success);"></div>
+                                                </div>
+                                                <div class="label-caps text-muted">@percent% (@completed/@total)</div>
+                                            </td>
+                                            <td class="text-end pe-3">
+                                                <a href="/testruns/execute/@run.Id" class="btn btn-sm btn-outline-primary">@L["Resume"]</a>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var run in myActiveRuns)
-                                        {
-                                            <tr>
-                                                <td class="fw-bold">@run.RunNumber</td>
-                                                <td>@run.Project?.Title</td>
-                                                <td>@run.TestSuite?.Title</td>
-                                                <td style="min-width: 120px;">
-                                                    @{
-                                                        var total = run.CaseResults.Count;
-                                                        var completed = run.CaseResults.Count(cr => cr.Status != "Pending");
-                                                        var percent = total > 0 ? (int)((double)completed / total * 100) : 0;
-                                                    }
-                                                    <div class="progress" style="height: 8px;">
-                                                        <div class="progress-bar bg-success" style="width: @percent%"></div>
-                                                    </div>
-                                                    <div class="small text-muted mt-1">@percent% (@completed/@total)</div>
-                                                </td>
-                                                <td class="text-end pe-3">
-                                                    <a href="/testruns/execute/@run.Id" class="btn btn-sm btn-outline-primary">@L["Resume"]</a>
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        }
-                    </div>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
             </div>
+        </div>
 
-            <!-- Right Column: Recent Activity / Shortcuts -->
-            <div class="col-md-5 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0 fw-bold"><i class="bi bi-lightning-charge me-2 text-warning"></i>@L["QuickLinks"]</h5>
+        <!-- Right Column: Recent Activity / Shortcuts -->
+        <div class="col-md-5">
+            <div class="card h-100">
+                <div class="card-header py-3 d-flex align-items-center">
+                    <span class="material-symbols-outlined me-2">bolt</span>
+                    <span class="title-sm mb-0">@L["QuickLinks"]</span>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/testruns/create" class="btn btn-outline-primary text-start d-flex align-items-center p-3">
+                            <span class="material-symbols-outlined me-3">play_circle</span>
+                            <span class="body-md flex-grow-1">@L["StartNewRun"]</span>
+                            <span class="material-symbols-outlined small opacity-50">chevron_right</span>
+                        </a>
+                        <a href="/bugs/create" class="btn btn-outline-primary text-start d-flex align-items-center p-3">
+                            <span class="material-symbols-outlined me-3">bug_report</span>
+                            <span class="body-md flex-grow-1">@L["ReportBug"]</span>
+                            <span class="material-symbols-outlined small opacity-50">chevron_right</span>
+                        </a>
+                        <a href="/projects" class="btn btn-outline-primary text-start d-flex align-items-center p-3">
+                            <span class="material-symbols-outlined me-3">folder</span>
+                            <span class="body-md flex-grow-1">@L["BrowseProjects"]</span>
+                            <span class="material-symbols-outlined small opacity-50">chevron_right</span>
+                        </a>
                     </div>
-                    <div class="card-body">
-                        <div class="list-group list-group-flush">
-                            <a href="/testruns/create" class="list-group-item list-group-item-action py-3 border-0 rounded mb-2 bg-light">
-                                <div class="d-flex w-100 justify-content-between align-items-center">
-                                    <span><i class="bi bi-play-circle me-3 text-success fs-4"></i> @L["StartNewRun"]</span>
-                                    <i class="bi bi-chevron-right small text-muted"></i>
-                                </div>
-                            </a>
-                            <a href="/bugs/create" class="list-group-item list-group-item-action py-3 border-0 rounded mb-2 bg-light">
-                                <div class="d-flex w-100 justify-content-between align-items-center">
-                                    <span><i class="bi bi-bug me-3 text-danger fs-4"></i> @L["ReportBug"]</span>
-                                    <i class="bi bi-chevron-right small text-muted"></i>
-                                </div>
-                            </a>
-                            <a href="/projects" class="list-group-item list-group-item-action py-3 border-0 rounded mb-2 bg-light">
-                                <div class="d-flex w-100 justify-content-between align-items-center">
-                                    <span><i class="bi bi-folder me-3 text-primary fs-4"></i> @L["BrowseProjects"]</span>
-                                    <i class="bi bi-chevron-right small text-muted"></i>
-                                </div>
-                            </a>
-                        </div>
 
-                        <div class="mt-4">
-                            <h6 class="fw-bold mb-3">@L["SystemSummary"]</h6>
-                            <div class="alert alert-secondary small border-0 py-2">
-                                <i class="bi bi-info-circle me-2"></i> @string.Format(L["SystemStatsMessage"], weeklyPassCount + weeklyFailCount, lastWeekRunsCount)
+                    <div class="mt-4 pt-4 border-top">
+                        <div class="label-caps mb-3">@L["SystemSummary"]</div>
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-2 px-3 body-sm d-flex align-items-center">
+                                <span class="material-symbols-outlined small me-2 text-primary">info</span>
+                                <span>@string.Format(L["SystemStatsMessage"], weeklyPassCount + weeklyFailCount, lastWeekRunsCount)</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    }
-</div>
+    </div>
+}
 
 @code {
     private bool isLoading = true;
