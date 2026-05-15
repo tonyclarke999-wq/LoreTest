@@ -8,50 +8,72 @@
 @inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>@L["Users"]</PageTitle>
-
-<h1>@L["Users"]</h1>
-
-<p>
-    <a href="/users/create" class="btn btn-primary">@L["CreateNew"]</a>
-</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="headline-md">@L["Users"]</div>
+    <a href="/users/create" class="btn btn-primary d-flex align-items-center">
+        <span class="material-symbols-outlined small me-1">person_add</span> @L["CreateNew"]
+    </a>
+</div>
 
 @if (users == null)
 {
-    <p><em>@L["Loading"]</em></p>
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">@L["Loading"]</span>
+        </div>
+    </div>
+}
+else if (!users.Any())
+{
+    <div class="card p-5 text-center text-muted">
+        <span class="material-symbols-outlined display-lg d-block mb-2 opacity-25">group_off</span>
+        <div class="body-md">@L["NoUsersFound"]</div>
+    </div>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>@L["Email"]</th>
-                <th>@L["Name"]</th>
-                <th>@L["JobTitle"]</th>
-                <th>@L["Role"]</th>
-                <th>@L["StartDate"]</th>
-                <th>@L["EndDate"]</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in users)
-            {
-                <tr>
-                    <td>@user.Email</td>
-                    <td>@user.Name</td>
-                    <td>@user.JobTitle</td>
-                    <td>@user.Role</td>
-                    <td>@user.StartDate?.ToString("d")</td>
-                    <td>@user.EndDate?.ToString("d")</td>
-                    <td>
-                        <a href="/users/edit/@user.Id">@L["Edit"]</a> |
-                        <a href="/users/delete/@user.Id">@L["Delete"]</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="card p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>@L["Email"]</th>
+                        <th>@L["Name"]</th>
+                        <th>@L["JobTitle"]</th>
+                        <th>@L["Role"]</th>
+                        <th>@L["StartDate"]</th>
+                        <th>@L["EndDate"]</th>
+                        <th class="text-end">@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in users)
+                    {
+                        <tr>
+                            <td class="body-md">@user.Email</td>
+                            <td class="body-md fw-bold">@user.Name</td>
+                            <td class="body-md text-muted">@user.JobTitle</td>
+                            <td>
+                                <span class="badge @(user.Role == "Administrator" ? "bg-primary" : "bg-light text-dark")">@user.Role</span>
+                            </td>
+                            <td class="body-sm text-muted">@user.StartDate?.ToString("d")</td>
+                            <td class="body-sm text-muted">@user.EndDate?.ToString("d")</td>
+                            <td class="text-end pe-3">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="/users/edit/@user.Id" class="btn btn-sm btn-outline-primary" title="@L["Edit"]">
+                                        <span class="material-symbols-outlined small">edit</span>
+                                    </a>
+                                    <a href="/users/delete/@user.Id" class="btn btn-sm btn-outline-danger" title="@L["Delete"]">
+                                        <span class="material-symbols-outlined small">delete</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
 
 @code {
