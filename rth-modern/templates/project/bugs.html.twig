@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bugs - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Bug Tracking</h1>
+            <p class="subtitle">Managing {{ bugs|length }} defects for {{ project.project_name }}</p>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <form method="get" style="display: flex; gap: 0.5rem;">
+                <input type="text" name="q" value="{{ search }}" class="form-control" placeholder="Search bugs..." style="padding: 0.5rem 1rem; width: 250px; font-size: 0.875rem;">
+                {% if search %}
+                    <a href="{{ path('app_project_bugs', {id: project.project_id}) }}" class="badge badge-red" style="text-decoration: none; display: flex; align-items: center;">Clear</a>
+                {% endif %}
+            </form>
+            <a href="{{ path('app_project_bug_new', {id: project.project_id}) }}" class="btn-primary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.875rem;">Report Bug</a>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    {% if bugs|length > 0 %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Summary</th>
+                <th>Priority</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Reported</th>
+                <th width="200">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bug in bugs %}
+            <tr>
+                <td style="color: var(--primary); font-weight: 600;">#{{ bug.bugid }}</td>
+                <td style="font-weight: 500;">{{ bug.summary }}</td>
+                <td>
+                    {% set priority_class = 'badge-blue' %}
+                    {% if bug.priority == 'Immediate' %}{% set priority_class = 'badge-red' %}
+                    {% elseif bug.priority == 'High' %}{% set priority_class = 'badge-yellow' %}
+                    {% endif %}
+                    <span class="badge {{ priority_class }}">{{ bug.priority }}</span>
+                </td>
+                <td>
+                    {% set severity_class = 'badge-blue' %}
+                    {% if bug.severity == 'Blocker' or bug.severity == 'Critical' %}{% set severity_class = 'badge-red' %}
+                    {% elseif bug.severity == 'Major' %}{% set severity_class = 'badge-yellow' %}
+                    {% endif %}
+                    <span class="badge {{ severity_class }}">{{ bug.severity }}</span>
+                </td>
+                <td>
+                    {% set status_class = 'badge-yellow' %}
+                    {% if bug.status == 'Closed' or bug.status == 'Resolved' %}{% set status_class = 'badge-green' %}
+                    {% elseif bug.status == 'New' %}{% set status_class = 'badge-blue' %}
+                    {% elseif bug.status == 'Confirmed' %}{% set status_class = 'badge-red' %}
+                    {% endif %}
+                    <span class="badge {{ status_class }}">{{ bug.status }}</span>
+                </td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">{{ bug.reporteddate }}</td>
+                <td style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="{{ path('app_project_bug_edit', {id: project.project_id, bugId: bug.bugid}) }}" class="badge badge-blue" style="text-decoration: none;">Edit</a>
+                    {% if bug.status != 'Resolved' and bug.status != 'Closed' %}
+                    <form action="{{ path('app_project_bug_resolve', {id: project.project_id, bugId: bug.bugid}) }}" method="post" style="margin: 0;">
+                        <button type="submit" class="badge badge-green" style="border: none; cursor: pointer; font-family: inherit; font-size: inherit;">Resolve</button>
+                    </form>
+                    {% endif %}
+                    <form action="{{ path('app_project_bug_delete', {id: project.project_id, bugId: bug.bugid}) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this bug?');" style="margin: 0;">
+                        <button type="submit" class="badge badge-red" style="border: none; cursor: pointer; font-family: inherit; font-size: inherit;">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <p>No bugs found for this project.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

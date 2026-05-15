@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  xampp:
+    image: tomsik68/xampp:5
+    container_name: xampp-php5
+    ports:
+      - "8888:80"       # Apache (Web)
+      - "33066:3306"    # MySQL
+    volumes:
+      - ./www:/opt/lampp/htdocs      # Web root
+      - mysql-data:/opt/lampp/var/mysql
+    restart: unless-stopped
+
+volumes:
+  mysql-data:

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Project Report - {{ project.project_name }}</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .header {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: var(--primary);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-box {
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        h2 {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            text-align: left;
+            background: #f8fafc;
+            padding: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+        <button onclick="window.print()" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Print to PDF</button>
+        <a href="{{ path('app_project_show', {id: project.project_id}) }}" style="margin-left: 10px; color: var(--text-muted);">Back to Dashboard</a>
+    </div>
+
+    <div class="header">
+        <div>
+            <h1>Project Status Report</h1>
+            <p style="margin: 5px 0 0 0; color: var(--text-muted);">{{ project.project_name }} • Generated on {{ "now"|date("F j, Y, g:i a") }}</p>
+        </div>
+        <div style="text-align: right;">
+            <p><strong>RTH Modern</strong></p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-value">{{ stats.total_reqs }}</div>
+            <div class="stat-label">Requirements</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">{{ stats.total_bugs }}</div>
+            <div class="stat-label">Total Bugs</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">{{ stats.open_bugs }}</div>
+            <div class="stat-label">Open Defects</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">{{ stats.critical_bugs }}</div>
+            <div class="stat-label">Critical Issues</div>
+        </div>
+    </div>
+
+    <h2>Requirements Summary</h2>
+    <table>
+        <thead>
+            <tr>
+                <th width="10%">ID</th>
+                <th width="60%">Requirement Name</th>
+                <th width="15%">Version</th>
+                <th width="15%">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requirements %}
+            <tr>
+                <td>#{{ req.reqid }}</td>
+                <td><strong>{{ req.reqname }}</strong></td>
+                <td>{{ req.version }}</td>
+                <td><span class="badge badge-blue">{{ req.status }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Defect Overview (Open & Recent)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th width="10%">ID</th>
+                <th width="50%">Summary</th>
+                <th width="15%">Priority</th>
+                <th width="15%">Severity</th>
+                <th width="10%">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bug in bugs %}
+            <tr>
+                <td>#{{ bug.bugid }}</td>
+                <td>{{ bug.summary }}</td>
+                <td>{{ bug.priority }}</td>
+                <td>
+                    <span class="badge {% if bug.severity in ['Critical', 'Blocker'] %}badge-red{% else %}badge-blue{% endif %}">
+                        {{ bug.severity }}
+                    </span>
+                </td>
+                <td>{{ bug.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 60px; font-size: 0.875rem; color: var(--text-muted); text-align: center; border-top: 1px solid var(--border); padding-top: 20px;">
+        End of Report - Confidential Project Information
+    </div>
+</body>
+</html>

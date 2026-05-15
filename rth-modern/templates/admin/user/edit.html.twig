@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit User - Admin{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Edit User: {{ user.username }}</h1>
+            <p class="subtitle">System Administration - Profile Update</p>
+        </div>
+        <a href="{{ path('app_admin_users') }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to List</a>
+    </div>
+</div>
+
+<div class="project-card" style="max-width: 800px;">
+    <form method="post">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" value="{{ user.username }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" required>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" name="first_name" class="form-control" value="{{ user.firstName }}" required>
+            </div>
+            <div class="form-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" class="form-control" value="{{ user.lastName }}" required>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="password">New Password (leave blank to keep current)</label>
+                <input type="password" id="password" name="password" class="form-control" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label for="is_admin">Administrator Privileges</label>
+                <select id="is_admin" name="is_admin" class="form-control" required>
+                    <option value="N" {% if user.userAdmin == 'N' %}selected{% endif %}>Regular User</option>
+                    <option value="Y" {% if user.userAdmin == 'Y' %}selected{% endif %}>System Administrator</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn-primary">Save Changes</button>
+            <a href="{{ path('app_admin_users') }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

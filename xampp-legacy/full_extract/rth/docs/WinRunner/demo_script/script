@@ -1,0 +1,88 @@
+######################################################################################################
+# 
+#	Call the initialization script.  You could also make this the tslinit startup script.
+#
+######################################################################################################
+call_close "C:\\Apache2\\htdocs\\rth\\docs\\WinRunner\\wr_initialization"();
+
+######################################################################################################
+# 
+#	Set values necessary to write results to RTH.  The TestID should be set to the TestID in RTH
+#
+######################################################################################################
+arControlArray[TestID] 	 = 1;
+arControlArray[TestName] = SetTestName( getvar("testname") );
+public stepno 			 = 1;
+
+######################################################################################################
+# 
+#	Update test status to WIP in RTH database. This allows users to know the test status in real time.
+# 	UPDATE status in TestSet_TestSuite_Assoc table and INSERT INTO TestSuiteResults table.
+#
+######################################################################################################
+TestStarted( arControlArray );
+
+######################################################################################################
+# 
+#	Examples of how the custom fields can be used in RTH
+#
+######################################################################################################
+FirstName = "George";
+LastName  = "Holbrook";
+
+arControlArray[Custom_1] = FirstName;
+arControlArray[Custom_2] = LastName;
+
+######################################################################################################
+# 
+#	Write the first test step of Demo_Test (TestID 1) to RTH.  An INFO step.
+#
+######################################################################################################
+WriteVerification(stepno,"This is my action. I am running","Expected: I will not fall on my face","Actual: I fell on my face","INFO","","Login","Text", getvar("line_no"),arControlArray);
+stepno++;
+
+######################################################################################################
+# 
+#	Verify information and write out result to RTH database.  PASS or FAIL steps.
+#
+######################################################################################################
+# Verify value of val_1 and write results to RTH database.  INSERT INTO VerifyResults table.
+val_1 = 0;
+
+if( val_1 == 0 ) {
+	WriteVerification(stepno,"Verify val_1 = 1","val_1 = 1","val_1 = " & val_1,"PASS","","Login","Text", getvar("line_no"),arControlArray);
+}
+else {
+	WriteVerification(stepno,"Verify Val = 1","val_1 equals 1","Val = " & val_1,"FAIL","","Login","Text", getvar("line_no"),arControlArray);
+}
+stepno++;
+
+# Verify value of val_2. This step will fail
+val_2 = 1;
+
+if( val_2 == 0 ) {
+	WriteVerification(stepno,"Verify val_2 = 1","val_1 = 1","val_2 = " & val_2,"PASS","","Main Screen","Table", getvar("line_no"),arControlArray);
+}
+else {
+	WriteVerification(stepno,"Verify val_2 = 1","val_2 = 1","val_2 = " & val_2,"FAIL","","Main Screen","Table", getvar("line_no"),arControlArray);
+}
+stepno++;
+
+# Verify value of val_3
+val_3 = 0;
+
+if( val_3 == 0 ) {
+	WriteVerification(stepno,"Verify val_3 = 1","val_3 = 1","val_3 = " & val_3,"PASS","","Login","Text", getvar("line_no"),arControlArray);
+}
+else {
+	WriteVerification(stepno,"Verify val_3 = 1","val_3 = 1","val_3 = " & val_3,"FAIL","","Login","Text", getvar("line_no"),arControlArray);
+}
+stepno++;
+
+
+######################################################################################################
+#
+#	Update test status to show that the test is "Finished: Awaiting Review"
+#
+######################################################################################################
+TestCompleted(arControlArray[TSUniqueID]);

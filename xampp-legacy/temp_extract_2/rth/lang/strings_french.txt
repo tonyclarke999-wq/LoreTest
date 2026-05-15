@@ -1,0 +1,1086 @@
+<?php
+# ------------------------------------
+# Language File
+#
+# $RCSfile: strings_french.txt,v $ 
+# $Revision: 1.1 $
+#
+# The string file is divided into various sections described below
+# Please search for the word you need before adding it to this file
+#
+# Section 1:  Words that are common throughout the application
+# Section 2:  Page Links
+# Section 3:  Page Titles ( should follow the "_page" format
+# Section 4:  Requirements
+# Section 5:  Tests
+# Section 6:  Test Results
+# Section 7:  Bugs
+# Section 8:  Release - words related to Releases, Builds, and Testsets
+# Section 9:  Admin 
+# Section 10: Project
+# Section 11: User
+# Section 12: Reporting
+# Section 13: Help
+# Section 14: Phrases
+# Section 15: Deletion Messages
+# Section 16: Warning and Error Messages
+# Section 17: List of elements in listbox
+##############################################################################
+
+#########################################################
+# SECTION 1:
+# Common - words common throughout the application or used on many pages
+#########################################################
+$l_id				= 'N&deg;';
+$l_all				= 'Tous';
+$l_description			= 'Description';
+$l_comments			= 'Commentaires';
+$l_comment			= 'Commentaire';
+$l_detail			= 'D&eacute;tail';
+$l_details			= 'D&eacute;tails';
+$l_csv_export			= '[Exporter vers CSV]';
+$l_excel_export			= '[Exporter vers Excel]';
+$l_subject			= 'Sujet';
+$l_blank			= 'Vide';
+$l_add				= 'Ajouter';
+$l_edit				= 'Editer';
+$l_copy				= 'Copier';
+$l_remove			= 'Retirer';
+$l_delete			= 'Supprimer';
+$l_deleted			= 'Supprimer';
+# VERSIONS
+$l_add_new_version		= 'Ajouter une nouvelle version';
+$l_new_version			= 'Nouvelle version';
+$l_show_history			= 'Montrer l\'historique';
+$l_history			= 'Historique';
+$l_all_versions			= 'Toutes les versions';
+$l_latest_version		= 'Derni&egrave;re version';
+# ASSIGNMENTS  
+$l_assigned_to			= 'Assigner &agrave;';
+$l_assign_to_release		= 'Assigner &agrave; la Release';
+$l_author			= 'Auteur';
+# STATUS 
+$l_status			= 'Statut';
+$l_update_status		= 'Modifier le Statut';
+$l_select_all			= 'Selectionner tout';
+$l_hold_ctrl			= 'Maintenir la touche Ctrl pour s&eacute;lectionner/D&eacute;s&eacute;lectionner plusieurs valeurs.';
+# UPDATES - DATES  
+$l_last_updated			= 'Derni&egrave;re modification';
+$l_last_updated_by		= 'Derni&egrave;re modification par';
+$l_last_updated_date		= 'Date de derni&egrave;re modification';
+$l_date_created			= 'Date de cr&eacute;ation';
+$l_created			= 'Cr&eacute;&eacute;';
+$l_date_received		= 'Date de r&eacute;ception';
+$l_date_started			= 'D&eacute;marr&eacute; le';
+$l_sign_off			= 'Cl&ocirc;turer';
+$l_signed_off_by		= 'Cl&ocirc;tur&eacute;e par';
+$l_sign_off_date		= 'Date de cl&ocirc;ture';
+# NAVIGATION 
+$l_switch_project		= 'Changer de projet';
+$l_back_to_top			= 'Haut';
+$l_search			= 'Recherche';
+$l_first			= 'Premier';
+$l_last				= 'Dernier';
+$l_previous			= 'Pr&eacute;c&eacute;dent';
+$l_next				= 'Suivant';
+$l_show 			= 'Montrer';
+$l_jump				= 'Aller &agrave;';
+$l_up				= 'Haut';
+$l_down				= 'Bas';
+$l_must_complete_field 		= 'Champ obligatoire';
+$l_operation_successful		= 'Op&eacute;ration r&eacute;alis&eacute;e avec succ&egrave;s';
+# PRIORITY 
+$l_priority_high		= 'Haute';
+$l_priority_medium		= 'Moyenne';
+$l_priority_low			= 'Basse';
+# BUTTONS
+$l_okay_btn			= 'OK';
+$l_submit_btn			= 'Valider';
+$l_add_user_btn			= 'Ajouter l\'utilisateur';
+$l_edit_user			= 'Modifier l\'utilisateur';
+$l_save				= 'Sauvegarder';
+$l_create			= 'Cr&eacute;er';
+$l_yes				= 'Oui';
+$l_no				= 'Non';
+$l_update			= 'Mettre &agrave; jour';
+$l_change			= 'Changer';
+$l_create_new_account		= 'Cr&eacute;er un nouveau compte';
+$l_select_children		= 'Editer les fils';
+$l_edit_assoc			= 'Editer les associations';
+$l_children			= 'Fils';
+$l_parent			= 'Parent';
+$l_create_test			= 'Cr&eacute;er un test';
+$l_create_child_req		= 'Cr&eacute;er une exigence fille';
+$l_file				= 'Fichier';
+$l_record			= 'Enregistrement';
+$l_root_requirement		= 'Document maître';
+$l_total			= 'Total';
+# HOME PAGE
+$l_news				= 'Nouvelles';
+$l_latest_test_results		= 'R&eacute;sultats de test - Plus r&eacute;cents';
+$l_latest_tests			= 'Tests - 5 derniers modifi&eacute;s';
+$l_latest_requirements		= 'Exigences - 5 derni&egrave;res modifi&eacute;es';
+$l_new_post			= 'New Post';
+$l_copywrite			= 'Copyright 2005 - MMV';
+$l_contact_admin 		= 'Contacter votre administrateur';
+$l_rth_admin_email		= 'RTH_Admin';
+$l_correct_date_format 		= '(yyyy-mm-dd)';
+$l_latest_build			= 'Build - Dernier';
+$l_logged_in_as			= 'Connect&eacute; en tant que';
+
+#########################################################
+# SECTION 2:
+# Page Links - primarily links on the main menu or sub-menus
+#########################################################
+$l_home_link			= 'Accueil';
+$l_req_link 			= 'Exigences';
+$l_test_link 			= 'Tests';
+$l_test_add_link		= 'Ajouter un test';
+$l_test_workflow_link		= 'Test Workflow';
+$l_results_link 		= 'Ex&eacute;cution';
+$l_release_link			= 'Campagnes de tests';
+$l_admin_link			= 'Administration';
+$l_user_link			= 'Utilisateur';
+$l_reports_link			= 'Rapports';
+$l_calendar_link		= 'Calendrier';
+$l_help_link			= 'Aide';
+$l_logout_link 			= 'Se d&eacute;connecter';
+$l_docs_link			= 'Documents';
+$l_update_link			= 'Mettre &agrave; jour';
+$l_sign_off_link		= 'Fermer';
+$l_bug_link			= 'Anomalies';
+$l_bug_view_link		= 'Voir les anomalies';
+$l_bug_add_link			= 'Cr&eacute;er une anomalie';
+$l_edit_link			= 'Editer';
+$l_delete_link			= 'Supprimer';
+
+#########################################################
+# SECTION 3:
+# Page and Window titles
+#########################################################
+$l_add_users_page		= 'Cr&eacute;ation d\'utilisateurs';
+$l_admin_page			= 'Aministration';
+$l_testset_add_tests_page	= 'Ajout de tests';
+$l_alter_testset		= 'Modification de la campagne';
+$l_archive_tests_page		= 'Archivage des tests';
+$l_archive_results_page		= 'Archivage des r&eacute;sultats';
+$l_project_add_page		= 'Cr&acute;ation d\'un projet';
+$l_add_area_tested_page		= 'Cr&acute;ation d\'un &eacute;l&eacute;ment &agrave; tester';
+$l_add_machine_page		= 'Cr&acute;ation d\'un h&ocirc;te';
+$l_add_testtype_page		= 'Cr&acute;ation d\'un type de test';
+$l_add_test_doc_type_page	= 'Cr&acute;ation d\'un type de document de test';
+$l_add_environment_page		= 'Cr&acute;ation d\'un environnement';
+$l_add_req_doc_type_page	= 'Cr&acute;ation d\'un type de document des exigences';
+$l_add_req_functionality_page	= 'Cr&acute;ation d\'une fonctionnalit&eacute;';
+$l_add_req_area_covered_page	= 'Cr&acute;ation d\'un &eacute;l&eacute;ment couvert';
+$l_report_area_tested_page	= 'Rapport par l\'&eacutel&eacute;ment test&eacute;';
+$l_report_build_status_page	= 'Statut du build';
+$l_report_verif_page		= 'Rapport des ex&eacute;cutions';
+$l_report_failed_verif_page	= 'Rapport des ex&eacute;cutions &eacute;chou&eacute;es';
+$l_report_signoff_page		= 'R&eacute;sultat de la campagne';
+$l_report_requirements_page	= 'Couverture des exigences';
+$l_requirements_new_version	= 'Cr&acute;ation d\'une version d\'exigence';
+$l_build_page			= 'Build';
+$l_build_edit_page		= 'Modification d\'un build';
+$l_create_test_page		= 'Cr&acute;ation d\'un test';
+$l_edit_area_tedsted_page	= 'Modification d\'un &eacute;l&eacute;ment test&eacute;';
+$l_edit_machine_page		= 'Modification d\'un h&ocirc;te';
+$l_edit_testtype_page		= 'Modification d\'un type de test';
+$l_edit_testset_page		= 'Modification d\'une campagne';
+$l_edit_test_doc_type_page	= 'Modification d\'un type de document de test';
+$l_edit_req_doc_type_page	= 'Modification d\'un type de documention des exigences';
+$l_edit_req_area_covered_page	= 'Modification des &acute;l&eacute;ments couverts par les exigences';
+$l_edit_project_page		= 'Modification du projet';
+$l_edit_environment_page	= 'Modification de l\'environnement';
+$l_edit_functionality_page	= 'Modification de la fonctionnalité';
+$l_forgot_password_page		= 'Nouveau mot de passe - ';
+$l_login_page 			= 'Connexion - ';
+$l_news_edit_page		= 'Modificatino des nouvelles';
+$l_news_add_page		= 'Post d\'une nouvelle';
+$l_delete_page			= 'Supprimer';
+$l_release_page			= 'Release';
+$l_release_edit_page		= 'Edition d\'une release';
+$l_testset_page			= 'Campagne';
+$l_testset_edit_page		= 'Modification d\'une campagne';
+$l_testset_copy_page		= 'Copie d\'une campagne';
+$l_test_results			= 'R&eacute;sultats du test';
+$l_test_detail_page		= 'D&eacute;tail du test';
+$l_test_doc_history_page	= 'Historique du document';
+$l_test_import_csv_page		= 'Import des &eacute;tapes de test en CSV';
+$l_reporting_page		= 'Rapports';
+$l_manage_project_page		= 'Administration du projet';
+$l_test_step_edit_page		= 'Modification des &eacute;tapes de test';
+$l_run_manual_test_page		= 'Ex&eacute;cution du test';	
+$l_user_manage_page		= 'G&eacute;rer les utilisateurs';
+$l_user_edit_page		= 'Modification de l\'utilisateur';
+$l_update_test_result_page	= 'Mise &agrave; jour du r&eacute;sultat';
+$l_update_verification		= 'Modification des v&eacute;rifications';
+$l_update_test_page		= 'Modification du test';
+$l_manage_projects_page		= 'Gestion des projets';
+$l_renumber_test_step_page	= 'Encahinement des &eacute;tapes de test';
+$l_add_test_step_page		= 'Cr&eacteation d\'une &eacute;tape de test';
+$l_add_test_version_page	= 'Cr&eacteation d\'une nouvelle version du test';
+$l_req_update_status_page	= 'Modification du statut de l\'exigence';
+$l_req_update_assign_release_page = 'Modification de l\'association entre exigence et release';
+$l_req_detail_page		= 'D&eacute;tail de l\'exigence';
+$l_req_page			= 'Exigences';
+$l_req_discussion_page		= 'Commentaires sur l\'exigence';
+$l_req_edit_page		= 'Modification de l\'exigence';
+$l_req_notifications		= 'Notifications';
+$l_req_add_page			= 'Cr&eacteation d\'une exigence';
+$l_req_assoc_tests_page		= 'Modification des tests associ&eacute;s';
+$l_req_assoc_releases_page	= 'Modification des releases associ&eacute;es';
+$l_req_req_assoc_page		= 'S&eacute;lection de l\'exigence fille';
+$l_req_assoc_page		= 'Associations des exigences';
+$l_discussion_add_page		= 'Cr&ation d\'une discussion';
+$l_discussion_post_add_page	= 'Ajouter un post &agrave; le discussion';
+$l_discussion_close_page	= 'Fermeture de la discussion';
+$l_window_title 		= 'UF_Wiki';
+$l_page_title 			= 'UF Wiki';
+$l_test_req_assoc_page		= 'Association Test/Exigence';
+$l_test_req_coverage_page	= 'COuverture des exigences';
+$l_test_mass_update_page	= 'Mise &agrave; jour de masse';
+$l_bug_mass_update_page		= 'Mise &agrave; jour de masse';
+$l_test_page			= 'Tests';
+$l_req_mass_update_page		= 'Mise &agrave; jour de masse';
+$l_results_mass_update_page	= 'Mise &agrave; jour de masse';
+$l_test_results_page		= 'Ex&eacute;cution';
+$l_req_folder_view_page		= 'Exigences - Vue arborescente';
+$l_bug_page			= 'Anomalies';
+$l_add_bug_page			= 'Cr&eacute;er une anomalie';
+$l_add_bug_category_page	= 'Cr&eacute;er une cat&eacute;gorie';
+$l_edit_bug_category_page	= 'Modification d\'une cat&eacute;gorie';
+$l_add_bug_component_page	= 'Cr&eacteation d\'un composant';
+$l_edit_bug_component_page	= 'Modification d\'un composant';
+$l_bug_detail_page		= 'D&eacute;tail de l\'anomalie';
+$l_update_bug_page		= 'Modification de l\'anomalie';
+$l_edit_bugnote_page		= 'Edition d\'une note';
+$l_bug_close_page		= 'Cl&ocirc;ture de l\'anomalie';
+$l_testset_signoff_page		= 'Cl&ocirc;ture de la campagne';
+$l_testset_time_remaining_page	= 'Temps d\'ex&eacute;cution estim&eacute;';
+$l_auto_pass_page		= 'Passage automatique';
+$l_file_upload_page		= 'D&eacute;p&ocirc;t de fichier';
+$l_release_signoff_page		= 'Cl&ocirc;ture de la release';
+$l_screen_page			= 'Ecrans';
+$l_field_page			= 'Champs';
+$l_function_page		= 'Fonctions';
+$l_remote_execution_page	= 'Ex&eacute;cution de test automatique';
+$l_home_page			= 'Accueil';
+
+
+#########################################################
+# SECTION 4:
+# Requirement - words that are related to requirements
+#########################################################
+$l_req				= 'Exigence';
+$l_req_id			= 'Exigence N&deg;';
+$l_req_add_file_link		= 'Ajouter une exigence - Fichier';
+$l_req_add_rec_link		= 'Ajouter une exigence - Enregistrement';
+$l_req_add_folder		= 'Ajouter un dossier';
+$l_add_req_functionality	= 'Ajouter une fonctionnalit&eacute;';
+$l_req_search			= 'Recherche';
+$l_req_name			= 'Nom';
+$l_req_type			= 'Type de document';
+$l_req_area			= 'El&eacute;ment couvert';
+$l_req_status			= 'Statut';
+$l_req_priority			= 'Priorit&eacute;';
+$l_req_untestable		= 'Non testable';
+$l_req_version			= 'Version';
+$l_req_locked			= 'V&eacute;rouill&eacute;e';
+$l_req_locked_by		= 'V&eacute;rouill&eacute;e par';
+$l_req_locked_date		= 'V&eacute;rouill&eacute;e le';
+$l_req_assign_release		= 'Impl&eacute;ment&eacute;e dans la version';
+$l_req_detail			= 'D&eacute;tail';
+$l_req_actions			= 'Actions';
+$l_total_coverage		= 'Couverture totale';
+$l_num_req			= 'Nombre d\'exigences';
+$l_tot_percent_req_cov		= '% d\'exigences couvertes';
+$l_functionality		= 'Fonctionalit&eacute;';
+$l_req_created			= 'Cr&eacute;&eacute;e le';
+$l_req_rels			= 'Relations';
+$l_req_rel			= 'Relation';
+$l_req_test_rel			= 'Liaisons avec les tests';
+$l_req_release_assoc		= 'Releases associ&eacute;es';
+$l_req_update			= 'Modifier';
+$l_req_delete			= 'Supprimer';
+$l_req_lock			= 'V&eacute;rouiller';
+$l_req_unlock			= 'D&eacute;v&eacute;rouiller l\'exigence';
+$l_req_add_rel			= 'Ajouter une relation';
+$l_req_add_ver			= 'Cr&eacute;er une nouvelle version';
+$l_req_notification		= 'Notifications';
+$l_close_discussion		= 'Fermer la discussion';
+$l_req_detail			= 'D&eacute;tail';
+$l_req_reason_change		= 'Cause de la modification';
+$l_req_assoc			= 'Exigences associ&eacute;es';
+$l_req_test_assoc		= 'Tests associ&eacute;s';
+$l_req_discussions		= 'Discussions';
+$l_req_assoc_type		= 'Type d\'association:';
+$l_req_folder_view		= 'Vue arborescente';
+$l_reqs				= 'Exigences';
+
+# DISCUSSIONS FORUM
+$l_discussion			= 'Discussion';
+$l_add_discussion		= 'Ajouter une discussion';
+$l_num_posts			= 'Nombre de messages';
+$l_posts			= 'Messages';
+$l_post				= 'Message';
+$l_posted			= 'Post&eacute;';
+$l_add_new_post			= 'Ajouter un nouveau message';
+
+$l_update_req_status		= 'Modifier le statut';
+$l_update_req_release		= 'Modifier la version';
+
+#########################################################
+# SECTION 5:
+# Tests - words that are related to tests
+#########################################################
+$l_test				= 'Test';
+$l_tests			= 'Tests';
+$l_testing			= 'Test';
+$l_test_id			= 'Test N&deg;';
+$l_test_name			= 'Nom du test';
+$l_ba_owner			= 'Analyste m&eacute;tier';
+$l_qa_owner			= 'Responsable validation';
+$l_tester			= 'Testeur';
+$l_testtype			= 'Type de test';
+$l_area_tested			= 'El&eacute;ment &agrave; tester';
+$l_automated			= 'Automatis&eacute;';
+$l_automated_test		= 'Test automatique';
+$l_manual			= 'Manuel';
+$l_manual_test			= 'Test manuel';
+$l_man_auto			= 'Man/Auto';
+$l_man_auto_test		= 'Manuel &amp; Test auto';
+$l_test_status			= 'Statut du test';
+$l_test_run_status		= 'R&eacute;sultat de l\'ex&eacute;cution';
+$l_email_test_run_status	= 'E-mail utilisateur';
+$l_autopass			= 'AutoPass';
+$l_priority			= 'Priorit&eacute;';
+$l_results			= 'Resultats';
+$l_test_doc			= 'Documentation du test';
+$l_file_type			= 'Type de document';
+$l_date_assigned		= 'Assign&eacute; le';
+$l_date_expected		= 'Attendu le';
+$l_date_complete		= 'R&eacute;alis&eacute; le';
+$l_ba_signoff_date		= 'Cl&ocirc;tur&eacute; le';
+$l_signoff_date			= 'Date de cl&ocirc;ture';
+$l_signoff_by			= 'Cl&ocirc;tur&eacute; par';
+$l_signoff			= 'Cl&ocirc;turer';
+$l_version			= 'Version';
+$l_active			= 'Actif';
+$l_make_active			= 'Activer';
+$l_view_test			= 'Visualiser';
+$l_requirements_assoc		= 'Association Exigence/Test';
+$l_req_assoc_link		= 'Exigences associ&eacute;es';
+$l_test_history_link		= 'Historique';
+$l_info				= 'Information';
+$l_upload_heading		= 'Ajouter un nouveau fichier';
+$l_upload_new_file_version	= 'Ajouter une nouvelle version du fichier:';
+$l_upload_test_plan		= 'Ajouter le plan de test';
+$l_test_plan_file_upload	= 'Ajout du plan de test';
+$l_test_plan_history		= 'Historique du plan de test';
+$l_test_plan_add		= 'Ajouter un plan de test';
+$l_upload_new_test_plan		= 'Ajouter une nouvelle version du plan de test';
+$l_uploading_new_version	= 'Ajout d\'une nouvelle version de:';
+$l_upload			= 'Upload';
+$l_file_name			= 'Nom du fichier';
+$l_view				= 'Visualiser';
+$l_num_of_tests_for_area	= 'Nombre de test par &eacute;l&eacute;ment';
+$l_num_of_tests_used		= 'Nombre d\'ex&eacute;cutions de tests';
+$l_num_of_tests			= 'Nombre de tests';
+$l_num_of_test_sets		= 'Nombre de campagne';
+$l_num_of_not_started		= 'Nombre de tests non ex&eacute;cut&eacute;s';
+$l_num_of_passed		= 'Nombre de tests pass&eacute;s avec succ&egrave;s';
+$l_num_of_failed		= 'Nombre de tests &eacute;chou&eacute;s';
+$l_num_of_wip			= 'No. WIP';
+$l_num_of_finished		= 'No. Finished Awaiting Review';
+$l_download			= 'Download';
+$l_show_log			= 'Montrer les logs';
+$l_add_version			= 'Ajouter une version';
+$l_uploaded_by			= 'Ajout&eacute; par';
+$l_date_added			= 'Ajout&eacute; le';
+$l_delete_latest		= 'Supprimer la derni&egrave;re version';
+$l_req_documents		= 'Documents';
+$l_percent_covered		= '% couvert';
+$l_percent_covered_test		= '% couvert par test';
+$l_percent_covered_req		= '% couvert par exigence';
+$l_percent_covered_string	= 'Pourcentage couvert';
+$l_percentage_of_area_tests	= '% of Area Tests';
+$l_no_test_suites		= 'Aucune campagne ne correcpond &agrave; votre crit&egrave;re de recherche';
+$l_no_req_docs			= 'Il n\'y a pas de documentation des exigences associ&eacute;e';
+$l_no_documentation		= 'Aucune documentation existe.';
+$l_include			= 'Inclure';
+$l_testsuite_name		= 'Nom de la campagne';
+$l_test_version			= 'Version du test';
+$l_created_by			= 'Cr&eacute;&eacute; par';
+$l_test_created_date		= 'Cr&eacute;&eacute; le';
+$l_test_steps			= 'Etapes de test';
+$l_test_docs			= 'Documents associ&eacute;s';
+$l_test_history			= 'Historique';
+$l_duration			= 'Dur&eacute;e';
+$l_in_minutes			= '(en minutes)';
+$l_time_to_run_test		= 'Dur&eacute;e de l\'ex&eacute;cution du test';
+$l_test_view_detail		= 'Voir les d&eacute;tails du test';
+$l_info_step			= 'Info';
+$l_continue_test_run		= 'Continuer l\'ex&eacute;cution';
+$l_cvs_version			= 'Version CVS';
+$l_import_teststeps_csv		= 'Importer les &eacute;tapes depuis le format CSV';
+$l_export_teststeps_csv		= 'Exporter les &eacute;tapes en CSV';
+$l_import_teststeps_excel	= 'Importer les &eacute;tapes depuis Excel';
+$l_export_teststeps_excel	= 'Exporter les &eacute;tapes vers Excel';
+
+
+$l_add_test			= 'Ajouter un test';
+$l_add_test_version		= 'Ajouter une nouvelle version du test:';
+$l_test_purpose			= 'Objectif';
+$l_test_comments		= 'Commentaires';
+$l_test_assigned_to		= 'Assign&eacute; &agrave;';
+$l_test_tester			= 'Testeur';
+$l_test_assigned_by		= 'Assign&eacute; par';
+$l_test_email_person		= 'Email this person on Not Running';
+$l_test_performance		= 'LoadRunner';
+$l_update_test_coverage		= 'Modifier la couverture du test';
+$l_update_man_auto		= 'Modifier Manuel/Automatique';
+$l_update_ba_owner		= 'Changer l\'analyste m&eacute;tier';
+$l_update_qa_owner		= 'Changer le responsable validation';
+$l_update_test_status		= 'Changer le statut du test';
+$l_update_priority		= 'Changer la priorit&eacute;';
+$l_update_autopass		= 'Changer Auto Pass';
+$l_update_testtype		= 'Changer le type du test';
+$l_update_area_tested		= 'Changer l\'&eacute;l&eacute;ment du test';
+$l_update_test			= 'Modifier le test';
+$l_add_version			= 'Ajouter une version';
+$l_delete_test_btn		= 'Supprimer le test';
+$l_delete_test			= 'Etes-vous sûr de vouloir supprimer toutes les versions de';
+$l_test_steps_section		= 'Etapes de test';
+$l_upload_section		= 'D&eacute;p&ocirc;t de fichier';
+$l_req_assoc_section		= 'Exigences associ&eacute;es';
+$l_step				= 'Etape:';
+$l_add_test_step		= 'Ajouter une &eacute;tape de test';
+$l_add_step			= 'Ajouter une &eacute;tape';
+$l_edit_step			= 'Editer une &eacute;tape';
+$l_move_step			= 'D&eacute;placer une &eacute;tape';
+$l_step_no			= 'N&deg; de l\'&eacute;tape';
+$l_step_action			= 'Action';
+$l_step_inputs			= 'Entr&eacute;es';
+$l_step_expected		= 'R&eacute;sultat attendu';
+$l_step_edit			= 'Modifier/Supprimer';
+$l_renumber_steps		= 'Reordoner les &eacute;tapes';
+
+$l_screen_link			= 'Ecrans';
+$l_add_screen			= 'Ajouter un &eacute;cran';
+$l_edit_screen			= 'Editer l\'&eacute;cran';
+$l_screen_name			= 'Nom de l\'&eacute;cran';
+$l_order			= 'Position';
+
+
+$l_field_link			= 'Champs';
+$l_field_edit_link		= 'Champ';
+$l_field_name			= 'Nom du champ';
+$l_add_field			= 'Ajouter un champ';
+$l_edit_field			= 'Editer le champ';
+$l_text_box			= 'Zone de texte';
+
+$l_field_value_link		= 'Valeurs';
+$l_function_link		= 'Fonctions';
+
+#########################################################
+# SECTION 6:
+# Results - words that are related to test results
+#########################################################
+$l_test_run			= 'Ex&eacute;cution de test';
+$l_view_run			= 'Voir l\'ex&eacute;cution';
+$l_update_test_run		= 'Modifier l\'ex&eacute;cution';
+$l_update_test_result_form	= 'Modifier les r&eacute;sultats';
+$l_update_verification		= 'Update Verification';
+$l_test_case			= 'Cas de test';
+$l_step_no			= 'Etape';
+$l_action			= 'Action';
+$l_expected_result		= 'R&eacute;sultat attendu';
+$l_test_inputs			= 'Donn&eacute;es d\'entr&eacute;es';
+$l_actual_result		= 'R&eacute;sultat constat&eacute;';
+$l_action_			= '______Action______';
+$l_expected_			= '______R&eacute;sultat attendu______';
+$l_test_inputs_			= '______Donn&eacute;es d\'entr&eacute;es______';
+$l_actual_			= '______Actual Result______';
+$l_machine_name			= 'Nom de l\'h&ocirc;te';
+$l_time_started			= 'D&eacute;but&eacute; &agrave;';
+$l_time_finished		= 'Termin&eacute; &agrave;';
+$l_environment			= 'Environment';
+$l_finished			= 'Fini';
+$l_os				= 'OS';
+$l_sp				= 'SP';
+$l_doc				= 'Doc';
+$l_test_run_id			= 'Campagne N&deg;';
+$l_pass				= 'Succ&egrave;s';
+$l_pass_test			= 'Test pass&eacute; avec succ&egrave;s';
+$l_fail				= 'Echec';
+$l_fail_test			= 'Test &eacute;chou&eacute;';
+$l_phone_no			= 'T&eacute;l&eacute;phone';
+$l_policy_id			= 'Tracking No';
+$l_quote_id			= 'Customer ID';
+$l_claim_id			= 'Login ID';
+$l_n_number			= 'Booking Number';
+$l_time_tested			= 'Test&eacute; &agrave;';
+$l_time_approved		= 'Approuv&eacute; &agrave;';
+$l_window			= 'Fenêtre';
+$l_object			= 'Objet';
+$l_line_no			= 'Ligne N&deg;';
+$l_script_version		= 'Version';
+$l_hold				= 'Hold';
+$l_other			= 'Autre';
+$l_tot_phy_mem			= 'TotPhyMem';
+$l_free_phy_mem			= 'FreePhyMem';
+$l_tot_vir_mem			= 'TotVirMem';
+$l_free_vir_mem			= 'FreeVirMem';
+$l_cur_mem_util			= 'CurMemUtil';
+$l_tot_page_file		= 'TotPageFile';
+$l_free_page_file		= 'FreePageFile';
+$l_root_cause			= 'Raison de l\'&eacute;chec';
+$l_no_test_runs			= 'Il n\'y a pas d\'ex&eacute;cution pour ce test.';
+$l_tester			= 'Testeur';
+$l_info				= 'Info';
+$l_bug				= 'Anomalie';
+$l_run_test			= 'Ex&eacute;cuter le test';
+$l_view_results			= 'Voir les r&eacute;sultats';
+$l_est_time_for_testset		= 'Estimation du temps d\'ex&eacute;cution :';
+$l_est_time			= 'Estimation du temps d\'ex&eacute;cution';
+$l_est_total_time		= 'Temps total estim&eacute;';
+$l_est_time_remaining		= 'Temps restant estim&eacute;';
+$l_run_autopass			= 'Run Autopass';
+$l_autopass_complete		= 'Autopass Complete...';
+
+# Manual Test Run
+$l_run_test			= 'Ex&eacute;cuter le test';
+$l_time_started			= 'Heure de d&eacute;marrage';
+$l_os				= 'OS';
+$l_environment			= 'Environnement de test';
+$l_upload_file			= 'Ajouter un fichier';
+$l_upload_doc_test_run		= 'Ajouter un document pour ce test';
+$l_save_results			= 'Enregistrer les r&eacute;sultats';
+$l_actual_result		= 'R&eacute;sulat actuel';
+$l_pass_fail			= 'Succ&egrave;s/Echec';
+$l_correct_file_format		= 'Assurer vous de d&eacute;poser un fichier dans le format suivant';
+
+$l_remote_execution		= 'Ex&eacute;cution &agrave; distance';
+$l_run				= 'Ex&eacute;cution';
+$l_test_path			= 'Chemin';
+$l_parameters			= 'Param&egrave;tres';
+$l_test_tool			= 'Outil de test';
+$l_upload_tests			= 'Upload Tests';
+
+#########################################################
+# SECTION 7:
+# Bugs - words that are related to defects
+#########################################################
+# Bugs - words related to Defect tracking
+$l_defect			= 'Anomalie';
+$l_defect_link			= 'Anomalies';
+$l_defect_id			= 'Anomalie N&deg;';
+$l_bug_id			= 'Bug N&deg;';
+$l_bug_priority			= 'Priorit&eacute;';
+$l_bug_severity			= 'Severit&eacute;';
+$l_bug_status			= 'Statut';
+$l_bug_project_id		= 'Projet N&deg;';
+# Category
+$l_bug_category			= 'Categorie';
+$l_bug_category_link		= 'Cat&eacute;gorie de l\'anomalie';
+$l_add_bug_category		= 'Ajouter une cat&eacute;gorie';
+$l_edit_bug_category		= 'Editer une cat&eacute;gorie';
+# Component
+$l_bug_component		= 'Composant';
+$l_bug_component_link	= 'Comosant';
+$l_add_bug_component	= 'Ajouter un composant';
+$l_edit_bug_component	= 'Editer le composant';
+$l_reported_by			= 'Rapport&eacute; par';
+$l_reported_date		= 'Rapport&eacute; le';
+$l_date_modified		= 'Modifi&eacute; le';
+$l_assigned_to			= 'Assign&eacute; &agrave;';
+$l_tester				= 'Testeur';
+$l_assign_to			= 'Assign&eacute; &agrave;';
+$l_assigned_to_developer= 'D&eacute;veloppeur';
+$l_assign_to_developer	= 'D&eacute;veloppeur';
+$l_found_in_release		= 'D&eacute;tect&eacute; dans la version';
+$l_assigned_to_release	= 'Version de correction pr&eacute;vue';
+$l_implemented_in_release	= 'Impl&eacute;ment&eacute;e dans la version';
+$l_bug_summary			= 'R&eacute;sum&eacute;';
+$l_bug_description		= 'Description';
+$l_view_closed_bugs		= 'Voir les fiches ferm&eacute;es';
+$l_add_bug				= 'Ajouter une anomalie';
+$l_discovery_period		= 'Phase de d&eacute;tection';
+$l_bug_view_detail		= 'Voir les d&eacute;tails';
+$l_bug_detail			= 'D&eacute;tail de l\'anomalie';
+$l_update_bug			= 'Modifier';
+$l_no_bug_detail		= 'Il n\'y a pas de d&eacute;tail disponible pour l\'anomalie n&deg;: ';
+$l_assign_to_user		= 'Valideur';
+$l_change_status		= 'Changer le statut';
+$l_delete_bug			= 'Supprimer l\'anomalie';
+$l_add_bugnote			= 'Ajouter une note';
+$l_delete_bugnote		= 'Supprimer la note';
+$l_bug_note				= 'Note';
+$l_bug_notes			= 'Notes';
+$l_edit_bugnote			= 'Editer la note';
+$l_jump_to_bugnotes		= 'Voir les notes';
+$l_bugnote_id			= 'Note N&deg;';
+$l_severity_low			= 'Basse';
+$l_severity_medium		= 'Moyenne';
+$l_severity_high		= 'Elev&eacute;e';
+$l_severity_critical		= 'Critique';
+$l_test_step_id			= 'Etape N&deg;';
+$l_test_step_no			= 'Etape N&deg;';
+$l_bug_history			= 'Historique';
+$l_jump_to_history		= 'Aller &agrave; l\'historique';
+$l_field			= 'Nom du champ';
+$l_change			= 'Changer';
+$l_new_bug			= 'Nouvelle anomalie';
+$l_summary_updated		= 'Modifier le r&eacute;sum&eacute;';
+$l_description_updated		= 'Description mise &agrave; jour';
+$l_add_relationship		= 'Ajouter une relation';
+$l_new_relationship		= 'Nouvelle relation';
+$l_current_bug_is		= 'Cette anomalie est :';
+$l_related_to			= 'en relation avec';
+$l_child_of				= 'Fille de';
+$l_parent_of			= 'Parent de';
+$l_test_verification_id	= 'Verification ID'; # as it appears on bug pages
+$l_view_closed			= 'Montrer les anomalies cl&ocirc;tur&eacute;es';
+$l_update_bug_status	= 'Modifier le statut';
+$l_update_assign_to		= 'Assign&eacute; &agrave;';
+$l_update_assign_to_developer	= 'Responsable de la correction';
+$l_close_bug			= 'Cloturer l\'anomalie';
+$l_closed_reason_code	= 'Closed Reason Code';
+$l_bug_closed			= 'Clotur&eacute;e' ;
+$l_bug_closed_date		= 'Clotur&eacute;e le';
+$l_req_version_id		= 'Exigence N°';
+
+
+#########################################################
+# SECTION 8:
+# Release - words that are related to the Release section
+#########################################################
+# RELEASE
+$l_release			= 'Release';
+$l_release_name			= 'Nom de la release';
+$l_edit_release			= 'Editer la release';
+$l_release_id			= 'Release N°';
+$l_release_none			= 'Aucune release';
+$l_add_release			= 'Ajouter une release au projet';
+$l_rel_date_received		= 'Date de livraison';
+$l_rel_description		= 'Description';
+$l_rel_qa_signoff		= 'Validation du responsable';
+$l_rel_qa_signoff_by		= 'Valid&eacute;e par'; # we have this elsewhere
+$l_rel_qa_signoff_date		= 'Date';
+$l_rel_qa_signoff_note		= 'Commentaires';   # we already have this word
+$l_rel_ba_signoff		= 'Validation de l\'analyse m&eacute;tier';
+$l_rel_ba_signoff_by		= 'Valid&eacute;e par';
+$l_rel_ba_signoff_date		= 'Date';
+$l_rel_ba_signoff_note		= 'Commentaires';
+$l_test_machine			= 'Machine de test';
+
+# BUILD
+$l_build			= 'Build';
+$l_builds			= 'Builds';
+$l_add_build			= 'Ajouter Build &agrave; la release';
+$l_edit_build			= 'Editer le build';
+$l_build_name			= 'Nom du build';
+$l_build_id			= 'Build N&deg;';
+$l_builds_none			= 'Auncun build';
+$l_build_description		= 'Description';
+$l_build_date_received		= 'Date de livraison';
+
+# TESTSET
+$l_testset				= 'Campagne';
+$l_testsets				= 'Campagnes';
+$l_testset_name			= 'Nom de la campagne';
+$l_testset_id			= 'Campagne N&deg;';
+$l_testset_none			= 'Aucune campagne';
+$l_testset_date_received	= 'Date';
+$l_edit_testset			= 'Editer la campagne';
+$l_add_tests			= 'Ajouter des tests';
+$l_add_testset			= 'Ajouter des campagnes au build';
+$l_copy_testset			= 'Copier la camapgne dans le build';
+$l_testset_select_group		= 'S&eacute;lectionner les tests';
+$l_copy_testset_to		= 'Copier la campagne';
+$l_no_tests_testset		= 'Il n\'y a pas de test dans cette campagne.';
+$l_edit_add_tests		= 'Editer/Ajouter des tests';
+$l_testsets_last_five   = 'Campagnes - 5 derni&egrave;res';
+
+
+#########################################################
+# SECTION 9:
+# Admin - words that are related to the Admin section
+#########################################################
+$l_machine			= 'H&ocirc;te';
+$l_machine_location		= 'Emplacement';
+$l_machine_ip			= 'Adresse IP';
+$l_test_doc_type		= 'Type de document de test';
+$l_add_area_tested		= 'Ajouter un nouvel &eacute;l&eacute;ment de test';
+$l_add_machine			= 'Cr&eacute;er un h&ocirc;te';
+$l_add_testtype			= 'Cr&eacute;er un type de test';
+$l_add_test_doc_type		= 'Cr&eacute;er un type de document de test';
+$l_add_environment		= 'Ajouter un environnement';
+$l_req_doc_type			= 'Type de document de sp&eacute;cification';
+$l_req_functionality		= 'Fonctionnalit&eacute;';
+$l_add_req_doc_type		= 'Cr&eacute;er un type de document';
+$l_req_area_covered		= 'Requirement Area Covered';
+$l_add_req_area_covered		= 'Add Requirement Area Covered';
+$l_delete_rights		= 'Droits de suppression';
+$l_user_rights			= 'Profil';
+$l_qa_tester			= 'Responsable qualit&eacute;';
+$l_ba_owner			= 'Analyste m&eacute;tier';
+$l_email_testset		= 'Email Testset';
+$l_email_discussions		= 'Email Discussions';
+$l_email_new_bug		= 'Alerte - Nouvelle anomalie';
+$l_email_update_bug		= 'Alerte - Anomalie modifi&eacute;e';
+$l_email_assigned_bug		= 'Alerte - Anomalie assign&eacute;e';
+$l_email_bugnote_bug		= 'Alerte - Nouvelle note';
+$l_email_status_bug		= 'Alerte - Modification status anomalie';
+$l_no_discussions		= 'Il n\'y a aucune discussion.';
+$l_add_user_to_project		= 'Ajouter le(s) utilisateur(s) au projet';
+$l_top				= 'Haut';
+$l_archive_tests		= 'Archiver les tests';
+$l_archive_results		= 'Archiver les r&eacute;sultats';
+$l_archive			= 'Archiver';
+
+
+#########################################################
+# SECTION 10:
+# Projects - words that are related to the Projects 
+#########################################################
+$l_project_name			= 'Nom du projet';
+$l_projects			= 'Projets';
+$l_default_project		= 'Projet par d&eacute;faut';
+$l_manage_projects		= 'Administration des projets';
+$l_manage_project		= 'Administration du projet';
+$l_edit_project			= 'Editer le projet';
+$l_my_account			= 'Mon compte';
+$l_add_project			= 'Cr&eacute;er un projet';
+$l_add_to_projects		= 'Ajouter aux projets';
+$l_project_view_hide		= 'Voir/Masquer les colonnes';
+$l_project_use_files		= 'Utiliser les fichiers';
+$l_project_enable		= 'Activer';
+$l_project_disable		= 'D&eacute;sactiver';
+$l_project_req_upload_path 	= 'Requirements Upload Path';
+$l_project_bug_upload_path	= 'Bug Upload Path';
+$l_project_testplan_upload_path	= 'Test Plan Upload Path';
+$l_project_test_run_upload_path	= 'Test Run Upload Path';
+$l_project_test_upload_path	= 'Test Upload Path';
+$l_project_managers		= 'Administrateur';
+$l_view_memory_stats		= 'VOir les stats m&eacute;moire';
+$l_show_testcase		= 'Cas de test';
+$l_show_custom_1		= 'Personnalis&eacute; 1';
+$l_show_custom_2		= 'Personnalis&eacute; 2';
+$l_show_custom_3		= 'Personnalis&eacute; 3';
+$l_show_custom_4		= 'Personnalis&eacute; 4';
+$l_show_custom_5		= 'Personnalis&eacute; 5';
+$l_show_custom_6		= 'Personnalis&eacute; 6';
+$l_show_window			= 'Fenêtre';
+$l_show_object			= 'Objet';
+$l_show_mem_stats		= 'Stats m&eacute;moire';
+$l_show_priority		= 'Priorit&eacute;';
+$l_show_test_input		= 'Donn&eacute;es d\'entr&eacute;e (&eacute;tapes)';
+
+#########################################################
+# SECTION 11:
+# Users - words that are related to the users 
+#########################################################
+$l_user				= 'Utilisateur';
+$l_users			= 'Utilisateurs';
+$l_all_users			= 'Tous les utilisateurs';
+$l_first_name			= 'Pr&eacute;nom';
+$l_last_name			= 'Nom';
+$l_add_user			= 'Ajouter un utilisateur';
+$l_add_new_user			= 'Cr&eacute;er un utilisateur';
+$l_login			= 'Login';
+$l_username			= 'identifiant';
+$l_password			= 'Mot de passe';
+$l_password_confirm		= 'Confirmer le mot de passe';
+$l_change_password		= 'Changer le mot de passe';
+$l_save_login			= 'Sauvegarder le login';
+$l_phone			= 'T&eacute;l&eacute;phone';
+$l_full_name			= 'Nom complet';
+$l_admin			= 'Adminstrateur';
+$l_user				= 'Utilisateur';
+$l_manager			= 'Manager';
+$l_developer		= 'Developeur';
+$l_add_user			= 'Ajouter l\'utilisateur';
+$l_email			= 'E-Mail';
+$l_user_email			= 'Email';
+$l_email_address		= 'Adresse mail';
+$l_password_verify		= 'Verifier le mot de passe';
+$l_access_level			= 'Access Level';
+$l_administrator		= 'Administrateur';
+$l_manager			= 'Manager';
+$l_updater			= 'Modification';
+$l_viewer			= 'Visualisation';
+$l_enabled			= 'Activ&eacute;';
+$l_prefs			= 'Pr&eacute;f&eacute;rences';
+$l_user_rights			= 'Profils';
+$l_tempest_admin		= 'Administrateur';
+$l_tempest_user_rights		= 'Droits utilisateurs';
+$l_project_user_rights		= 'Droits utilisateurs';
+$l_actions			= 'Actions';
+
+$l_forgot_password		= 'Mot de pass oubli&eacute;?';
+$l_password_reset_form		= 'Ceci va r&eacute;initialiser votre mot de passe. Veuillez entrer votre adresse mail:	';
+$l_new_reset_password		= "Un email vient de vous être envoy&eacute; avec un lien de confirmation. Merci de cliquer sur ce lien pour r&eacute;initialiser votre mot de passe.";
+$l_reset_password		= "Votre mot de passe &agrave; &eacute;t&eacute; modifi&eacute;.";
+$l_confirm_password		= 'Confirmer votre mot de passe';
+
+$l_home_welcome			= 'Bienvenue sur RTH';
+
+#########################################################
+# SECTION 12:
+# Reporting - words that are related to reports
+#########################################################
+$l_report_name			= 'Rapport';
+$l_verifs_passed		= 'Etapes pass&eacute;es avec succ&egrave;s';
+$l_verifs_failed		= 'Etapes en &eacute;chec';
+$l_back_to_verifs_report	= 'Retour';
+$l_num_bugs			= 'Nombre d\'anomalies';
+$l_step_id			= 'Etape N&deg;';
+$l_action			= 'Action';
+$l_result			= 'Resultat';
+$l_time_failed			= 'Heure de l\'&eacute;chec';
+$l_status_of			= 'Statut de';
+$l_tests_in_ts			= 'Tests dans la campage';
+$l_tests_in_build		= 'Tests dans le build';
+$l_all_tests_in			= 'Tous les tests dans';
+$l_num_of_tests_in_ts		= 'Nombre de tests dans la campagne';
+$l_percent_of_tests		= 'Pourcentage de tests';
+$l_percent_of_all_tests		= 'Pourcentage de tous les tests';
+$l_percent_of_tests_in_ts	= 'Pourcentage des tests dans la campagne';
+$l_information			= 'Information';
+$l_tot_num_tests		= 'Nombre total de tests';
+$l_area_tested_desc		= 'Voir le nombre total de tests &eacute;x&eacute;cut&eacute;s par &eacute;l&eacute;ment pour une Release > Build > Campagne s&eacute;lectionn&eacute;e.';
+$l_build_status			= 'Statut du build';
+$l_build_status_desc		= 'Voir le statut de tous les tests pour le build s&eacute;lectionn&eacute;.';
+$l_failed_verifications		= 'Etapes de test en &eacute;chec';
+$l_failed_ver_desc		= 'Voir les informations d&eacute;taill&eacute;es sur toutes les &eacute;tapes en &eacute;chec pour la campagne s&eacute;lectionn&eacute;e.';
+$l_requirements_coverage	= 'Couverture des exigences';
+$l_requirements_coverage_desc	= 'Voir la couverture des exigences pour la campagne s&eacute;lectionn&eacute;e.';
+$l_signoff_report		= 'Avancement des tests';
+$l_signoff_report_desc		= 'R&eacute;sultats des tests dans une campagne donn&eacute;e.';
+$l_report_custom_page		= 'Rapport personnalis&eacute;';
+$l_report_custom_page_desc	= 'Cr&eacute;er votre propre rapport.';
+
+#########################################################
+# SECTION 13:
+# Help - words that are related to the Help section
+#########################################################
+$l_help_index			= 'Index';
+$l_help_return_to_index		= 'Retour &agrave; l\'index';
+$l_help_requirements		= 'Aide: Exigences';
+$l_help_tests			= 'Aide: Tests';
+$l_help_releases		= 'Aide: Gestion des releases, builds et campagnes';
+$l_help_run_test		= 'Aide: Ex&eacute;cuter un test et visualiser les r&eacute;sultats';
+$l_help_manage_proj		= 'Aide: Gestion des projets';
+# Requirements Help Index
+$l_help_req_overview		= 'Exigences: Intoduction';
+$l_help_req_add			= 'Cr&eacute;er une exigence';
+$l_help_req_view		= 'Visualiser les exigences';
+$l_help_req_detail		= 'Visualiser le d&eacute;tail de l\'exigence';
+$l_help_req_add_version		= 'Cr&eacute;er un nouvelle version';
+$l_help_req_history		= 'Consulter l\'historique des exigences';
+$l_help_req_assoc		= 'Associer une exigence à une autre exigence';
+$l_help_req_test_assoc		= 'Associer une exigence à des tests';
+# Tests Help Index
+$l_help_test_overview		= 'Tests: Intoduction';
+$l_help_test_add		= 'Cr&eacute;er un test';
+$l_help_test_view		= 'Visualiser les tests';
+$l_help_test_detail		= 'Visualiser le d&eacute;tail d\'un test';
+$l_help_test_add_steps		= 'Ajouter des étapes de test';
+$l_help_test_associate_req	= 'Associer un test aux exigences';
+# Releases/Builds/Test Sets
+$l_help_release_overview	= 'Release/Build/Campagnes: Intoduction';
+$l_help_add_release		= 'Gestion des releases';
+$l_help_add_build		= 'Gestion des  builds';
+$l_help_add_testset		= 'Cr&eacute;er une campagne';
+$l_help_edit_testset		= 'Edit Test Set';
+$l_help_view_testset		= 'Visualiser une campagne';
+# Results
+$l_help_results_overview	= 'Resultats: Intoduction';
+$l_help_results_run_test	= 'Exécuter un test';
+$l_help_results_view_tests	= 'Visualiser les résultats';
+$l_help_results_view_testrun	= 'Visualiser les ex&eacute;cutions';
+$l_help_results_view_verifications	= 'Visualiser le détail des vérifications';
+# Run Test
+$l_help_run_test_overview	= 'Ex&eacute;cution : Intoduction';
+$l_help_run_test_manual		= 'Ex&eacute;cuter un test manuel';
+$l_help_run_test_automated	= 'Ex&eacute;cuter un test automatique';
+$l_help_run_test_continue	= 'Reprise de l\'ex&eacution des tests';
+$l_help_run_test_link_bug	= 'Lier une anomalie à une étape en &eacute;chec';
+$l_help_run_test_link_reporting	= 'Rapports d\'ex&eacute;cutions';
+
+# Manage Project
+$l_help_project_overview	= 'Projet : Introduction';
+$l_help_project_add		= 'Cr&eacute;er un projet';
+$l_help_project_prefs		= 'Modifier les pr&eacute;f&eacute;rences du projet';
+$l_help_project_users		= 'Gestion des utilisateurs';
+$l_help_project_reqs		= 'Configuration des exigences';
+$l_help_project_tests		= 'Configuration des tests';
+$l_help_project_defects		= 'Configuration des anomalies';
+
+$l_help_warning_on_meta_data	= 'Lire';
+$l_help_meta_data_warning_title = 'A lire avant d\'ajouter des meta-données';
+$l_help_meta_data_warning_text	= 'It is recomended that users have a thorough understanding
+				  of the RTH reporting section before entering any meta data
+				  as many of the reports hinge on the values entered in the meta 
+				  data fields. A good understanding of your own application is 
+				  also required to populate meta-data fields so that the data 
+				  helps users sort and find the records they want to view.';
+
+#########################################################
+# SECTION 14:
+# Phrases 
+#########################################################
+$l_no_project			= 'Aucun projet ne v&eacute;rifie ces crit&egrave;res.';
+$l_no_testsets 			= 'Il n\'y a aucune campagne dans ce build.';
+$l_no_releases			= 'Il n\'y a aucune release.';
+$l_no_builds			= 'Il n\'y a aucune release dans ce build.';
+$l_no_tests			= 'Il n\y a aucun test v&eacute;rifiant les crit&egrave;res sp&eacute;cifi&eacute;s.';
+$l_no_posts			= 'Il n\'y a aucun message.';
+$l_ask_close_discussion		= 'Etes-vous s&ucirc;r de vouloir cl&ocirc;turer cette discussion?';
+$l_no_requirements		= 'Il n\'y a aucune exigence v&eacute;rifiant les crit&egrave;res sp&eacute;cifi&eacute;s.';
+$l_no_related_reqs		= 'Il n\'y a aucune exigence associ&eacute;e &agrave; cette exigence.';
+$l_no_related_tests		= 'Il n\'y a aucun test associ&eacute; &agrave; cette exigence.';
+$l_no_related_releases		= 'Il n\'y a aucune release associ&eacute;e &agrave; cette exigence.';
+$l_no_testsets_in_project 	= 'Il n\'y a aucune camapagne dans ce projet.';
+$l_no_testsets_in_build 	= 'Il n\'y a auncune campagne dans le dernier build.';
+$l_no_builds_in_release		= 'Il n\'y a aucun build dans la derni&egrave;re campagne.';
+$l_no_releases_in_project	= 'Il n\'y a aucune relase dans ce projet.';
+$l_no_tests_in_project	 	= 'Il n\'y a aucun test dans ce projet.';
+$l_no_requirements_in_project	= 'Il n\'y a aucune exigence dans ce projet.';
+$l_no_archive_results		= 'Il n\'y a auncun r&eacute;sultat.';
+$l_no_archive_tests		= 'Il n\'y a aucun test.';
+$l_no_areas_covered		= 'Il n\'y a aucun &eacute;l&eacute;ment couvert dans ce projet.';
+$l_no_reqdoctype		= 'Il n\'y a aucun type de document de sp&eacute;cification d&eacute;finit dans ce projet.';
+$l_no_reqfunctionality		= 'Il n\'y a aucune fonctionnalit&eacute; renseign&eacute;e dans ce projet.';
+$l_no_testareatested		= 'Il n\'y a aucun &eacute;l&eacute;m&eacute;net à tester dans ce projet.';
+$l_no_testenvironment		= 'Il n\'y a aucun environnement dans ce projet.';
+$l_no_testmachines		= 'Il n\'y a aucun h&ocirc;te de test de renseign&eacute; dans ce projet.';
+$l_no_testdoctype		= 'Il n\'y a aucun document de test dans ce projet.';
+$l_no_testtype			= 'Il n\'y a aucun type de test dans ce projet.';
+$l_no_project_users		= 'Il n\'y a aucun utilisateur assign&eacute; à ce projet.';
+$l_no_req_assoc			= 'Il n\'y a aucune exigence associ&eacute;e à ce test.';
+$l_no_bug_categories		= 'Il n\'y a aucune cat&eacute;gorie associ&eacute;e à ce projet.';
+$l_no_bug_components		= 'Il n\'y a aucun composant associ&eacute; à ce projet.';
+$l_no_screens			= 'Il n\'y a aucun &eacute;cran';
+$l_no_fields			= 'Il n\'y a aucun champ renseign&eacute; pour cet &eacute;cran';
+$l_no_field_values		= 'Il n\'y a aucune valeur entr&eacute;e pour ce champ';
+$l_home_notes			= 'Cet outil poss&egrave;de les fonctionnalit&eacute;s suivantes:
+				<UL>
+				  <LI>Stocker des exigences avec gestion des versions
+				  <LI>Affecter des champs personnalis&eacute;s aux exigences (ex:. priorit&eacute;, risque, release)
+				  <LI>Lier des exigences à d\'autres exigences
+				  <LI>Lier des tests et des exigences
+				  <LI>Stocker les tests et les art&eacute;facts associ&eacute;s avec une gestion des versions
+				  <LI>G&eacute;rer les tests manuels et automatiques
+				  <LI>Connecter simplement un outil de gestion des versions et de gestion des anomalies
+				  <LI>Fournir des rapports sur les exigences, les test, les ex&eacute;cutions
+				 </UL>';
+
+#########################################################
+# SECTION 15:
+# Deletion Messages: Phrases related to deleting data 
+#########################################################
+$l_del_msg[DEL_TEST_RUN]	  		= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cette ex&eacute;cution?\n";
+$l_del_msg[DEL_RELEASE]		  		= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cette release?\nCeci supprimera tous les builds, campagnes et r&eacute;sultats associ&eacute;s &agrave; cette release.";
+$l_del_msg[DEL_BUILD]		  		= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer ce build?\nCeci supprimera toutes les campagnes et r&eacute;sultats associ&eacute;s &agrave; ce build.";
+$l_del_msg[DEL_TESTSET]		  		= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cette campagne?\nCeci xupprimera toutes les ex&eacute;cutions associ&eacute;es &agrave; cette campagne.";
+$l_del_msg[DEL_USER_FROM_PROJECT]		= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cet utilisateur de ce projet?\n";
+$l_del_msg[DEL_AREA_FROM_PROJECT]		= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cet &eacute;l&eacute;ment?\n";
+$l_del_msg[DEL_ENVIRONMENT_FROM_PROJECT]	= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cet environment?\n";
+$l_del_msg[DEL_REQ_DOC_TYPE_FROM_PROJECT]	= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer ce type de document?\n";
+$l_del_msg[DEL_MACHINE_FROM_PROJECT]		= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cet h&ocirc;te?\n";
+$l_del_msg[DEL_TESTTYPE_FROM_PROJECT]		= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer ce type de test?\n";
+$l_del_msg[DEL_TEST_DOC_TYPE_FROM_PROJECT]	= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer ce type de document?\n";
+$l_del_msg[DEL_TEST_STEP]			= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cette &eacute;tape?\n";
+$l_del_msg[DEL_PROJECT]				= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer ce projet?\n";
+$l_del_msg[DEL_USER]				= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cet utilisateur?\n";
+$l_del_msg[DEL_REQ_AREA_FROM_PROJECT] = "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cet &eacute;l&eacute;ment?\n";
+$l_del_msg[DEL_REQUIREMENT]			= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cette exigence ainsi que toutes les versions pr&eacute;c&eacute;dentes?\n";
+$l_del_msg[DEL_REQ_FUNCT_FROM_PROJECT]		= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cette fonctionalit&eacute;?\n";
+$l_del_msg[DEL_TEST]				= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer ce test?\n";
+$l_del_msg[DEL_NEWS]				= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer ce post?\n";
+$l_del_msg[DEL_BUG_CATEGORY_FROM_PROJECT]	= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cette cat&eacute;gorie?\n";
+$l_del_msg[DEL_BUG_COMPONENT_FROM_PROJECT]	= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer ce composant?\n";
+$l_del_msg[DEL_BUG]				= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cette anomalie?";
+$l_del_msg[DEL_BUGNOTE]				= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cette note\n";
+$l_del_msg[DEL_BUG_ASSOC]			= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cette relation?\n";
+$l_del_msg[DEL_TEST_PLAN]			= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer ce plan de test?\n";
+$l_del_msg[DEL_TEST_RUN_DOC]			= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer ce document?\n";
+$l_del_msg[DEL_SCREEN]				= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer cet &eacute;cran?\nCeci supprimera tous les champs et valeurs associ&eacute;s";
+$l_del_msg[DEL_FIELD]				= "&ecirc;tes-vous s&ucirc;r de vouloir supprimer ce champ?\nCeci supprimera toutes les valeurs associ&eacute;es";
+
+#########################################################
+# SECTION 16:
+# Warning and Error Messages: Phrases related to errors 
+#########################################################
+$l_err_msg[INVALID_LOGIN]	  		= "ATTENTION: Login invalide. Veuillez entrer &agrave; nouveau votre login et mot de passe.";
+$l_err_msg[NO_DEFAULT_PROJ]	  		= "ATTENTION: Vous n\'avez pas de projet par d&eacute;. Veuillez contacter votre administrateur.";
+$l_err_msg[NO_USER_RIGHTS]	  		= "ATTENTION: Vous n\'avez pas les droits suffisant pour effectuer cette op&eacute;ration. Veuillez contacter votre administrateur.";
+$l_err_msg[NOT_LOGGED_IN]	  		= "ATTENTION: Vous n\'&ecirc;tes pas connect&eacute.  Veuillez entrer &agrave; nouveau votre login et mot de passe.";
+$l_err_msg[COOKIES_NOT_ENABLED]	  		= "ATTENTION: Les cookies doivent &ecirc;tre autoris&eacute;s pour utiliser cette fonctionnalit&eacute;. Veuillez activer les cookies et essayer &agrave; nouveau.";
+$l_err_msg[PROJECT_SWITCH_FAILED] 		= "ATTENTION: Le changement de projet a &eacutechou&eacute;. Veuillez contacter votre administrateur.";
+$l_err_msg[REQUIRED_FIELD_MISSING]		= "ATTENTION: Un champ obligatoire n'est pas renseigné. Veuillez le renseigner et essayer &agrave nouveau.";
+$l_err_msg[INVALID_DATE]   				= "ATTENTION: Le format de  la date est invalide. Le format valide est yyyy-mm-dd.";
+$l_err_msg[DUPLICATE_TEST_DOC_TYPE]		= "ATTENTION: Ce type de document de test existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_REQUIREMENT_DOCTYPE]		= "ATTENTION: Ce type de document existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_REQUIREMENT_FUNCTIONALITY]	= "ATTENTION: Cette fonctionnalit&eacute; existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_ENVIRONMENT_NAME]	= "ATTENTION: Cet environnement existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_TESTTYPE_NAME]		= "ATTENTION: Ce type de test existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_BUG_CATEGORY]		= "ATTENTION: Cette cat&eacute;gorie existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_BUG_COMPONENT]		= "ATTENTION: Ce composant existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_MACHINE_NAME]		= "ATTENTION: Cet h&ocirc;te existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_IP_ADDRESS]		= "ATTENTION: Cet adresse IP existe d&eacute;j&agrave;. Veuillez choisir une autre adresse IP.";
+$l_err_msg[DUPLICATE_TESTAREA]			= "ATTENTION: Cet &eacute;l&eacute;ment existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_TESTNAME]			= "ATTENTION: Ce nom de test existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_AREANAME]			= "ATTENTION: Cet &eacute;l&eacute;ment existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_BUILD_NAME]		= "ATTENTION: Ce nom de build existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_TESTSET_NAME]		= "ATTENTION: Ce nom de campagne existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[PROJECT_DB_NOT_SET]			= "ERREUR: Aucune base de donn&eacute;es n\'a &eacute;t&eacute; d&eacute;finie pour ce projet. Veuillez contacter votre administrateur.";
+$l_err_msg[DUPLICATE_RELEASE_NAME]		= "ATTENTION: Ce nom de release existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[DUPLICATE_FILE_NAME]			= "ERREUR: Ce nom de fichier existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[FAILED_FILE_UPLOAD]			= "ERREUR: Echec lors de l\'upload du fichier.";
+$l_err_msg[PASSWORDS_NOT_MATCH]			= "ATTENTION: Les mots de passe ne sont pas identiques.";
+$l_err_msg[USERNAME_NOT_UNIQUE]			= "ERREUR: Ce nom d\utilisateur existe d&eacute;j&agrave;.";
+$l_err_msg[PROJECT_NOT_UNIQUE]			= "ERREUR: Ce projet existe d&eacute;j&agrave;.";
+$l_err_msg[UNABLE_TO_CREATE_PROJECT_FOLDERS]	= "ERREUR: Impossible de cr&eacute;er les r&eacute;pertoire du projet.";
+$l_err_msg[NO_RIGHTS_TO_VIEW_PAGE]		= "ATTENTION: Vous n\'avez pas les droits pour acc&eacute;der &agrave; cette page.";
+$l_err_msg[NO_REQ_SELECTED]			= "ATTENTION: Aucune exigence s&eacute;lectionn&eacute;es.";
+$l_err_msg[NO_TESTS_SELECTED]			= "ATTENTION: Aucun test s&eacute;lectionn&eacute;s.";
+$l_err_msg[DUPLICATE_REQ_NAME]			= "ATTENTION: Ce nom d\'exigence existe d&eacute;j&agrave;. Veuillez choisir un autre nom.";
+$l_err_msg[ERROR_ACCOUNT_NOT_FOUND]		= "ERREUR: Compte non trouv&eacute;.";
+$l_err_msg[ERROR_CANNOT_RESET_PASSWORD]		= "ERREUR: R&eacute;initialisation du mot de passe impossible. <br><br>Peut-&ecirc;tre vaez vous d&eacute;j&agrave; cliqu&eacute; sur ce lien. Veuillez consulter vos mails.";
+$l_err_msg[ERROR_WRONG_HOST]			= "ERREUR: Vous tentez d\'acc&eacute;der &agrave; RTH par une mauvaise adresse.";
+$l_err_msg[EMAIL_NOT_UNIQUE]			= "ERREUR: Un autre utilisateur existe avec la m&ecirc;me adressse mail.";
+$l_err_msg[NO_RIGHTS_TO_PROJECT]		= "ERREUR: Vous n\'avez pas les droits pour acc&eacute;der &agrave; ce projet.";
+$l_err_msg[COULD_NOT_CREATE_RELATIONSHIP]	= "ERREUR: Impossible de cr&eacute;er cette relation.";
+$l_err_msg[NO_BUGS_SELECTED]			= "ATTENTION: Il n\y a aucune anomalie de s&eacute;lectionn&eacute;. Veuillez essayer &agrave; nouveau.";
+$l_err_msg[INVALID_BUG_ID]			= "ATTENTION: Vous avez entrer un identifiant invalide. Veuillez essayer &agrave; nouveau.";
+$l_err_msg[NO_MATCHING_FILE_NAME]		= "ERREUR: Le nom du fichier ne correspond pas au nom de la version pr&eacute;c&eacute;dente.";
+$l_err_msg[NO_FILE_SPECIFIED]			= "ATTENTION: Aucun fichier sp&eacute;cifi&eacute;. Veuillez essayer &agrave; nouveau.";
+$l_err_msg[DUPLICATE_SCREEN_NAME]		= "ATTENTION: Ce nom existe d&acute;j&agrave;. Veuillez essayer &agrave; nouveau.";
+$l_err_msg[DUPLICATE_FIELD_NAME]		= "ATTENTION: Ce nom existe d&acute;j&agrave; pour cet &eacute;cran. Veuillez essayer &agrave; nouveau.";
+
+$l_ERREUR['ERROR_GENERIC']			= "ERREUR: Une erreur est intervenue.";
+$l_ERREUR['ERROR_SQL']				= "ERREUR: Erreur SQL. Un message a &eacute;t&eacute; envoy&eacute; &agrave; l\'administrateur.";
+$l_ERREUR['ERROR_LANG_STRING_NOT_FOUND']		= "ERREUR: Chaine non trouv&eacute;e.";
+
+#########################################################
+# SECTION 17:
+# List of elements in listbox
+#########################################################
+$l_passed='Succ&egrave;s';
+$l_failed='Echec';
+$l_wip='En cours';
+$l_waiting_review='Inconclusif';
+$l_incomplete='Non ex&eacute;cut&eacute;';
+
+# --------------------------------------------------------
+# $Log: strings_french.txt,v $
+# Revision 1.1  2006/12/05 05:28:07  gth2
+# adding initial version - gth
+#
+#
+# --------------------------------------------------------
+?>

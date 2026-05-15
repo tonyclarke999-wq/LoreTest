@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add User - Admin{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Add User</h1>
+            <p class="subtitle">System Administration - Create a new user account</p>
+        </div>
+        <a href="{{ path('app_admin_users') }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to List</a>
+    </div>
+</div>
+
+<div class="project-card" style="max-width: 800px;">
+    <form method="post">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="e.g., jdoe" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Initial Password</label>
+                <input type="password" id="password" name="password" class="form-control" required minlength="6">
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" name="first_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="e.g., jane.doe@example.com" required>
+        </div>
+
+        <div class="form-group">
+            <label for="is_admin" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="is_admin" name="is_admin" value="Y" style="width: auto; height: auto;">
+                <span>Grant Administrator Privileges</span>
+            </label>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn-primary">Create User</button>
+            <a href="{{ path('app_admin_users') }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

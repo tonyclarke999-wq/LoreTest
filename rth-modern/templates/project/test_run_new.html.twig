@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add New Test Run - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Create New Test Run</h1>
+            <p class="subtitle">Set up a new execution cycle for {{ project.project_name }}</p>
+        </div>
+        <a href="{{ path('app_project_test_runs', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to List</a>
+    </div>
+</div>
+
+<div class="project-card" style="max-width: 900px;">
+    <form method="post">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="name">Test Run Name</label>
+                <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Sprint 24 Regression" required>
+            </div>
+            <div class="form-group">
+                <label for="build_id">Target Build</label>
+                <select id="build_id" name="build_id" class="form-control" required>
+                    {% for build in builds %}
+                        <option value="{{ build.buildid }}">{{ build.releasename }} - {{ build.buildname }}</option>
+                    {% endfor %}
+                </select>
+                {% if builds|length == 0 %}
+                    <p style="color: var(--primary); font-size: 0.8rem; margin-top: 0.5rem;">No builds found. Please create a release and build first.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 2rem;">
+            <label style="margin-bottom: 1rem; display: block;">Select Test Cases to Include</label>
+            <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                <table style="font-size: 0.9rem;">
+                    <thead>
+                        <tr>
+                            <th width="40"><input type="checkbox" id="select-all"></th>
+                            <th width="60">ID</th>
+                            <th>Test Case Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test in testCases %}
+                        <tr>
+                            <td><input type="checkbox" name="test_ids[]" value="{{ test.testid }}" class="test-checkbox"></td>
+                            <td style="color: var(--primary); font-weight: 600;">#{{ test.testid }}</td>
+                            <td>{{ test.testsuitename }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding: 2rem; color: var(--text-muted);">No active test cases available in this project.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn-primary" {% if testCases|length == 0 or builds|length == 0 %}disabled{% endif %}>Create Test Run</button>
+            <a href="{{ path('app_project_test_runs', {id: project.project_id}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none;">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('select-all').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.test-checkbox');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+</script>
+{% endblock %}

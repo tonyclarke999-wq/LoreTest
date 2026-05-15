@@ -1,0 +1,44 @@
+The setup to get WinRunner writing to RTH is not complicated but you may want to have some WinRunner experience before beginning the configuration below.  The instructions assume you have some knowledge of WinRunner.
+
+#----------------------------------------
+# Important Files
+# 	wr_initialization
+#  	wrun.ini_updates
+# 	verify.fun
+#	demo_test
+#----------------------------------------
+
+1. Update the winrunner initialization file (wr_initialization) to suit your needs.
+	This file contains some things necessary for writing to the rth database.
+	You can make this script your WinRunner startup script (tslinit) or just call it at the beginning of each 		script.  You'll have to update many of the values in this file.  Set the correct path to your function 	files, etc.
+
+2. Copy values from wrun.ini_updates to to the wrun.ini file
+	The values should appear just after the [WrEnv] section.
+	Some of the values are described briefly below:
+		TESTSETID - This should be updated with the testset_id that is generated in 
+			    RTH when you create a new test set.  Each Test Set receives and auto-incrementing
+			    number assigned when adding a new record to the database.  Update this value with
+			    the test set id you want to write to.  
+			    NOTE: Both the test_id and test_set_id have to appear in the TestSet_TestSuite_Assoc
+			    table for WinRunner to write results to the rth database.  WinRunner will try to 
+			    update the table in the TestStarted function and the query will bomb if the test_id
+			    and testset_id aren't present (UPDATE table WHERE TestSetID = x and TestID = y).
+		WRITETORTH - If you're developing or debugging a test, you may not want to write the results 
+			    to the database.  Set WRITETORTH to zero (0) and the wr results will appear much 
+			    output will appear much like the results in rth but won't post to the database.
+
+3. Copy verify.fun to the directory with your other WinRunner functions
+
+4. Copy the demo_test to your test directory.
+
+5. Run the test and see if results appear in rth.
+	After running the TestStarted function, the status of the test should appear as WIP on the
+	results_page.php
+	After running the WriteVerification function, a test run and test step should appear (click on 
+	the Results link on the results_page.php to view the test run).
+
+
+
+
+
+

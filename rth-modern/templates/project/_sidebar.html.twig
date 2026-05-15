@@ -1,0 +1,41 @@
+<aside class="sidebar">
+    <div class="sidebar-logo">RTH Modern</div>
+    <nav class="sidebar-nav">
+        <a href="{{ path('app_home') }}" class="nav-item">
+            <span>Home</span>
+        </a>
+        {% if project is defined and project is not null %}
+            <a href="{{ path('app_project_show', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_show' ? 'active' : '' }}">
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ path('app_project_requirements', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_requirements' ? 'active' : '' }}">
+                <span>Requirements</span>
+            </a>
+            <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_tests' ? 'active' : '' }}">
+                <span>Test Cases</span>
+            </a>
+            <a href="{{ path('app_project_test_runs', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_test_runs' ? 'active' : '' }}">
+                <span>Test Runs</span>
+            </a>
+            <a href="{{ path('app_project_bugs', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_bugs' ? 'active' : '' }}">
+                <span>Bugs</span>
+            </a>
+        {% endif %}
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <div style="margin-top: 2rem; margin-bottom: 0.5rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Admin</div>
+            <a href="{{ path('app_admin_users') }}" class="nav-item {{ app.request.attributes.get('_route') starts with 'app_admin_user' ? 'active' : '' }}">
+                <span>User Management</span>
+            </a>
+            <a href="{{ path('app_admin_releases') }}" class="nav-item {{ app.request.attributes.get('_route') starts with 'app_admin_release' or app.request.attributes.get('_route') starts with 'app_admin_build' ? 'active' : '' }}">
+                <span>Releases & Builds</span>
+            </a>
+{% endif %}
+    </nav>
+    <a href="{{ path('app_profile') }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_profile' ? 'active' : '' }}">
+        <span>Profile</span>
+    </a>
+    <a href="{{ path('app_logout') }}" class="nav-item">
+        <span>Logout</span>
+    </a>
+</aside>

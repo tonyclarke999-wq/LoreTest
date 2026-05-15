@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Cases - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Test Cases</h1>
+            <p class="subtitle">Managing {{ tests|length }} test cases for {{ project.project_name }}</p>
+        </div>
+        <a href="{{ path('app_project_test_new', {id: project.project_id}) }}" class="btn-primary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.875rem;">Add Test Case</a>
+    </div>
+</div>
+
+<div class="table-container">
+    {% if tests|length > 0 %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Assigned To</th>
+                <th width="200">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for test in tests %}
+            <tr>
+                <td style="color: var(--primary); font-weight: 600;">#{{ test.testid }}</td>
+                <td style="font-weight: 500;">{{ test.testsuitename }}</td>
+                <td>{{ test.testtype }}</td>
+                <td>
+                    {% set priority_class = 'badge-blue' %}
+                    {% if test.priority == 'High' %}{% set priority_class = 'badge-red' %}
+                    {% elseif test.priority == 'Medium' %}{% set priority_class = 'badge-yellow' %}
+                    {% endif %}
+                    <span class="badge {{ priority_class }}">{{ test.priority }}</span>
+                </td>
+                <td>
+                    {% set status_class = 'badge-yellow' %}
+                    {% if test.status == 'Passed' or test.status == 'Approved' %}{% set status_class = 'badge-green' %}
+                    {% elseif test.status == 'Failed' %}{% set status_class = 'badge-red' %}
+                    {% elseif test.status == 'Ready' %}{% set status_class = 'badge-blue' %}
+                    {% elseif test.status == 'Retired' %}{% set status_class = 'badge-red' %}
+                    {% endif %}
+                    <span class="badge {{ status_class }}">{{ test.status }}</span>
+                </td>
+                <td>{{ test.assignedto|default('Unassigned') }}</td>
+                <td style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="{{ path('app_project_test_edit', {id: project.project_id, testId: test.testid}) }}" class="badge badge-blue" style="text-decoration: none;">Edit</a>
+                    <a href="{{ path('app_project_test_steps', {id: project.project_id, testId: test.testid}) }}" class="badge badge-green" style="text-decoration: none;">Steps</a>
+                    {% if test.status != 'Retired' %}
+                    <form action="{{ path('app_project_test_retire', {id: project.project_id, testId: test.testid}) }}" method="post" style="margin: 0;">
+                        <button type="submit" class="badge badge-red" style="border: none; cursor: pointer; font-family: inherit; font-size: inherit; background: rgba(239, 68, 68, 0.1);">Retire</button>
+                    </form>
+                    {% endif %}
+                    <form action="{{ path('app_project_test_delete', {id: project.project_id, testId: test.testid}) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this test case?');" style="margin: 0;">
+                        <button type="submit" class="badge badge-red" style="border: none; cursor: pointer; font-family: inherit; font-size: inherit;">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <p>No test cases found for this project.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

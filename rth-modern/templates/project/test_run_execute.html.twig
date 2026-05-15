@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Execute: {{ testRun.testsetname }} - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Execute Test Run</h1>
+            <p class="subtitle">{{ testRun.testsetname }} - {{ project.project_name }}</p>
+        </div>
+        <a href="{{ path('app_project_test_runs', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to Runs</a>
+    </div>
+</div>
+
+<div class="table-container">
+    {% if tests|length > 0 %}
+    <table>
+        <thead>
+            <tr>
+                <th>Test ID</th>
+                <th>Test Name</th>
+                <th>Status</th>
+                <th>Tester</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for test in tests %}
+            <tr>
+                <td style="color: var(--primary); font-weight: 600;">#{{ test.testid }}</td>
+                <td style="font-weight: 500;">{{ test.testsuitename }}</td>
+                <td>
+                    {% set status_class = 'badge-blue' %}
+                    {% if test.teststatus == 'Passed' %}{% set status_class = 'badge-green' %}
+                    {% elseif test.teststatus == 'Failed' %}{% set status_class = 'badge-red' %}
+                    {% elseif test.teststatus == 'Running' %}{% set status_class = 'badge-yellow' %}
+                    {% endif %}
+                    <span class="badge {{ status_class }}">{{ test.teststatus|default('Not Started') }}</span>
+                </td>
+                <td>{{ test.assignedto|default('Unassigned') }}</td>
+                <td>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="badge badge-green" style="border: none; cursor: pointer;">Pass</button>
+                        <button class="badge badge-red" style="border: none; cursor: pointer;">Fail</button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <p>No tests found in this test run.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

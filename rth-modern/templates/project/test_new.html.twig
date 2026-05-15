@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add New Test Case - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Create New Test Case</h1>
+            <p class="subtitle">Define a new testing asset for {{ project.project_name }}</p>
+        </div>
+        <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to List</a>
+    </div>
+</div>
+
+<div class="project-card" style="max-width: 800px;">
+    <form method="post">
+        <div class="form-group">
+            <label for="name">Test Name</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Login Validation" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="type">Test Type</label>
+                <select id="type" name="type" class="form-control" required>
+                    <option value="Regression">Regression</option>
+                    <option value="Functional">Functional</option>
+                    <option value="Smoke">Smoke</option>
+                    <option value="Performance">Performance</option>
+                    <option value="UI/UX">UI/UX</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <select id="priority" name="priority" class="form-control" required>
+                    <option value="High">High</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="status">Initial Status</label>
+                <select id="status" name="status" class="form-control" required>
+                    <option value="Ready">Ready</option>
+                    <option value="Draft" selected>Draft</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Test Purpose & Summary</label>
+            <textarea id="description" name="description" class="form-control" style="min-height: 150px;" placeholder="Outline what this test case verifies..."></textarea>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn-primary">Create Test Case</button>
+            <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

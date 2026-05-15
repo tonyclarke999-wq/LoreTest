@@ -114,7 +114,7 @@ else
         public string? Role { get; set; }
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
-        public string? PreferredLanguage { get; set; }
+        public string PreferredLanguage { get; set; } = "en";
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -140,15 +140,22 @@ else
             user.EndDate = Input.EndDate;
             user.PreferredLanguage = Input.PreferredLanguage;
 
-            var result = await UserManager.UpdateAsync(user);
+            try
+            {
+                var result = await UserManager.UpdateAsync(user);
 
-            if (result.Succeeded)
-            {
-                NavigationManager.NavigateTo("/users");
+                if (result.Succeeded)
+                {
+                    NavigationManager.NavigateTo("/users");
+                }
+                else
+                {
+                    errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+                }
             }
-            else
+            catch (Exception ex)
             {
-                errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+                errorMessage = L["ErrorUpdatingUser"] + ": " + ex.Message;
             }
         }
     }

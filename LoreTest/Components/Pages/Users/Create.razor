@@ -83,7 +83,11 @@
 
     private string? errorMessage;
 
-    protected override void OnInitialized() => Input ??= new();
+    protected override void OnInitialized()
+    {
+        Input ??= new();
+        Input.PreferredLanguage ??= "en";
+    }
 
     public class InputModel : IValidatableObject
     {
@@ -100,7 +104,7 @@
         public string? Role { get; set; }
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
-        public string? PreferredLanguage { get; set; }
+        public string PreferredLanguage { get; set; } = "en";
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -130,15 +134,22 @@
             EmailConfirmed = true
         };
 
-        var result = await UserManager.CreateAsync(user, Input.Password);
+        try
+        {
+            var result = await UserManager.CreateAsync(user, Input.Password);
 
-        if (result.Succeeded)
-        {
-            NavigationManager.NavigateTo("/users");
+            if (result.Succeeded)
+            {
+                NavigationManager.NavigateTo("/users");
+            }
+            else
+            {
+                errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+            }
         }
-        else
+        catch (Exception ex)
         {
-            errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+            errorMessage = L["ErrorCreatingUser"] + ": " + ex.Message;
         }
     }
 }

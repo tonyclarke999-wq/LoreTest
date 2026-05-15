@@ -1,0 +1,118 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ project.project_name }} - Dashboard{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>{{ project.project_name }}</h1>
+            <p class="subtitle">Project Overview & Health Metrics</p>
+        </div>
+        <a href="{{ path('app_project_report', {id: project.project_id}) }}" target="_blank" class="badge badge-blue" style="text-decoration: none; padding: 0.5rem 1rem; margin-bottom: 0.5rem;">Export Report</a>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Requirements</div>
+        <div class="stat-value">{{ stats.requirements }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Test Cases</div>
+        <div class="stat-value">{{ stats.tests }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Open Bugs</div>
+        <div class="stat-value">{{ stats.bugs }}</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+    <!-- Bug Severity Chart -->
+    <div class="project-card">
+        <h3>Bug Severity Distribution</h3>
+        <div style="height: 300px; display: flex; align-items: center; justify-content: center; margin-top: 1rem;">
+            <canvas id="bugChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Test Status Chart -->
+    <div class="project-card">
+        <h3>Test Status Overview</h3>
+        <div style="height: 300px; display: flex; align-items: center; justify-content: center; margin-top: 1rem;">
+            <canvas id="testChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const bugCtx = document.getElementById('bugChart').getContext('2d');
+        new Chart(bugCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ bugSeverity|map(s => s.severity)|json_encode|raw }},
+                datasets: [{
+                    data: {{ bugSeverity|map(s => s.count)|json_encode|raw }},
+                    backgroundColor: [
+                        '#ef4444', // Blockers/Critical
+                        '#f59e0b', // Major
+                        '#3b82f6', // Minor
+                        '#10b981'  // Trivial
+                    ],
+                    borderWidth: 0,
+                    spacing: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#94a3b8', font: { family: 'Inter' } }
+                    }
+                }
+            }
+        });
+
+        const testCtx = document.getElementById('testChart').getContext('2d');
+        new Chart(testCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ testStatus|map(s => s.status)|json_encode|raw }},
+                datasets: [{
+                    label: 'Test Cases',
+                    data: {{ testStatus|map(s => s.count)|json_encode|raw }},
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
