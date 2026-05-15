@@ -34,129 +34,138 @@ else if (testRun.Status == "Completed")
 }
 else
 {
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>@string.Format(L["RunNumberPrefix"] + " {0}", testRun.RunNumber) <small class="text-muted fs-5">@L["Execution"]</small></h1>
-        <div class="text-end">
-            <div class="fw-bold">@testRun.Project?.Title</div>
-            <div class="text-muted">@testRun.TestSuite?.Title</div>
-        </div>
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <div class="headline-md">@string.Format(L["RunNumberPrefix"] + " {0}", testRun.RunNumber) <small class="text-muted fs-6">@L["Execution"]</small></div>
+        <div class="body-sm text-muted mt-1">@testRun.Project?.Title &nbsp;•&nbsp; @testRun.TestSuite?.Title</div>
     </div>
-
-    <div class="progress mb-4" style="height: 25px;">
+    <div class="text-end">
         @{
             var totalSteps = flattenedSteps.Count;
             var completedSteps = flattenedSteps.Count(s => s.StepResult.Status != "Not Run");
             var percent = totalSteps > 0 ? (int)((double)completedSteps / totalSteps * 100) : 0;
         }
-        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" 
-             style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">
-            @string.Format(L["ProgressSummary"], percent, completedSteps, totalSteps)
+        <div class="body-sm fw-bold mb-1">@percent% @L["Complete"]</div>
+        <div class="progress" style="height: 6px; width: 200px; background-color: var(--surface-container-high);">
+            <div class="progress-bar bg-success" style="width: @percent%;"></div>
         </div>
     </div>
+</div>
 
-    @if (currentStepIndex >= 0 && currentStepIndex < flattenedSteps.Count)
-    {
-        var current = flattenedSteps[currentStepIndex];
-        
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                <span>
-                    <strong>@L["TestCase"]:</strong> @current.CaseResult.TestCase?.Title 
-                    <small class="ms-2 text-info">(@string.Format(L["CaseOfTotal"], currentCaseIndex + 1, testRun.CaseResults.Count))</small>
+@if (currentStepIndex >= 0 && currentStepIndex < flattenedSteps.Count)
+{
+    var current = flattenedSteps[currentStepIndex];
+    
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <span class="material-symbols-outlined me-2 text-info">assignment</span>
+                <span class="body-md fw-bold">@L["TestCase"]: @current.CaseResult.TestCase?.Title</span>
+                <span class="badge-custom ms-3" style="background: rgba(255,255,255,0.1); color: white;">
+                    @string.Format(L["CaseOfTotal"], currentCaseIndex + 1, testRun.CaseResults.Count)
                 </span>
-                <span class="badge bg-light text-dark">@L["Step"] @current.StepResult.TestStep?.StepNumber</span>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 border-end">
-                        <h6 class="text-uppercase text-muted fw-bold small mb-3">@L["Requirements"]</h6>
-                        <div class="mb-3">
-                            <label class="fw-bold d-block mb-1">@L["StepDescription"]:</label>
-                            <div class="p-2 bg-light border rounded">
-                                @((MarkupString)(current.StepResult.TestStep?.Description ?? $"<em>{L["NoDescriptionProvided"]}</em>"))
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="fw-bold d-block mb-1">@L["ExpectedResult"]:</label>
-                            <div class="p-2 bg-light border rounded">
-                                @((MarkupString)(current.StepResult.TestStep?.ExpectedResult ?? $"<em>{L["NoExpectedResultDefined"]}</em>"))
-                            </div>
+            <span class="badge bg-light text-dark fw-bold">@L["Step"] @current.StepResult.TestStep?.StepNumber</span>
+        </div>
+        <div class="card-body p-4 p-md-5">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="label-caps text-muted mb-3">@L["Requirements"]</div>
+                    
+                    <div class="mb-4">
+                        <div class="title-xs mb-2">@L["StepDescription"]</div>
+                        <div class="p-3 bg-light rounded border-start border-4 border-primary">
+                            @((MarkupString)(current.StepResult.TestStep?.Description ?? $"<em>{L["NoDescriptionProvided"]}</em>"))
                         </div>
                     </div>
-                    <div class="col-md-6 ps-md-4">
-                        <h6 class="text-uppercase text-muted fw-bold small mb-3">@L["ActualExecution"]</h6>
-                        
-                        <div class="mb-4">
-                            <label class="fw-bold d-block mb-2">@L["SetStatus"]</label>
-                            <div class="btn-group w-100" role="group">
-                                <button type="button" class="btn @(current.StepResult.Status == "Pass" ? "btn-success" : "btn-outline-success")"
-                                        @onclick='() => SetStepStatus("Pass")'>
-                                    <i class="bi bi-check-circle me-1"></i> @L["PASS"]
-                                </button>
-                                <button type="button" class="btn @(current.StepResult.Status == "Fail" ? "btn-danger" : "btn-outline-danger")"
-                                        @onclick='() => SetStepStatus("Fail")'>
-                                    <i class="bi bi-x-circle me-1"></i> @L["FAIL"]
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <button type="button" class="btn btn-warning w-100" @onclick="OpenBugModal">
-                                <i class="bi bi-bug-fill me-1"></i> @L["ReportBug"]
-                            </button>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="actualResult" class="fw-bold d-block mb-2">@L["ActualResultNotes"]</label>
-                            <textarea id="actualResult" class="form-control" rows="5" 
-                                      placeholder="@L["DescribeWhatHappened"]"
-                                      @bind="current.StepResult.ActualResult"></textarea>
+                    
+                    <div class="mb-0">
+                        <div class="title-xs mb-2">@L["ExpectedResult"]</div>
+                        <div class="p-3 bg-light rounded border-start border-4 border-success">
+                            @((MarkupString)(current.StepResult.TestStep?.ExpectedResult ?? $"<em>{L["NoExpectedResultDefined"]}</em>"))
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="card-footer bg-white d-flex justify-content-between">
-                <button class="btn btn-outline-secondary" @onclick="PrevStep" disabled="@(currentStepIndex == 0)">
-                    <i class="bi bi-arrow-left"></i> @L["PreviousStep"]
-                </button>
-                
-                @if (currentStepIndex < flattenedSteps.Count - 1)
-                {
-                    <button class="btn btn-primary" @onclick="NextStep" disabled="@(current.StepResult.Status == "Not Run")">
-                        @L["NextStep"] <i class="bi bi-arrow-right"></i>
-                    </button>
-                }
-                else
-                {
-                    <button class="btn btn-success px-5" @onclick="FinishRun" disabled="@(current.StepResult.Status == "Not Run")">
-                        @L["CompleteTestRun"]
-                    </button>
-                }
+
+                <div class="col-lg-6 ps-lg-5 border-start">
+                    <div class="label-caps text-muted mb-3">@L["ActualExecution"]</div>
+                    
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <button type="button" class="btn w-100 py-3 fw-bold d-flex flex-column align-items-center gap-1 @(current.StepResult.Status == "Pass" ? "btn-success" : "btn-outline-success")"
+                                    @onclick='() => SetStepStatus("Pass")'>
+                                <span class="material-symbols-outlined">check_circle</span>
+                                @L["PASS"]
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn w-100 py-3 fw-bold d-flex flex-column align-items-center gap-1 @(current.StepResult.Status == "Fail" ? "btn-danger" : "btn-outline-danger")"
+                                    @onclick='() => SetStepStatus("Fail")'>
+                                <span class="material-symbols-outlined">cancel</span>
+                                @L["FAIL"]
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="btn btn-warning w-100 py-2 fw-bold d-flex align-items-center justify-content-center" @onclick="OpenBugModal">
+                            <span class="material-symbols-outlined me-2">bug_report</span> @L["ReportBug"]
+                        </button>
+                    </div>
+
+                    <div class="mb-0">
+                        <label for="actualResult" class="title-xs d-block mb-2">@L["ActualResultNotes"]</label>
+                        <textarea id="actualResult" class="form-control" rows="4" 
+                                  placeholder="@L["DescribeWhatHappened"]"
+                                  @bind="current.StepResult.ActualResult"></textarea>
+                    </div>
+                </div>
             </div>
         </div>
+        <div class="card-footer bg-light p-3 d-flex justify-content-between border-0">
+            <button class="btn btn-outline-primary d-flex align-items-center" @onclick="PrevStep" disabled="@(currentStepIndex == 0)">
+                <span class="material-symbols-outlined me-2">arrow_back</span> @L["PreviousStep"]
+            </button>
+            
+            @if (currentStepIndex < flattenedSteps.Count - 1)
+            {
+                <button class="btn btn-primary px-4 d-flex align-items-center" @onclick="NextStep" disabled="@(current.StepResult.Status == "Not Run")">
+                    @L["NextStep"] <span class="material-symbols-outlined ms-2">arrow_forward</span>
+                </button>
+            }
+            else
+            {
+                <button class="btn btn-success px-5 fw-bold d-flex align-items-center" @onclick="FinishRun" disabled="@(current.StepResult.Status == "Not Run")">
+                    @L["CompleteTestRun"] <span class="material-symbols-outlined ms-2">task_alt</span>
+                </button>
+            }
+        </div>
+    </div>
 
-        <div class="mt-4">
-            <h6>@L["RunProgressLog"]</h6>
-            <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
-                <table class="table table-sm table-hover border">
-                    <thead class="sticky-top bg-white border-bottom">
+    <div class="mt-5">
+        <div class="label-caps text-muted mb-3">@L["RunProgressLog"]</div>
+        <div class="card p-0 overflow-hidden">
+            <div class="table-responsive" style="max-height: 250px;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light sticky-top">
                         <tr>
-                            <th>@L["Step"]</th>
+                            <th style="width: 80px">@L["Step"]</th>
                             <th>@L["Case"]</th>
-                            <th>@L["Status"]</th>
+                            <th class="text-end" style="width: 120px">@L["Status"]</th>
                         </tr>
                     </thead>
                     <tbody>
                         @for (int i = 0; i < flattenedSteps.Count; i++)
                         {
                             var s = flattenedSteps[i];
-                            <tr class="@(i == currentStepIndex ? "table-primary" : "")" style="cursor:pointer" @onclick="() => currentStepIndex = i">
-                                <td>@s.StepResult.TestStep?.StepNumber</td>
-                                <td class="text-truncate" style="max-width: 200px;">@s.CaseResult.TestCase?.Title</td>
-                                <td>
-                                    @if (s.StepResult.Status == "Pass") { <span class="badge bg-success">P</span> }
-                                    else if (s.StepResult.Status == "Fail") { <span class="badge bg-danger">F</span> }
-                                    else { <span class="badge bg-secondary">-</span> }
+                            var isActive = i == currentStepIndex;
+                            <tr class="@(isActive ? "table-primary" : "")" style="cursor:pointer" @onclick="() => currentStepIndex = i">
+                                <td class="data-mono">@s.StepResult.TestStep?.StepNumber</td>
+                                <td class="body-sm @(isActive ? "fw-bold" : "")">@s.CaseResult.TestCase?.Title</td>
+                                <td class="text-end pe-3">
+                                    @if (s.StepResult.Status == "Pass") { <span class="badge-custom" data-status="Pass">@L["P"]</span> }
+                                    else if (s.StepResult.Status == "Fail") { <span class="badge-custom" data-status="Fail">@L["F"]</span> }
+                                    else { <span class="badge-custom" data-status="Pending">—</span> }
                                 </td>
                             </tr>
                         }
@@ -164,7 +173,8 @@ else
                 </table>
             </div>
         </div>
-    }
+    </div>
+}
 }
 
 @if (showBugModal)
