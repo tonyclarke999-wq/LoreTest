@@ -1,3 +1,4 @@
+#nullable enable
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -24,6 +25,6 @@ namespace LoreTest.Data
         [StringLength(50)]
         public string Status { get; set; } = "Pending";
 
-        public ICollection<TestRunStepResult> StepResults { get; set; } = new List<TestRunStepResult>();
+        public ICollection<TestRunStepResult> StepResults { get; set; } = [];
     }
 }

@@ -1,3 +1,4 @@
+#nullable enable
 using LoreTest.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;

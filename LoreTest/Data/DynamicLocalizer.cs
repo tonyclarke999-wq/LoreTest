@@ -1,3 +1,4 @@
+#nullable enable
 using Microsoft.Extensions.Localization;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
