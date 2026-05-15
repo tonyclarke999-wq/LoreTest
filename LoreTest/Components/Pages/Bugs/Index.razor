@@ -12,62 +12,80 @@
 
 <PageTitle>@L["BugReports"]</PageTitle>
 
-<h1>@L["BugReports"]</h1>
-
-<p>
-    <a href="/bugs/create" class="btn btn-primary">@L["ReportNewBug"]</a>
-</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="headline-md">@L["BugReports"]</div>
+    <a href="/bugs/create" class="btn btn-primary d-flex align-items-center">
+        <span class="material-symbols-outlined small me-1">add</span> @L["ReportNewBug"]
+    </a>
+</div>
 
 @if (bugs == null)
 {
-    <p><em>@L["Loading"]</em></p>
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">@L["Loading"]</span>
+        </div>
+    </div>
 }
 else if (!bugs.Any())
 {
-    <p>@L["NoBugsFound"]</p>
+    <div class="card p-5 text-center text-muted">
+        <span class="material-symbols-outlined display-lg d-block mb-2 opacity-25">bug_report</span>
+        <div class="body-md">@L["NoBugsFound"]</div>
+    </div>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>@L["ID"]</th>
-                <th>@L["Title"]</th>
-                <th>@L["Severity"]</th>
-                <th>@L["Priority"]</th>
-                <th>@L["Status"]</th>
-                <th>@L["Reporter"]</th>
-                <th>Project</th>
-                <th>@L["Assignee"]</th>
-                <th>@L["Actions"]</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var bug in bugs)
-            {
-                <tr>
-                    <td>@bug.Id</td>
-                    <td>@translatedTitles.GetValueOrDefault(bug.Id, bug.Title)</td>
-                    <td>
-                        <span class="badge @GetSeverityClass(bug.Severity)">@L[bug.Severity.ToString()]</span>
-                    </td>
-                    <td>
-                        <span class="badge @GetPriorityClass(bug.Priority)">@L[bug.Priority.ToString()]</span>
-                    </td>
-                    <td>
-                        <span class="badge @GetStatusClass(bug.Status)">@L[bug.Status.ToString()]</span>
-                    </td>
-                    <td>@(bug.Reporter?.UserName ?? L["Unknown"])</td>
-                    <td>@(bug.Project?.Title ?? "None")</td>
-                    <td>@(bug.Assignee?.UserName ?? L["Unassigned"])</td>
-                    <td>
-                        <a href="/bugs/details/@bug.Id">@L["Details"]</a> |
-                        <a href="/bugs/edit/@bug.Id">@L["Edit"]</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="card p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 80px">ID</th>
+                        <th>@L["Title"]</th>
+                        <th>@L["Severity"]</th>
+                        <th>@L["Priority"]</th>
+                        <th>@L["Status"]</th>
+                        <th>@L["Reporter"]</th>
+                        <th>Project</th>
+                        <th>@L["Assignee"]</th>
+                        <th class="text-end">@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var bug in bugs)
+                    {
+                        <tr>
+                            <td class="data-mono">@bug.Id</td>
+                            <td class="body-md fw-bold">@translatedTitles.GetValueOrDefault(bug.Id, bug.Title)</td>
+                            <td>
+                                <span class="badge-custom" data-severity="@bug.Severity">@L[bug.Severity.ToString()]</span>
+                            </td>
+                            <td>
+                                <span class="badge-custom" data-priority="@bug.Priority">@L[bug.Priority.ToString()]</span>
+                            </td>
+                            <td>
+                                <span class="badge-custom" data-status="@bug.Status">@L[bug.Status.ToString()]</span>
+                            </td>
+                            <td class="body-sm text-muted">@(bug.Reporter?.UserName ?? L["Unknown"])</td>
+                            <td class="body-sm">@(bug.Project?.Title ?? "None")</td>
+                            <td class="body-sm text-muted">@(bug.Assignee?.UserName ?? L["Unassigned"])</td>
+                            <td class="text-end pe-3">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="/bugs/details/@bug.Id" class="btn btn-sm btn-outline-primary" title="@L["Details"]">
+                                        <span class="material-symbols-outlined small">visibility</span>
+                                    </a>
+                                    <a href="/bugs/edit/@bug.Id" class="btn btn-sm btn-outline-primary" title="@L["Edit"]">
+                                        <span class="material-symbols-outlined small">edit</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
 
 @code {
@@ -90,30 +108,5 @@ else
         }
     }
 
-    private string GetSeverityClass(BugSeverity severity) => severity switch
-    {
-        BugSeverity.Critical => "bg-danger",
-        BugSeverity.Major => "bg-warning text-dark",
-        BugSeverity.Minor => "bg-info text-dark",
-        BugSeverity.Cosmetic => "bg-secondary",
-        _ => "bg-light text-dark"
-    };
-
-    private string GetPriorityClass(BugPriority priority) => priority switch
-    {
-        BugPriority.High => "text-danger",
-        BugPriority.Medium => "text-warning",
-        BugPriority.Low => "text-success",
-        _ => ""
-    };
-
-    private string GetStatusClass(BugStatus status) => status switch
-    {
-        BugStatus.Open => "bg-primary",
-        BugStatus.InProgress => "bg-warning text-dark",
-        BugStatus.Resolved => "bg-success",
-        BugStatus.Closed => "bg-secondary",
-        BugStatus.Reopened => "bg-info text-dark",
-        _ => "bg-light text-dark"
-    };
+    }
 }
