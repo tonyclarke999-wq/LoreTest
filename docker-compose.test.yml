@@ -14,7 +14,10 @@ services:
       - loretest-network-test
 
   loretest-app-test:
-    image: ghcr.io/tonyclarke999-wq/loretest:develop
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: loretest-local:latest
     container_name: loretest-app-test
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
