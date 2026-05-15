@@ -16,164 +16,205 @@
 
 <PageTitle>@L["ReportBug"]</PageTitle>
 
-<h1>@L["ReportNewBug"]</h1>
-
-<hr />
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="headline-md">@L["ReportNewBug"]</div>
+    <a href="/bugs" class="btn btn-sm btn-outline-primary d-flex align-items-center">
+        <span class="material-symbols-outlined small me-1">arrow_back</span> @L["BackToList"]
+    </a>
+</div>
 
 <div class="row">
-    <div class="col-md-8">
-        <EditForm Model="bug" OnValidSubmit="HandleValidSubmit" FormName="CreateBugForm">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" />
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 p-md-5">
+                @if (isCreated)
+                {
+                    <div class="alert alert-success d-flex align-items-center mb-4">
+                        <span class="material-symbols-outlined me-2">check_circle</span>
+                        <div>Bug created successfully in LoreTest!</div>
+                    </div>
 
-            <div class="mb-3">
-                <label for="project" class="form-label">Project</label>
-                <InputSelect id="project" @bind-Value="bug.ProjectId" class="form-select">
-                    <option value="">-- No Project --</option>
-                    @foreach (var project in projects)
+                    @if (canCreateJiraBug)
                     {
-                        <option value="@project.Id">@project.Title</option>
+                        <div class="card bg-light border-0 mb-4">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="body-md fw-bold">Sync with Jira</div>
+                                    <div class="body-sm text-muted">This project is linked to Jira. You can create a corresponding ticket now.</div>
+                                </div>
+                                <button type="button" class="btn btn-primary d-flex align-items-center" @onclick="CreateJiraBug" disabled="@isCreatingJiraBug">
+                                    @if (isCreatingJiraBug)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="material-symbols-outlined small me-1">sync</span>
+                                    }
+                                    @L["CreateJiraBug"]
+                                </button>
+                            </div>
+                        </div>
                     }
-                </InputSelect>
-            </div>
 
-            <div class="mb-3">
-                <label for="title" class="form-label">@L["Title"]</label>
-                <InputText id="title" @bind-Value="bug.Title" class="form-control" placeholder="@L["TitlePlaceholder"]" />
-                <ValidationMessage For="() => bug.Title" class="text-danger" />
-            </div>
+                    @if (!string.IsNullOrEmpty(jiraBugError))
+                    {
+                        <div class="alert alert-danger mb-4">@jiraBugError</div>
+                    }
 
-            <div class="mb-3">
-                <label for="description" class="form-label">@L["DescriptionReproductionSteps"]</label>
-                <InputTextArea id="description" @bind-Value="bug.Description" class="form-control" rows="5" placeholder="@L["DescriptionPlaceholder"]" />
-                <ValidationMessage For="() => bug.Description" class="text-danger" />
-            </div>
+                    @if (!string.IsNullOrEmpty(bug.JiraBugReference))
+                    {
+                        <div class="card border-primary mb-4">
+                            <div class="card-body py-2 px-3 d-flex align-items-center">
+                                <span class="material-symbols-outlined text-primary me-2">link</span>
+                                <span class="body-md fw-bold me-2">Jira Ticket:</span>
+                                <a href="@($"{jiraBaseUrl?.TrimEnd('/')}/browse/{bug.JiraBugReference}")" target="_blank" class="text-decoration-none">
+                                    @bug.JiraBugReference
+                                </a>
+                            </div>
+                        </div>
+                    }
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="expected" class="form-label">@L["ExpectedResult"]</label>
-                    <InputTextArea id="expected" @bind-Value="bug.ExpectedResult" class="form-control" rows="3" />
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="actual" class="form-label">@L["ActualResult"]</label>
-                    <InputTextArea id="actual" @bind-Value="bug.ActualResult" class="form-control" rows="3" />
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label for="severity" class="form-label">@L["Severity"]</label>
-                    <InputSelect id="severity" @bind-Value="bug.Severity" class="form-select">
-                        @foreach (var val in Enum.GetValues<BugSeverity>())
-                        {
-                            <option value="@val">@L[val.ToString()]</option>
-                        }
-                    </InputSelect>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="priority" class="form-label">@L["Priority"]</label>
-                    <InputSelect id="priority" @bind-Value="bug.Priority" class="form-select">
-                        @foreach (var val in Enum.GetValues<BugPriority>())
-                        {
-                            <option value="@val">@L[val.ToString()]</option>
-                        }
-                    </InputSelect>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="environment" class="form-label">@L["Environment"]</label>
-                    <InputText id="environment" @bind-Value="bug.Environment" class="form-control" placeholder="@L["EnvironmentPlaceholder"]" />
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="components" class="form-label">@L["Components"]</label>
-                    <InputText id="components" @bind-Value="bug.Components" class="form-control" placeholder="@L["ComponentsPlaceholder"]" />
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="labels" class="form-label">@L["Labels"]</label>
-                    <InputText id="labels" @bind-Value="bug.Labels" class="form-control" placeholder="@L["LabelsPlaceholder"]" />
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="assignee" class="form-label">@L["Assignee"]</label>
-                    <InputSelect id="assignee" @bind-Value="bug.AssigneeId" class="form-select">
-                        <option value="">-- @L["Unassigned"] --</option>
-                        @foreach (var user in users)
-                        {
-                            <option value="@user.Id">@user.UserName</option>
-                        }
-                    </InputSelect>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="dueDate" class="form-label">@L["DueDate"]</label>
-                    <InputDate id="dueDate" @bind-Value="bug.DueDate" class="form-control" />
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="affectedVersion" class="form-label">@L["AffectedVersion"]</label>
-                    <InputText id="affectedVersion" @bind-Value="bug.AffectedVersion" class="form-control" />
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="fixVersion" class="form-label">@L["FixVersion"]</label>
-                    <InputText id="fixVersion" @bind-Value="bug.FixVersion" class="form-control" />
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label for="attachments" class="form-label">@L["AttachmentsLabel"]</label>
-                <InputFile OnChange="LoadFiles" class="form-control" multiple />
-                @if (selectedFiles.Any())
-                {
-                    <ul class="mt-2 list-unstyled">
-                        @foreach (var file in selectedFiles)
-                        {
-                            <li><i class="bi bi-file-earmark"></i> @file.Name (@(file.Size / 1024) KB)</li>
-                        }
-                    </ul>
-                }
-            </div>
-
-            <div class="mt-4 mb-5">
-                @if (!isCreated)
-                {
-                    <button type="submit" class="btn btn-success me-2">@L["CreateBugReport"]</button>
-                    <a href="/bugs" class="btn btn-secondary">@L["Cancel"]</a>
+                    <div class="d-flex gap-2">
+                        <a href="/bugs/details/@bug.Id" class="btn btn-primary">@L["ViewBugDetails"]</a>
+                        <a href="/bugs" class="btn btn-outline-primary">@L["BackToList"]</a>
+                    </div>
                 }
                 else
                 {
-                    <div class="alert alert-success">Bug created successfully!</div>
-                    @if (canCreateJiraBug)
-                    {
-                        <button type="button" class="btn btn-primary me-2" @onclick="CreateJiraBug" disabled="@isCreatingJiraBug">
-                            @if (isCreatingJiraBug)
-                            {
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            }
-                            Create JIRA Bug
-                        </button>
-                    }
-                    @if (!string.IsNullOrEmpty(jiraBugError))
-                    {
-                        <div class="alert alert-danger mt-2">@jiraBugError</div>
-                    }
-                    @if (!string.IsNullOrEmpty(bug.JiraBugReference))
-                    {
-                        <div class="alert alert-info mt-2">
-                            Jira Ticket Created: 
-                            <a href="@($"{jiraBaseUrl?.TrimEnd('/')}/browse/{bug.JiraBugReference}")" target="_blank">
-                                @bug.JiraBugReference
-                            </a>
+                    <EditForm Model="bug" OnValidSubmit="HandleValidSubmit" FormName="CreateBugForm">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger mb-4" role="alert" />
+
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="project" class="form-label label-caps text-muted">Project</label>
+                                <InputSelect id="project" @bind-Value="bug.ProjectId" class="form-select">
+                                    <option value="">-- No Project --</option>
+                                    @foreach (var project in projects)
+                                    {
+                                        <option value="@project.Id">@project.Title</option>
+                                    }
+                                </InputSelect>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label for="title" class="form-label label-caps text-muted">@L["Title"]</label>
+                                <InputText id="title" @bind-Value="bug.Title" class="form-control" placeholder="@L["TitlePlaceholder"]" />
+                                <ValidationMessage For="() => bug.Title" class="text-danger" />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label for="description" class="form-label label-caps text-muted">@L["DescriptionReproductionSteps"]</label>
+                                <InputTextArea id="description" @bind-Value="bug.Description" class="form-control" rows="5" placeholder="@L["DescriptionPlaceholder"]" />
+                                <ValidationMessage For="() => bug.Description" class="text-danger" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="expected" class="form-label label-caps text-muted">@L["ExpectedResult"]</label>
+                                <InputTextArea id="expected" @bind-Value="bug.ExpectedResult" class="form-control" rows="3" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="actual" class="form-label label-caps text-muted">@L["ActualResult"]</label>
+                                <InputTextArea id="actual" @bind-Value="bug.ActualResult" class="form-control" rows="3" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="severity" class="form-label label-caps text-muted">@L["Severity"]</label>
+                                <InputSelect id="severity" @bind-Value="bug.Severity" class="form-select">
+                                    @foreach (var val in Enum.GetValues<BugSeverity>())
+                                    {
+                                        <option value="@val">@L[val.ToString()]</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="priority" class="form-label label-caps text-muted">@L["Priority"]</label>
+                                <InputSelect id="priority" @bind-Value="bug.Priority" class="form-select">
+                                    @foreach (var val in Enum.GetValues<BugPriority>())
+                                    {
+                                        <option value="@val">@L[val.ToString()]</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="environment" class="form-label label-caps text-muted">@L["Environment"]</label>
+                                <InputText id="environment" @bind-Value="bug.Environment" class="form-control" placeholder="@L["EnvironmentPlaceholder"]" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="components" class="form-label label-caps text-muted">@L["Components"]</label>
+                                <InputText id="components" @bind-Value="bug.Components" class="form-control" placeholder="@L["ComponentsPlaceholder"]" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="labels" class="form-label label-caps text-muted">@L["Labels"]</label>
+                                <InputText id="labels" @bind-Value="bug.Labels" class="form-control" placeholder="@L["LabelsPlaceholder"]" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="assignee" class="form-label label-caps text-muted">@L["Assignee"]</label>
+                                <InputSelect id="assignee" @bind-Value="bug.AssigneeId" class="form-select">
+                                    <option value="">-- @L["Unassigned"] --</option>
+                                    @foreach (var user in users)
+                                    {
+                                        <option value="@user.Id">@user.UserName</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="dueDate" class="form-label label-caps text-muted">@L["DueDate"]</label>
+                                <InputDate id="dueDate" @bind-Value="bug.DueDate" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="affectedVersion" class="form-label label-caps text-muted">@L["AffectedVersion"]</label>
+                                <InputText id="affectedVersion" @bind-Value="bug.AffectedVersion" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fixVersion" class="form-label label-caps text-muted">@L["FixVersion"]</label>
+                                <InputText id="fixVersion" @bind-Value="bug.FixVersion" class="form-control" />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label for="attachments" class="form-label label-caps text-muted">@L["AttachmentsLabel"]</label>
+                                <InputFile OnChange="LoadFiles" class="form-control" multiple />
+                                @if (selectedFiles.Any())
+                                {
+                                    <div class="mt-3 d-flex flex-wrap gap-2">
+                                        @foreach (var file in selectedFiles)
+                                        {
+                                            <div class="badge bg-light text-muted border py-2 px-3">
+                                                <span class="material-symbols-outlined small align-middle me-1">file_present</span>
+                                                @file.Name (@(file.Size / 1024) KB)
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
                         </div>
-                    }
-                    <a href="/bugs" class="btn btn-secondary mt-2">Back to Bugs</a>
+
+                        <div class="mt-5 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-4 py-2 fw-bold">@L["CreateBugReport"]</button>
+                            <a href="/bugs" class="btn btn-outline-primary px-4 py-2">@L["Cancel"]</a>
+                        </div>
+                    </EditForm>
                 }
             </div>
-        </EditForm>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 bg-light">
+            <div class="card-body">
+                <div class="label-caps text-muted mb-3">Guidelines</div>
+                <ul class="body-sm text-muted ps-3 mb-0">
+                    <li class="mb-2">Be descriptive in the title.</li>
+                    <li class="mb-2">Include clear reproduction steps.</li>
+                    <li class="mb-2">Specify the environment where the bug was found.</li>
+                    <li>Attach screenshots if possible.</li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
 
