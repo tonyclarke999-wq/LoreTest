@@ -6,13 +6,15 @@
 
     <div class="main-wrapper">
         <header class="top-header">
-            <div class="d-flex justify-content-between align-items-center w-100">
-                <div class="headline-md">LoreTest</div>
+            <div class="d-flex justify-content-end align-items-center w-100">
                 <div class="d-flex align-items-center">
                     <CultureSelector />
                     <AuthorizeView>
                         <Authorized>
-                            <span class="ms-3 body-md text-muted">@context.User.Identity?.Name</span>
+                            <a href="Account/Manage" class="ms-3 d-flex align-items-center text-decoration-none">
+                                <span class="material-symbols-outlined me-1 text-muted" style="font-size: 20px;">account_circle</span>
+                                <span class="body-md text-muted">@context.User.Identity?.Name</span>
+                            </a>
                         </Authorized>
                     </AuthorizeView>
                 </div>

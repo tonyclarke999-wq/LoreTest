@@ -41,10 +41,6 @@
                         </NavLink>
                     }
                     
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="material-symbols-outlined">account_circle</span> <span class="nav-text">@authContext.User.Identity?.Name</span>
-                    </NavLink>
-
                     <form action="Account/Logout" method="post" class="mt-1">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
