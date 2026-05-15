@@ -9,9 +9,9 @@ using Moq;
 using Microsoft.Extensions.Localization;
 using LoreTest.Resources;
 using System.Security.Claims;
-
 namespace LoreTest.Tests
 {
+    using LoreTest.Components;
     [TestClass]
     public class ProjectComponentTests : Bunit.TestContext
     {
@@ -47,11 +47,11 @@ namespace LoreTest.Tests
             Services.AddSingleton(context);
 
             // Act
-            var cut = RenderComponent<global::LoreTest.Components.Pages.Projects.Index>();
+            var cut = RenderComponent<ProjectIndex>();
 
             // Assert
             Assert.Contains("Loading", cut.Markup);
-            
+
             // Cleanup to avoid hanging tasks
             tcs.SetResult(null);
         }
@@ -70,7 +70,7 @@ namespace LoreTest.Tests
             Services.AddSingleton(context);
 
             // Act
-            var cut = RenderComponent<global::LoreTest.Components.Pages.Projects.Index>();
+            var cut = RenderComponent<ProjectIndex>();
 
             // assert
             Assert.Contains("TestProjects", cut.Markup);
@@ -94,7 +94,7 @@ namespace LoreTest.Tests
             Services.AddSingleton(context);
 
             // Act
-            var cut = RenderComponent<global::LoreTest.Components.Pages.Projects.Index>();
+            var cut = RenderComponent<ProjectIndex>();
 
             // Assert
             var rows = cut.FindAll("tbody tr");
@@ -120,7 +120,7 @@ namespace LoreTest.Tests
             Services.AddSingleton(context);
 
             // Act
-            var cut = RenderComponent<global::LoreTest.Components.Pages.Projects.Index>();
+            var cut = RenderComponent<ProjectIndex>();
 
             // Assert
             Assert.Contains("CreateNew", cut.Markup);

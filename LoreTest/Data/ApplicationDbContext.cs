@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Authorization;
+#nullable enable
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

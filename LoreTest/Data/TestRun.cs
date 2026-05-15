@@ -1,3 +1,4 @@
+#nullable enable
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -38,6 +39,6 @@ namespace LoreTest.Data
         [StringLength(50)]
         public string Status { get; set; } = "In Progress";
 
-        public ICollection<TestRunCaseResult> CaseResults { get; set; } = new List<TestRunCaseResult>();
+        public ICollection<TestRunCaseResult> CaseResults { get; set; } = [];
     }
 }
