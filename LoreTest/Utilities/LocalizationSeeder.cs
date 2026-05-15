@@ -34,7 +34,7 @@ namespace LoreTest.Utilities
                 { "PreferredLanguage", "Preferred Language" },
                 { "Profile", "Profile" },
                 { "Save", "Save" },
-                { "WelcomeTitle", "Hello, world!" },
+                { "WelcomeTitle", "Dashboard" },
                 { "WelcomeMessage", "Welcome to your new app." },
                 { "ManageUsers", "Manage Application Users" },
                 { "About", "About" },

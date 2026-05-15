@@ -95,7 +95,7 @@
     <value>Save</value>
   </data>
   <data name="WelcomeTitle" xml:space="preserve">
-    <value>Hello, world!</value>
+    <value>Dashboard</value>
   </data>
   <data name="WelcomeMessage" xml:space="preserve">
     <value>Welcome to your new app.</value>
