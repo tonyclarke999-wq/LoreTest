@@ -19,19 +19,30 @@
 }
 else
 {
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h1 class="mb-0">@testCase.Title</h1>
-        <div class="d-flex gap-2 align-items-center">
-            <span class="badge fs-6 @PriorityBadge(testCase.Priority)">@L[testCase.Priority ?? "Low"]</span>
-            <span class="badge fs-6 @StatusBadge(testCase.Status)">@L[testCase.Status ?? "Pending"]</span>
-            @if (canEdit)
-            {
-                <a href="/testcases/edit/@testCase.Id" class="btn btn-outline-primary btn-sm">@L["EditCase"]</a>
-                <a href="/testcases/delete/@testCase.Id" class="btn btn-outline-danger btn-sm">@L["DeleteCase"]</a>
-            }
+<div class="d-flex justify-content-between align-items-start mb-1">
+    <div>
+        <div class="headline-md">@testCase.Title</div>
+        <div class="body-sm text-muted mt-1">
+            ID: <span class="data-mono">@testCase.Id</span> &nbsp;|&nbsp; 
+            @L["Suite"]: <a href="/testsuites/details/@testCase.TestSuiteId" class="text-decoration-none fw-bold">@testCase.TestSuite?.Title</a>
         </div>
     </div>
-    <p class="text-muted small">ID: @testCase.Id &nbsp;|&nbsp; @L["Suite"]: <a href="/testsuites/details/@testCase.TestSuiteId">@testCase.TestSuite?.Title</a></p>
+    <div class="d-flex gap-2 align-items-center">
+        <span class="badge-custom" data-priority="@(testCase.Priority ?? "Low")">@L[testCase.Priority ?? "Low"]</span>
+        <span class="badge-custom" data-status="@(testCase.Status ?? "Pending")">@L[testCase.Status ?? "Pending"]</span>
+        @if (canEdit)
+        {
+            <div class="ms-3 d-flex gap-2">
+                <a href="/testcases/edit/@testCase.Id" class="btn btn-outline-primary btn-sm d-flex align-items-center">
+                    <span class="material-symbols-outlined small me-1">edit</span> @L["EditCase"]
+                </a>
+                <a href="/testcases/delete/@testCase.Id" class="btn btn-outline-danger btn-sm d-flex align-items-center">
+                    <span class="material-symbols-outlined small me-1">delete</span> @L["DeleteCase"]
+                </a>
+            </div>
+        }
+    </div>
+</div>
 
     <!-- Tabs -->
     <ul class="nav nav-tabs mb-3">
@@ -121,66 +132,83 @@ else
     <!-- Tab: Test Steps -->
     @if (activeTab == "steps")
     {
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">@L["StepsForThisCase"]</h5>
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+            <div class="title-sm">@L["StepsForThisCase"]</div>
             @if (canEdit)
             {
-                <a href="/teststeps/create?testCaseId=@testCase.Id" class="btn btn-primary btn-sm">@L["AddStep"]</a>
+                <a href="/teststeps/create?testCaseId=@testCase.Id" class="btn btn-primary btn-sm d-flex align-items-center">
+                    <span class="material-symbols-outlined small me-1">add</span> @L["AddStep"]
+                </a>
             }
         </div>
 
         @if (!testCase.TestSteps.Any())
         {
-            <div class="alert alert-info">@L["NoStepsAdded"] @(canEdit ? L["ClickAddStep"] : "")</div>
+            <div class="card p-5 text-center text-muted border-dashed">
+                <span class="material-symbols-outlined display-lg d-block mb-2 opacity-25">format_list_numbered</span>
+                <div class="body-md">@L["NoStepsAdded"] @(canEdit ? L["ClickAddStep"] : "")</div>
+            </div>
         }
         else
         {
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th style="width: 5%">#</th>
-                        <th style="width: 33%">@L["StepDescription"]</th>
-                        <th style="width: 28%">@L["ExpectedResult"]</th>
-                        <th style="width: 22%">@L["ActualResult"]</th>
-                        @if (canEdit)
-                        {
-                            <th style="width: 12%">@L["Actions"]</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var step in testCase.TestSteps.OrderBy(s => s.StepNumber))
-                    {
-                        <tr>
-                            <td class="text-center fw-bold">@step.StepNumber</td>
-                            <td>@((MarkupString)(step.Description ?? ""))</td>
-                            <td>@((MarkupString)(step.ExpectedResult ?? ""))</td>
-                            <td>
-                                @if (!string.IsNullOrWhiteSpace(step.ActualResult))
+            <div class="card p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px">#</th>
+                                <th>@L["StepDescription"]</th>
+                                <th>@L["ExpectedResult"]</th>
+                                <th>@L["ActualResult"]</th>
+                                @if (canEdit)
                                 {
-                                    @((MarkupString)(step.ActualResult))
+                                    <th class="text-end" style="width: 120px">@L["Actions"]</th>
                                 }
-                                else
-                                {
-                                    <span class="text-muted fst-italic">—</span>
-                                }
-                            </td>
-                            @if (canEdit)
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var step in testCase.TestSteps.OrderBy(s => s.StepNumber))
                             {
-                                <td>
-                                    <a href="/teststeps/edit/@step.Id" class="btn btn-sm btn-outline-primary">@L["Edit"]</a>
-                                    <a href="/teststeps/delete/@step.Id" class="btn btn-sm btn-outline-danger ms-1">@L["Delete"]</a>
-                                </td>
+                                <tr>
+                                    <td class="data-mono fw-bold">@step.StepNumber</td>
+                                    <td class="body-md">@((MarkupString)(step.Description ?? ""))</td>
+                                    <td class="body-md">@((MarkupString)(step.ExpectedResult ?? ""))</td>
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(step.ActualResult))
+                                        {
+                                            <span class="body-md">@((MarkupString)(step.ActualResult))</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic opacity-50">—</span>
+                                        }
+                                    </td>
+                                    @if (canEdit)
+                                    {
+                                        <td class="text-end pe-3">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a href="/teststeps/edit/@step.Id" class="btn btn-sm btn-outline-primary" title="@L["Edit"]">
+                                                    <span class="material-symbols-outlined small">edit</span>
+                                                </a>
+                                                <a href="/teststeps/delete/@step.Id" class="btn btn-sm btn-outline-danger" title="@L["Delete"]">
+                                                    <span class="material-symbols-outlined small">delete</span>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    }
+                                </tr>
                             }
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         }
     }
 
-    <div class="mt-4 mb-5">
-        <a href="/testsuites/details/@testCase.TestSuiteId" class="btn btn-secondary">@L["BackToTestSuite"]</a>
+    <div class="mt-5 mb-5 border-top pt-4">
+        <a href="/testsuites/details/@testCase.TestSuiteId" class="btn btn-outline-primary d-inline-flex align-items-center">
+            <span class="material-symbols-outlined small me-2">arrow_back</span> @L["BackToTestSuite"]
+        </a>
     </div>
 }
 
