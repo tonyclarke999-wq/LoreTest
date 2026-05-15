@@ -19,83 +19,103 @@
 }
 else
 {
-    <div class="d-flex justify-content-between align-items-center">
-        <h1>@L["TestSuiteTitlePrefix"] @testSuite.Title</h1>
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <div class="headline-md">@L["TestSuiteTitlePrefix"] @testSuite.Title</div>
+        @if (!string.IsNullOrWhiteSpace(testSuite.Description))
+        {
+            <div class="body-md text-muted mt-1">@((MarkupString)(testSuite.Description))</div>
+        }
+    </div>
+    @if (canEdit)
+    {
+        <div class="d-flex gap-2">
+            <a href="/testsuites/edit/@testSuite.Id" class="btn btn-sm btn-outline-primary d-flex align-items-center">
+                <span class="material-symbols-outlined small me-1">edit</span> @L["EditSuite"]
+            </a>
+            <a href="/testsuites/delete/@testSuite.Id" class="btn btn-sm btn-outline-primary text-danger d-flex align-items-center">
+                <span class="material-symbols-outlined small me-1">delete</span> @L["DeleteSuite"]
+            </a>
+        </div>
+    }
+</div>
+
+<div class="card mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <span class="material-symbols-outlined me-2">checklist</span>
+            <span class="title-sm mb-0">@L["TestCases"]</span>
+        </div>
         @if (canEdit)
         {
-            <div>
-                <a href="/testsuites/edit/@testSuite.Id" class="btn btn-outline-primary btn-sm">@L["EditSuite"]</a>
-                <a href="/testsuites/delete/@testSuite.Id" class="btn btn-outline-danger btn-sm ms-1">@L["DeleteSuite"]</a>
+            <a href="/testcases/create?suiteId=@testSuite.Id" class="btn btn-sm btn-primary d-flex align-items-center">
+                <span class="material-symbols-outlined small me-1">add</span> @L["AddTestCase"]
+            </a>
+        }
+    </div>
+    <div class="card-body p-0">
+        @if (!testSuite.TestCases.Any())
+        {
+            <div class="p-5 text-center text-muted">
+                <span class="material-symbols-outlined display-lg d-block mb-2 opacity-25">rule</span>
+                <div class="body-md">@L["NoTestCasesFound"]</div>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px">ID</th>
+                            <th>@L["Title"]</th>
+                            <th style="width: 120px">@L["Priority"]</th>
+                            <th style="width: 120px">@L["Status"]</th>
+                            <th class="text-end">@L["Actions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var tc in testSuite.TestCases.OrderBy(t => t.Id))
+                        {
+                            <tr>
+                                <td class="data-mono">@tc.Id</td>
+                                <td class="body-md fw-bold">@tc.Title</td>
+                                <td>
+                                    <span class="badge-custom" data-priority="@tc.Priority">@tc.Priority</span>
+                                </td>
+                                <td>
+                                    <span class="badge-custom" data-status="@tc.Status">@tc.Status</span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="/testcases/details/@tc.Id" class="btn btn-sm btn-outline-primary" title="@L["View"]">
+                                            <span class="material-symbols-outlined small">visibility</span>
+                                        </a>
+                                        @if (canEdit)
+                                        {
+                                            <a href="/testcases/edit/@tc.Id" class="btn btn-sm btn-outline-primary" title="@L["Edit"]">
+                                                <span class="material-symbols-outlined small">edit</span>
+                                            </a>
+                                            <a href="/testcases/delete/@tc.Id" class="btn btn-sm btn-outline-primary text-danger" title="@L["Delete"]">
+                                                <span class="material-symbols-outlined small">delete</span>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         }
     </div>
+</div>
 
-    @if (!string.IsNullOrWhiteSpace(testSuite.Description))
-    {
-        <div class="mb-3 mt-2">@((MarkupString)(testSuite.Description))</div>
-    }
-
-    <hr />
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>@L["TestCases"]</h2>
-        @if (canEdit)
-        {
-            <a href="/testcases/create?suiteId=@testSuite.Id" class="btn btn-primary btn-sm">@L["AddTestCase"]</a>
-        }
-    </div>
-
-    @if (!testSuite.TestCases.Any())
-    {
-        <p>@L["NoTestCasesFound"]</p>
-    }
-    else
-    {
-        <table class="table table-bordered table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th style="width: 6%">ID</th>
-                    <th>@L["Title"]</th>
-                    <th style="width: 10%">@L["Priority"]</th>
-                    <th style="width: 10%">@L["Status"]</th>
-                    <th style="width: 18%">@L["Actions"]</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var tc in testSuite.TestCases.OrderBy(t => t.Id))
-                {
-                    <tr>
-                        <td>@tc.Id</td>
-                        <td>@tc.Title</td>
-                        <td>
-                            <span class="badge @(tc.Priority == "High" ? "bg-danger" : tc.Priority == "Medium" ? "bg-warning text-dark" : "bg-secondary")">
-                                @tc.Priority
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge @(tc.Status == "Pass" ? "bg-success" : tc.Status == "Fail" ? "bg-danger" : "bg-warning text-dark")">
-                                @tc.Status
-                            </span>
-                        </td>
-                        <td>
-                            <a href="/testcases/details/@tc.Id">@L["View"]</a>
-                            @if (canEdit)
-                            {
-                                <span> | </span>
-                                <a href="/testcases/edit/@tc.Id">@L["Edit"]</a>
-                                <span> | </span>
-                                <a href="/testcases/delete/@tc.Id">@L["Delete"]</a>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-
-    <div class="mt-4">
-        <a href="/projects/details/@testSuite.TestProjectId" class="btn btn-secondary">@L["BackToProject"]</a>
-    </div>
+<div class="mt-4">
+    <a href="/projects/details/@testSuite.TestProjectId" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
+        <span class="material-symbols-outlined small me-1">arrow_back</span> @L["BackToProject"]
+    </a>
+</div>
 }
 
 @code {
