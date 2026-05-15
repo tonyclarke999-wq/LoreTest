@@ -16,61 +16,68 @@
 
 <PageTitle>@L["LoginTitle"]</PageTitle>
 
-<h1>@L["LoginTitle"]</h1>
-<div class="row">
-    <div class="col-lg-6">
-        <section>
-            <StatusMessage Message="@errorMessage" />
-            <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator />
-                <h2>@L["UseLocalAccount"]</h2>
-                <hr />
-                <ValidationSummary class="text-danger" role="alert" />
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username webauthn" aria-required="true" placeholder="name@example.com" />
-                    <label for="Input.Email" class="form-label">@L["Email"]</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+<div class="row justify-content-center pt-5">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="text-center mb-5">
+            <div class="display-lg mb-2">@L["LoginTitle"]</div>
+            <div class="body-md text-muted">@L["UseLocalAccount"]</div>
+        </div>
+
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="card-body p-4 p-lg-5">
+                <StatusMessage Message="@errorMessage" />
+                <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger mb-4" role="alert" />
+                    
+                    <div class="form-floating mb-3">
+                        <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username webauthn" aria-required="true" placeholder="name@example.com" />
+                        <label for="Input.Email" class="form-label">@L["Email"]</label>
+                        <ValidationMessage For="() => Input.Email" class="text-danger" />
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                        <label for="Input.Password" class="form-label">@L["Password"]</label>
+                        <ValidationMessage For="() => Input.Password" class="text-danger" />
+                    </div>
+                    
+                    <div class="form-check mb-4">
+                        <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" id="rememberMe" />
+                        <label class="form-check-label body-md" for="rememberMe">
+                            @L["RememberMe"]
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="w-100 btn btn-primary py-3 fw-bold">@L["LoginButton"]</button>
+                    
+                    <div class="d-flex flex-column mt-4 text-center">
+                        <span class="label-caps text-muted mb-2">@L["OrSeparator"]</span>
+                        <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email" class="btn btn-link body-sm text-decoration-none">
+                            <span class="material-symbols-outlined small align-middle me-1">fingerprint</span>
+                            @L["LoginWithPasskey"]
+                        </PasskeySubmit>
+                    </div>
+                </EditForm>
+            </div>
+            <div class="card-footer bg-light border-0 py-3 text-center">
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="Account/ForgotPassword" class="body-sm text-decoration-none">@L["ForgotPasswordLink"]</a>
+                        <span class="text-muted opacity-25">|</span>
+                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))" class="body-sm text-decoration-none">@L["RegisterAsNewUser"]</a>
+                    </div>
+                    <a href="Account/ResendEmailConfirmation" class="body-sm text-decoration-none text-muted">@L["ResendEmailConfirmation"]</a>
                 </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label for="Input.Password" class="form-label">@L["Password"]</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger" />
-                </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
-                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
-                        @L["RememberMe"]
-                    </label>
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">@L["LoginButton"]</button>
-                </div>
-                <hr />
-                <div class="d-flex flex-column">
-                    <span class="text-secondary mx-auto mt-2">@L["OrSeparator"]</span>
-                    <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email" class="btn btn-link mx-auto">@L["LoginWithPasskey"]</PasskeySubmit>
-                </div>
-                <hr />
-                <div>
-                    <p>
-                        <a href="Account/ForgotPassword">@L["ForgotPasswordLink"]</a>
-                    </p>
-                    <p>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">@L["RegisterAsNewUser"]</a>
-                    </p>
-                    <p>
-                        <a href="Account/ResendEmailConfirmation">@L["ResendEmailConfirmation"]</a>
-                    </p>
-                </div>
-            </EditForm>
-        </section>
-    </div>
-    <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>@L["UseAnotherService"]</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
+            </div>
+        </div>
+
+        <div class="mt-5 text-center">
+            <section>
+                <div class="label-caps text-muted mb-3">@L["UseAnotherService"]</div>
+                <ExternalLoginPicker />
+            </section>
+        </div>
     </div>
 </div>
 
