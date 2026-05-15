@@ -1,21 +1,28 @@
 @inherits LayoutComponentBase
 @inject IStringLocalizer<SharedResource> L
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="app-container">
+    <NavMenu />
 
-    <main>
-        <div class="top-row px-4">
-            <CultureSelector />
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank" class="ms-3">@L["About"]</a>
-        </div>
+    <div class="main-wrapper">
+        <header class="top-header">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <div class="headline-md">LoreTest</div>
+                <div class="d-flex align-items-center">
+                    <CultureSelector />
+                    <AuthorizeView>
+                        <Authorized>
+                            <span class="ms-3 body-md text-muted">@context.User.Identity?.Name</span>
+                        </Authorized>
+                    </AuthorizeView>
+                </div>
+            </div>
+        </header>
 
-        <article class="content px-4">
+        <main class="page-content">
             @Body
-        </article>
-    </main>
+        </main>
+    </div>
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
