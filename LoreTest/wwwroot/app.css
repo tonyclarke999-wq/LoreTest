@@ -122,8 +122,21 @@ html, body {
 }
 
 .btn-outline-primary:hover {
-    background-color: var(--surface-container-low);
-    border-color: var(--outline);
+    background-color: var(--primary);
+    color: var(--on-primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-danger {
+    color: var(--error);
+    border-color: var(--outline-variant);
+    background-color: transparent;
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--error);
+    color: white;
+    border-color: var(--error);
 }
 
 .card {
