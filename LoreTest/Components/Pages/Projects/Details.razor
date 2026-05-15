@@ -15,114 +15,125 @@
 
 <PageTitle>@L["ProjectDetails"]</PageTitle>
 
-<div class="d-flex justify-content-between align-items-start mb-4">
-    <div>
-        <div class="headline-md">@L["ProjectTitlePrefix"] @project.Title</div>
-        <div class="body-md text-muted mt-1">@((MarkupString)(project.Description ?? ""))</div>
-    </div>
-    @if (!string.IsNullOrWhiteSpace(project.JiraReference))
-    {
-        <div class="card bg-light border-0">
-            <div class="card-body py-2 px-3 d-flex align-items-center">
-                <span class="material-symbols-outlined small me-2 text-primary">link</span>
-                <span class="label-caps me-2">Jira:</span>
-                @if (!string.IsNullOrWhiteSpace(jiraUrl))
-                {
-                    <a href="@jiraUrl" target="_blank" class="body-sm fw-bold text-decoration-none">@project.JiraReference</a>
-                }
-                else
-                {
-                    <span class="body-sm fw-bold">@project.JiraReference</span>
-                }
-            </div>
-        </div>
-    }
-</div>
-
-<div class="card mb-4">
-    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-            <span class="material-symbols-outlined me-2">folder_zip</span>
-            <span class="title-sm mb-0">@L["TestSuites"]</span>
-        </div>
-        <div class="d-flex gap-2">
-            @if (canEdit)
-            {
-                <a href="/testsuites/create?projectId=@project.Id" class="btn btn-sm btn-primary d-flex align-items-center">
-                    <span class="material-symbols-outlined small me-1">add</span> @L["CreateNewTestSuite"]
-                </a>
-                <a href="/testsuites/import/@project.Id" class="btn btn-sm btn-outline-primary d-flex align-items-center">
-                    <span class="material-symbols-outlined small me-1">upload</span> @L["ImportCSV"]
-                </a>
-                <button class="btn btn-sm btn-outline-primary d-flex align-items-center" @onclick="ExportToCsv">
-                    <span class="material-symbols-outlined small me-1">download</span> @L["ExportCSV"]
-                </button>
-            }
-            @if (canCreateRun)
-            {
-                <a href="/testruns/setup?projectId=@project.Id" class="btn btn-sm btn-outline-primary d-flex align-items-center">
-                    <span class="material-symbols-outlined small me-1">play_arrow</span> @L["StartTestRun"]
-                </a>
-            }
+@if (project == null)
+{
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">@L["Loading"]</span>
         </div>
     </div>
-    <div class="card-body p-0">
-        @if (!project.TestSuites.Any())
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <div class="headline-md">@L["ProjectTitlePrefix"] @project.Title</div>
+            <div class="body-md text-muted mt-1">@((MarkupString)(project.Description ?? ""))</div>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(project.JiraReference))
         {
-            <div class="p-5 text-center text-muted">
-                <span class="material-symbols-outlined display-lg d-block mb-2 opacity-25">folder_off</span>
-                <div class="body-md">@L["NoTestSuitesFound"]</div>
+            <div class="card bg-light border-0">
+                <div class="card-body py-2 px-3 d-flex align-items-center">
+                    <span class="material-symbols-outlined small me-2 text-primary">link</span>
+                    <span class="label-caps me-2">Jira:</span>
+                    @if (!string.IsNullOrWhiteSpace(jiraUrl))
+                    {
+                        <a href="@jiraUrl" target="_blank" class="body-sm fw-bold text-decoration-none">@project.JiraReference</a>
+                    }
+                    else
+                    {
+                        <span class="body-sm fw-bold">@project.JiraReference</span>
+                    }
+                </div>
             </div>
         }
-        else
-        {
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>@L["Title"]</th>
-                            <th>@L["Description"]</th>
-                            <th class="text-end">@L["Actions"]</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var suite in project.TestSuites)
-                        {
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <span class="material-symbols-outlined me-2">folder_zip</span>
+                <span class="title-sm mb-0">@L["TestSuites"]</span>
+            </div>
+            <div class="d-flex gap-2">
+                @if (canEdit)
+                {
+                    <a href="/testsuites/create?projectId=@project.Id" class="btn btn-sm btn-primary d-flex align-items-center">
+                        <span class="material-symbols-outlined small me-1">add</span> @L["CreateNewTestSuite"]
+                    </a>
+                    <a href="/testsuites/import/@project.Id" class="btn btn-sm btn-outline-primary d-flex align-items-center">
+                        <span class="material-symbols-outlined small me-1">upload</span> @L["ImportCSV"]
+                    </a>
+                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center" @onclick="ExportToCsv">
+                        <span class="material-symbols-outlined small me-1">download</span> @L["ExportCSV"]
+                    </button>
+                }
+                @if (canCreateRun)
+                {
+                    <a href="/testruns/setup?projectId=@project.Id" class="btn btn-sm btn-outline-primary d-flex align-items-center">
+                        <span class="material-symbols-outlined small me-1">play_arrow</span> @L["StartTestRun"]
+                    </a>
+                }
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @if (!project.TestSuites.Any())
+            {
+                <div class="p-5 text-center text-muted">
+                    <span class="material-symbols-outlined display-lg d-block mb-2 opacity-25">folder_off</span>
+                    <div class="body-md">@L["NoTestSuitesFound"]</div>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
                             <tr>
-                                <td class="data-mono">@suite.Id</td>
-                                <td class="body-md fw-bold">@suite.Title</td>
-                                <td class="body-md text-muted">@((MarkupString)(suite.Description ?? ""))</td>
-                                <td class="text-end pe-3">
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <a href="/testsuites/details/@suite.Id" class="btn btn-sm btn-outline-primary" title="@L["ViewTestCases"]">
-                                            <span class="material-symbols-outlined small">visibility</span>
-                                        </a>
-                                        @if (canEdit)
-                                        {
-                                            <a href="/testsuites/edit/@suite.Id" class="btn btn-sm btn-outline-primary" title="@L["Edit"]">
-                                                <span class="material-symbols-outlined small">edit</span>
-                                            </a>
-                                            <a href="/testsuites/delete/@suite.Id" class="btn btn-sm btn-outline-primary text-danger" title="@L["Delete"]">
-                                                <span class="material-symbols-outlined small">delete</span>
-                                            </a>
-                                        }
-                                    </div>
-                                </td>
+                                <th>ID</th>
+                                <th>@L["Title"]</th>
+                                <th>@L["Description"]</th>
+                                <th class="text-end">@L["Actions"]</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
+                        </thead>
+                        <tbody>
+                            @foreach (var suite in project.TestSuites)
+                            {
+                                <tr>
+                                    <td class="data-mono">@suite.Id</td>
+                                    <td class="body-md fw-bold">@suite.Title</td>
+                                    <td class="body-md text-muted">@((MarkupString)(suite.Description ?? ""))</td>
+                                    <td class="text-end pe-3">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="/testsuites/details/@suite.Id" class="btn btn-sm btn-outline-primary" title="@L["ViewTestCases"]">
+                                                <span class="material-symbols-outlined small">visibility</span>
+                                            </a>
+                                            @if (canEdit)
+                                            {
+                                                <a href="/testsuites/edit/@suite.Id" class="btn btn-sm btn-outline-primary" title="@L["Edit"]">
+                                                    <span class="material-symbols-outlined small">edit</span>
+                                                </a>
+                                                <a href="/testsuites/delete/@suite.Id" class="btn btn-sm btn-outline-primary text-danger" title="@L["Delete"]">
+                                                    <span class="material-symbols-outlined small">delete</span>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
     </div>
-</div>
 
-<div class="mt-4">
-    <a href="/projects" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
-        <span class="material-symbols-outlined small me-1">arrow_back</span> @L["BackToList"]
-    </a>
-</div>
+    <div class="mt-4">
+        <a href="/projects" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
+            <span class="material-symbols-outlined small me-1">arrow_back</span> @L["BackToList"]
+        </a>
+    </div>
+}
 
 @code {
     [Parameter]
