@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Runs - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Test Runs</h1>
+            <p class="subtitle">Managing execution cycles for {{ project.project_name }}</p>
+        </div>
+        <a href="{{ path('app_project_test_run_new', {id: project.project_id}) }}" class="btn-primary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.875rem;">Add Test Run</a>
+    </div>
+</div>
+
+<div class="table-container">
+    {% if testRuns|length > 0 %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Release / Build</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for run in testRuns %}
+            <tr>
+                <td style="color: var(--primary); font-weight: 600;">#{{ run.testsetid }}</td>
+                <td style="font-weight: 500;">{{ run.testsetname }}</td>
+                <td>
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">{{ run.releasename }} /</span>
+                    <span style="font-weight: 500;">{{ run.buildname }}</span>
+                </td>
+                <td>
+                    {% set status_class = 'badge-blue' %}
+                    {% if run.testsetstatus == 'Closed' %}{% set status_class = 'badge-green' %}
+                    {% elseif run.testsetstatus == 'In Progress' %}{% set status_class = 'badge-yellow' %}
+                    {% endif %}
+                    <span class="badge {{ status_class }}">{{ run.testsetstatus|default('New') }}</span>
+                </td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">{{ run.datecreated }}</td>
+                <td>
+                    <a href="{{ path('app_project_test_run_execute', {id: project.project_id, runId: run.testsetid}) }}" class="badge badge-blue" style="text-decoration: none;">Execute</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <p>No test runs found for this project.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

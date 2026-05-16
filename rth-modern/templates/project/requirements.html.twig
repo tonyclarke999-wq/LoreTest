@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Requirements - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Requirements</h1>
+            <p class="subtitle">Managing {{ requirements|length }} requirements for {{ project.project_name }}</p>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <form method="get" style="display: flex; gap: 0.5rem;">
+                <input type="text" name="q" value="{{ search }}" class="form-control" placeholder="Search requirements..." style="padding: 0.5rem 1rem; width: 250px; font-size: 0.875rem;">
+                {% if search %}
+                    <a href="{{ path('app_project_requirements', {id: project.project_id}) }}" class="badge badge-red" style="text-decoration: none; display: flex; align-items: center;">Clear</a>
+                {% endif %}
+            </form>
+            <a href="{{ path('app_project_requirement_new', {id: project.project_id}) }}" class="btn-primary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.875rem;">Add Requirement</a>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    {% if requirements|length > 0 %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Version</th>
+                <th>Status</th>
+                <th>Author</th>
+                <th width="150">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requirements %}
+            <tr>
+                <td style="color: var(--primary); font-weight: 600;">#{{ req.reqid }}</td>
+                <td style="font-weight: 500;">{{ req.reqname }}</td>
+                <td><span class="badge badge-blue">v{{ req.version|default('1.0') }}</span></td>
+                <td>
+                    {% set status_class = 'badge-yellow' %}
+                    {% if req.status == 'Approved' %}{% set status_class = 'badge-green' %}
+                    {% elseif req.status == 'Draft' %}{% set status_class = 'badge-blue' %}
+                    {% elseif req.status == 'Rejected' %}{% set status_class = 'badge-red' %}
+                    {% endif %}
+                    <span class="badge {{ status_class }}">{{ req.status|default('Draft') }}</span>
+                </td>
+                <td>{{ req.author|default('System') }}</td>
+                <td style="display: flex; gap: 0.5rem;">
+                    <a href="{{ path('app_project_requirement_edit', {id: project.project_id, reqId: req.reqid}) }}" class="badge badge-blue" style="text-decoration: none;">Edit</a>
+                    <form action="{{ path('app_project_requirement_delete', {id: project.project_id, reqId: req.reqid}) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this requirement?');" style="margin: 0;">
+                        <button type="submit" class="badge badge-red" style="border: none; cursor: pointer; font-family: inherit; font-size: inherit;">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <p>No requirements found for this project.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add New Project{% endblock %}
+
+{% block body %}
+<div class="dashboard-container" style="max-width: 800px; margin: 4rem auto;">
+    <div class="welcome-header">
+        <h1>Create New Project</h1>
+        <p class="subtitle">Set up a new workspace for requirements and testing</p>
+    </div>
+
+    <div class="project-card" style="padding: 2.5rem;">
+        <form method="post">
+            <div class="form-group">
+                <label for="name">Project Name</label>
+                <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Mobile App v2.0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Project Description</label>
+                <textarea id="description" name="description" class="form-control" style="min-height: 150px;" placeholder="Outline the project goals and scope..."></textarea>
+            </div>
+
+            <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                <button type="submit" class="btn-primary">Create Project</button>
+                <a href="{{ path('app_home') }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

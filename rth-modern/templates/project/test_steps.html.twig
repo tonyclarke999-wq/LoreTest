@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Steps - {{ test.testsuitename }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Test Steps: {{ test.testsuitename }}</h1>
+            <p class="subtitle">Managing {{ steps|length }} steps for project {{ project.project_name }}</p>
+        </div>
+        <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to Test List</a>
+    </div>
+</div>
+
+<div class="steps-container">
+    {% for step in steps %}
+    <div class="project-card" style="margin-bottom: 1.5rem; padding: 1.5rem;">
+        <form method="post" style="display: grid; grid-template-columns: 80px 1fr 1fr 1fr 120px; gap: 1rem; align-items: start;">
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="step_id" value="{{ step.teststepid }}">
+            
+            <div class="form-group">
+                <label>Step #</label>
+                <input type="number" name="step_number" value="{{ step.teststep_number }}" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Action</label>
+                <textarea name="step_action" class="form-control" style="min-height: 80px;" required>{{ step.action }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Inputs</label>
+                <textarea name="inputs" class="form-control" style="min-height: 80px;">{{ step.inputs }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Expected Result</label>
+                <textarea name="expected_result" class="form-control" style="min-height: 80px;">{{ step.expected_result }}</textarea>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; padding-top: 1.5rem;">
+                <button type="submit" class="badge badge-blue" style="border: none; cursor: pointer; font-family: inherit;">Update</button>
+                <form action="{{ path('app_project_test_step_delete', {id: project.project_id, testId: test.testid, stepId: step.teststepid}) }}" method="post" onsubmit="return confirm('Delete this step?');">
+                     <button type="submit" class="badge badge-red" style="border: none; cursor: pointer; font-family: inherit; width: 100%;">Delete</button>
+                </form>
+            </div>
+        </form>
+    </div>
+    {% endfor %}
+
+    <div class="project-card" style="background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--primary);">
+        <h3 style="margin-bottom: 1rem; color: var(--primary);">Add New Step</h3>
+        <form method="post" style="display: grid; grid-template-columns: 80px 1fr 1fr 1fr 120px; gap: 1rem; align-items: start;">
+            <input type="hidden" name="action" value="add">
+            
+            <div class="form-group">
+                <label>Step #</label>
+                <input type="number" name="step_number" value="{{ (steps|length > 0) ? (steps|last).teststep_number + 1 : 1 }}" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Action</label>
+                <textarea name="step_action" class="form-control" style="min-height: 80px;" placeholder="e.g. Click Login button" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Inputs</label>
+                <textarea name="inputs" class="form-control" style="min-height: 80px;" placeholder="e.g. user/pass"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Expected Result</label>
+                <textarea name="expected_result" class="form-control" style="min-height: 80px;" placeholder="e.g. Dashboard displays"></textarea>
+            </div>
+            
+            <div style="padding-top: 1.5rem;">
+                <button type="submit" class="btn-primary" style="padding: 0.5rem; width: 100%; font-size: 0.8rem;">Add Step</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

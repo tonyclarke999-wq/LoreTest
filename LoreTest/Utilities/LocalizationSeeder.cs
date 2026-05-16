@@ -333,45 +333,41 @@ namespace LoreTest.Utilities
                 { "Column", "Column" },
                 { "OldValue", "Old Value" },
                 { "NewValue", "New Value" },
-                { "ShowingLastLogs", "Showing last {0} entries" }
+                { "ShowingLastLogs", "Showing last {0} entries" },
+                { "ErrorCreatingUser", "Error creating user" },
+                { "ErrorUpdatingUser", "Error updating user" }
             };
 
-            var keys = initialTranslations.Keys.ToList();
-            for (int i = 0; i < keys.Count; i++)
+            int nextFieldId = (await context.LocalizationFields.MaxAsync(f => (int?)f.Id) ?? 0) + 1;
+
+            foreach (var kvp in initialTranslations)
             {
-                var key = keys[i];
-                var value = initialTranslations[key];
-                var fieldId = i + 1;
+                var key = kvp.Key;
+                var value = kvp.Value;
 
                 // Ensure field exists in LocalizationFields
-                var field = await context.LocalizationFields.FirstOrDefaultAsync(f => f.Id == fieldId);
+                var field = await context.LocalizationFields.FirstOrDefaultAsync(f => f.Key == key);
                 if (field == null)
                 {
-                    field = new LocalizationField { Id = fieldId, Key = key };
+                    field = new LocalizationField { Id = nextFieldId++, Key = key };
                     context.LocalizationFields.Add(field);
+                    await context.SaveChangesAsync();
                 }
-                else
-                {
-                    field.Key = key;
-                    context.LocalizationFields.Update(field);
-                }
-
-                await context.SaveChangesAsync();
 
                 // Ensure English translation exists
                 var existing = await context.DynamicTranslations
-                    .FirstOrDefaultAsync(t => t.LanguageId == english.Id && t.FieldId == fieldId);
+                    .FirstOrDefaultAsync(t => t.LanguageId == english.Id && t.FieldId == field.Id);
 
                 if (existing == null)
                 {
                     context.DynamicTranslations.Add(new DynamicTranslation
                     {
                         LanguageId = english.Id,
-                        FieldId = fieldId,
+                        FieldId = field.Id,
                         TranslatedValue = value
                     });
                 }
-                else
+                else if (existing.TranslatedValue != value)
                 {
                     existing.TranslatedValue = value;
                     context.DynamicTranslations.Update(existing);

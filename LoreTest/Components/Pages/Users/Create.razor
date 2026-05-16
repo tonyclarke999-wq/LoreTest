@@ -4,76 +4,84 @@
 @using Microsoft.AspNetCore.Identity
 @using LoreTest.Data
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.Extensions.Localization
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>@L["CreateUser"]</PageTitle>
+<div class="headline-md mb-4">@L["CreateUser"]</div>
 
-<h1>@L["CreateUser"]</h1>
-<hr />
 <div class="row">
-    <div class="col-md-4">
-        <EditForm Model="Input" OnValidSubmit="ValidSubmit" FormName="CreateUser">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" />
+    <div class="col-xl-6">
+        <div class="card p-4">
+            <EditForm Model="Input" OnValidSubmit="ValidSubmit" FormName="CreateUser">
+                <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <label for="email" class="form-label">@L["Email"]</label>
+                    <InputText id="email" @bind-Value="Input.Email" class="form-control" />
+                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">@L["Password"]</label>
+                    <InputText id="password" type="password" @bind-Value="Input.Password" class="form-control" />
+                    <ValidationMessage For="() => Input.Password" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="name" class="form-label">@L["Name"]</label>
+                    <InputText id="name" @bind-Value="Input.Name" class="form-control" />
+                    <ValidationMessage For="() => Input.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="jobTitle" class="form-label">@L["JobTitle"]</label>
+                    <InputText id="jobTitle" @bind-Value="Input.JobTitle" class="form-control" />
+                    <ValidationMessage For="() => Input.JobTitle" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="role" class="form-label">@L["Role"]</label>
+                    <InputSelect id="role" @bind-Value="Input.Role" class="form-select">
+                        <option value="Tester">Tester</option>
+                        <option value="Editor">Editor</option>
+                        <option value="Administrator">Administrator</option>
+                    </InputSelect>
+                    <ValidationMessage For="() => Input.Role" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="startDate" class="form-label">@L["StartDate"]</label>
+                    <InputDate id="startDate" @bind-Value="Input.StartDate" class="form-control" />
+                    <ValidationMessage For="() => Input.StartDate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="endDate" class="form-label">@L["EndDate"] (Optional)</label>
+                    <InputDate id="endDate" @bind-Value="Input.EndDate" class="form-control" />
+                    <ValidationMessage For="() => Input.EndDate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="preferredLanguage" class="form-label">@L["PreferredLanguage"]</label>
+                    <InputSelect id="preferredLanguage" @bind-Value="Input.PreferredLanguage" class="form-select">
+                        <option value="en">English</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="es">Español</option>
+                    </InputSelect>
+                    <ValidationMessage For="() => Input.PreferredLanguage" class="text-danger" />
+                </div>
 
-            <div class="mb-3">
-                <label for="email" class="form-label">@L["Email"]</label>
-                <InputText id="email" @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">@L["Password"]</label>
-                <InputText id="password" type="password" @bind-Value="Input.Password" class="form-control" aria-required="true" />
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="name" class="form-label">@L["Name"]</label>
-                <InputText id="name" @bind-Value="Input.Name" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="jobTitle" class="form-label">@L["JobTitle"]</label>
-                <InputText id="jobTitle" @bind-Value="Input.JobTitle" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="role" class="form-label">@L["Role"]</label>
-                <InputSelect id="role" @bind-Value="Input.Role" class="form-select">
-                    <option value="">@L["SelectRole"]</option>
-                    <option value="Administrator">@L["Administrator"]</option>
-                    <option value="Editor">@L["Editor"]</option>
-                    <option value="Tester">@L["Tester"]</option>
-                    <option value="Reviewer">@L["Reviewer"]</option>
-                </InputSelect>
-            </div>
-            <div class="mb-3">
-                <label for="startDate" class="form-label">@L["StartDate"]</label>
-                <InputDate id="startDate" @bind-Value="Input.StartDate" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="endDate" class="form-label">@L["EndDate"]</label>
-                <InputDate id="endDate" @bind-Value="Input.EndDate" class="form-control" />
-                <ValidationMessage For="() => Input.EndDate" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="preferredLanguage" class="form-label">@L["PreferredLanguage"]</label>
-                <InputSelect id="preferredLanguage" @bind-Value="Input.PreferredLanguage" class="form-select">
-                    <option value="en">English</option>
-                    <option value="fr">Français</option>
-                    <option value="de">Deutsch</option>
-                    <option value="es">Español</option>
-                </InputSelect>
-            </div>
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
 
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-                <div class="alert alert-danger">@errorMessage</div>
-            }
-
-            <button type="submit" class="btn btn-primary">@L["Create"]</button>
-            <a href="/users" class="btn btn-secondary">@L["BackToList"]</a>
-        </EditForm>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary d-flex align-items-center">
+                        <span class="material-symbols-outlined small me-1">save</span> @L["Create"]
+                    </button>
+                    <a href="/users" class="btn btn-outline-secondary d-flex align-items-center">
+                        <span class="material-symbols-outlined small me-1">arrow_back</span> @L["BackToList"]
+                    </a>
+                </div>
+            </EditForm>
+        </div>
     </div>
 </div>
 
@@ -83,7 +91,11 @@
 
     private string? errorMessage;
 
-    protected override void OnInitialized() => Input ??= new();
+    protected override void OnInitialized()
+    {
+        Input ??= new();
+        Input.PreferredLanguage ??= "en";
+    }
 
     public class InputModel : IValidatableObject
     {
@@ -100,7 +112,7 @@
         public string? Role { get; set; }
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
-        public string? PreferredLanguage { get; set; }
+        public string PreferredLanguage { get; set; } = "en";
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -130,15 +142,22 @@
             EmailConfirmed = true
         };
 
-        var result = await UserManager.CreateAsync(user, Input.Password);
+        try
+        {
+            var result = await UserManager.CreateAsync(user, Input.Password);
 
-        if (result.Succeeded)
-        {
-            NavigationManager.NavigateTo("/users");
+            if (result.Succeeded)
+            {
+                NavigationManager.NavigateTo("/users");
+            }
+            else
+            {
+                errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+            }
         }
-        else
+        catch (Exception ex)
         {
-            errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+            errorMessage = L["ErrorCreatingUser"] + ": " + ex.Message;
         }
     }
 }

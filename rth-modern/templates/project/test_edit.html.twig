@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Test Case - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Edit Test Case #{{ test.testid }}</h1>
+            <p class="subtitle">Updating test parameters for {{ project.project_name }}</p>
+        </div>
+        <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to List</a>
+    </div>
+</div>
+
+<div class="project-card" style="max-width: 800px;">
+    <form method="post">
+        <div class="form-group">
+            <label for="name">Test Name</label>
+            <input type="text" id="name" name="name" class="form-control" value="{{ test.testsuitename }}" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <select id="priority" name="priority" class="form-control" required>
+                    <option value="High" {% if test.priority == 'High' %}selected{% endif %}>High</option>
+                    <option value="Medium" {% if test.priority == 'Medium' %}selected{% endif %}>Medium</option>
+                    <option value="Low" {% if test.priority == 'Low' %}selected{% endif %}>Low</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" name="status" class="form-control" required>
+                    <option value="Ready" {% if test.status == 'Ready' %}selected{% endif %}>Ready</option>
+                    <option value="Draft" {% if test.status == 'Draft' %}selected{% endif %}>Draft</option>
+                    <option value="Passed" {% if test.status == 'Passed' %}selected{% endif %}>Passed</option>
+                    <option value="Failed" {% if test.status == 'Failed' %}selected{% endif %}>Failed</option>
+                    <option value="Retired" {% if test.status == 'Retired' %}selected{% endif %}>Retired</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Test Description</label>
+            <textarea id="description" name="description" class="form-control" style="min-height: 150px;">{{ test.purpose }}</textarea>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn-primary">Save Changes</button>
+            <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
