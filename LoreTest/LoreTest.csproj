@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-LoreTest-2bd98a07-78a5-457e-bb27-a85563f38a17</UserSecretsId>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
-    <Version>0.4.0</Version>
+    <Version>0.5.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
