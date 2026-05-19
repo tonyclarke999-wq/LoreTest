@@ -576,6 +576,169 @@ final class ProjectController extends AbstractController
         ]);
     }
 
+    #[Route('/project/{id}/tests/import', name: 'app_project_test_import', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function testImport(int $id, Request $request, Connection $connection): Response
+    {
+        $project = $connection->fetchAssociative('SELECT * FROM project WHERE project_id = ?', [$id]);
+        if (!$project) {
+            throw $this->createNotFoundException('Project not found');
+        }
+
+        if ($request->isMethod('POST')) {
+            $file = $request->files->get('csv_file');
+            if (!$file) {
+                $this->addFlash('error', 'Please select a CSV file to upload.');
+                return $this->redirectToRoute('app_project_test_import', ['id' => $id]);
+            }
+
+            $path = $file->getRealPath();
+            if (($handle = fopen($path, 'r')) !== false) {
+                $bom = fread($handle, 3);
+                if ($bom !== chr(0xEF).chr(0xBB).chr(0xBF)) {
+                    rewind($handle);
+                }
+
+                $headers = fgetcsv($handle);
+                if (!$headers || count($headers) < 2) {
+                    $this->addFlash('error', 'Invalid CSV format. Header row missing or invalid.');
+                    fclose($handle);
+                    return $this->redirectToRoute('app_project_test_import', ['id' => $id]);
+                }
+
+                $currentTestId = null;
+                $newCount = 0;
+                $updateCount = 0;
+
+                while (($row = fgetcsv($handle)) !== false) {
+                    if (empty($row) || count($row) < 2) {
+                        continue;
+                    }
+
+                    $testName = trim($row[1] ?? '');
+                    if ($testName !== '') {
+                        $testIdRaw = trim($row[0] ?? '');
+                        $targetTestId = 0;
+                        if ($testIdRaw !== '') {
+                            $targetTestId = (int) filter_var($testIdRaw, FILTER_SANITIZE_NUMBER_INT);
+                        }
+
+                        $testType = trim($row[2] ?? 'Regression');
+                        $areaTested = trim($row[3] ?? 'Bugs');
+                        $priority = trim($row[4] ?? 'Medium');
+                        $status = trim($row[5] ?? 'Ready');
+                        $purpose = trim($row[6] ?? '');
+                        $comments = trim($row[7] ?? '');
+                        $baOwner = trim($row[8] ?? '');
+                        $scripter = trim($row[9] ?? '');
+                        $tester = trim($row[10] ?? '');
+                        $assignedTo = trim($row[11] ?? '');
+                        $assignedBy = trim($row[12] ?? '');
+                        
+                        $dateAssigned = trim($row[13] ?? '');
+                        if ($dateAssigned === '') $dateAssigned = null;
+
+                        $expDateComplete = trim($row[14] ?? '');
+                        if ($expDateComplete === '') $expDateComplete = null;
+
+                        $actDateComplete = trim($row[15] ?? '');
+                        if ($actDateComplete === '') $actDateComplete = null;
+
+                        $duration = ($row[16] ?? '') !== '' ? (int) $row[16] : 0;
+
+                        $autopass = in_array(strtoupper(trim($row[17] ?? '')), ['Y', 'YES', '1', 'TRUE']) ? 'Y' : 'N';
+                        $stepsEnabled = in_array(strtoupper(trim($row[18] ?? '')), ['Y', 'YES', '1', 'TRUE']) ? 'Y' : 'N';
+                        $scriptEnabled = in_array(strtoupper(trim($row[19] ?? '')), ['Y', 'YES', '1', 'TRUE']) ? 'Y' : 'N';
+                        $loadrunnerEnabled = in_array(strtoupper(trim($row[20] ?? '')), ['Y', 'YES', '1', 'TRUE']) ? 'Y' : 'N';
+
+                        $existingTest = null;
+                        if ($targetTestId > 0) {
+                            $existingTest = $connection->fetchAssociative(
+                                'SELECT testid FROM testsuite WHERE testid = ? AND project_id = ?',
+                                [$targetTestId, $id]
+                            );
+                        }
+
+                        $testData = [
+                            'project_id' => $id,
+                            'testsuitename' => $testName,
+                            'testtype' => $testType,
+                            'areatested' => $areaTested,
+                            'priority' => $priority,
+                            'status' => $status,
+                            'purpose' => $purpose,
+                            'comments' => $comments,
+                            'baowner' => $baOwner,
+                            'scripter' => $scripter,
+                            'tester' => $tester,
+                            'assignedto' => $assignedTo,
+                            'assignedby' => $assignedBy,
+                            'dateassigned' => $dateAssigned,
+                            'expdatecomplete' => $expDateComplete,
+                            'actdatecomplete' => $actDateComplete,
+                            'duration' => $duration,
+                            'autopass' => $autopass,
+                            'steps' => $stepsEnabled,
+                            'script' => $scriptEnabled,
+                            'loadrunner' => $loadrunnerEnabled,
+                            'lastupdated' => date('Y-m-d H:i:s'),
+                            'lastupdatedby' => $this->getUser()->getUserIdentifier(),
+                        ];
+
+                        if ($existingTest) {
+                            $connection->update('testsuite', $testData, ['testid' => $targetTestId]);
+                            $currentTestId = $targetTestId;
+                            $connection->executeStatement('DELETE FROM teststep WHERE testid = ?', [$targetTestId]);
+                            $updateCount++;
+                        } else {
+                            $testData['datecreated'] = date('Y-m-d H:i:s');
+                            $testData['uniqueid'] = uniqid();
+                            $testData['deleted'] = 'N';
+                            $connection->insert('testsuite', $testData);
+                            $currentTestId = (int) $connection->lastInsertId();
+                            $newCount++;
+                        }
+                    }
+
+                    if ($currentTestId !== null) {
+                        $stepNumberRaw = trim($row[21] ?? '');
+                        if ($stepNumberRaw !== '') {
+                            $stepNumber = (int) $stepNumberRaw;
+                            $action = trim($row[22] ?? '');
+                            $inputs = trim($row[23] ?? '');
+                            $expectedResult = trim($row[24] ?? '');
+                            $stepType = trim($row[25] ?? 'Manual');
+
+                            $connection->insert('teststep', [
+                                'testid' => $currentTestId,
+                                'teststep_number' => $stepNumber,
+                                'action' => $action,
+                                'inputs' => $inputs,
+                                'expected_result' => $expectedResult,
+                                'steptype' => $stepType
+                            ]);
+                        }
+                    }
+                }
+
+                fclose($handle);
+                $this->addFlash('success', sprintf(
+                    'CSV Import successful! Created %d new test cases, updated %d existing test cases.',
+                    $newCount,
+                    $updateCount
+                ));
+            } else {
+                $this->addFlash('error', 'Unable to open uploaded file.');
+            }
+
+            return $this->redirectToRoute('app_project_tests', ['id' => $id]);
+        }
+
+        return $this->render('project/test_import.html.twig', [
+            'project' => $project,
+        ]);
+    }
+
     #[Route('/project/{id}/bugs', name: 'app_project_bugs')]
     #[IsGranted('ROLE_USER')]
     public function bugs(int $id, Request $request, Connection $connection): Response
