@@ -9,6 +9,7 @@ services:
       - "54321:5432"
     volumes:
       - pg-data:/var/lib/postgresql/data
+      - ./rth_modern_postgres.sql:/docker-entrypoint-initdb.d/init.sql
 
   php:
     build: .

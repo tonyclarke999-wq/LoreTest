@@ -636,13 +636,8 @@ final class ProjectController extends AbstractController
                         $assignedBy = trim($row[12] ?? '');
                         
                         $dateAssigned = trim($row[13] ?? '');
-                        if ($dateAssigned === '') $dateAssigned = null;
-
                         $expDateComplete = trim($row[14] ?? '');
-                        if ($expDateComplete === '') $expDateComplete = null;
-
                         $actDateComplete = trim($row[15] ?? '');
-                        if ($actDateComplete === '') $actDateComplete = null;
 
                         $duration = ($row[16] ?? '') !== '' ? (int) $row[16] : 0;
 
