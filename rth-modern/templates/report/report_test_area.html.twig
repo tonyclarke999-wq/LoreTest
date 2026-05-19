@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Area Report - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header" style="margin-bottom: 2rem;">
+    <div>
+        <h1>Test Area Report</h1>
+        <p class="subtitle">View the number of tests executed by Test Area for a selected Test Set.</p>
+    </div>
+</div>
+
+{{ include('report/_filters.html.twig', { filter_type: 'testset' }) }}
+
+{% if selected_testset %}
+    <div class="table-container">
+        <table style="width: 100%; text-align: left; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Test Area</th>
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Total Tests</th>
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Passed</th>
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Failed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results %}
+                <tr style="border-bottom: 1px solid var(--glass-border);">
+                    <td style="padding: 1rem 1.25rem; color: var(--text-main);">{{ row.areatested ?: 'Unassigned' }}</td>
+                    <td style="padding: 1rem 1.25rem; color: var(--text-main);">{{ row.total_tests }}</td>
+                    <td style="padding: 1rem 1.25rem; color: var(--success);">{{ row.passed_tests }}</td>
+                    <td style="padding: 1rem 1.25rem; color: var(--danger);">{{ row.failed_tests }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="padding: 2rem; text-align: center; color: var(--text-muted);">No results found for this test set.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+
+{% endblock %}

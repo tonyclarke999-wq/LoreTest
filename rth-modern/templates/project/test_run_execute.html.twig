@@ -11,52 +11,168 @@
     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
         <div>
             <h1>Execute Test Run</h1>
-            <p class="subtitle">{{ testRun.testsetname }} - {{ project.project_name }}</p>
+            <p class="subtitle">{{ testRun.testsetname }} — {{ project.project_name }}</p>
         </div>
         <a href="{{ path('app_project_test_runs', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to Runs</a>
     </div>
 </div>
 
-<div class="table-container">
+<div style="display: flex; flex-direction: column; gap: 2.5rem; max-width: 1300px;">
     {% if tests|length > 0 %}
-    <table>
-        <thead>
-            <tr>
-                <th>Test ID</th>
-                <th>Test Name</th>
-                <th>Status</th>
-                <th>Tester</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for test in tests %}
-            <tr>
-                <td style="color: var(--primary); font-weight: 600;">#{{ test.testid }}</td>
-                <td style="font-weight: 500;">{{ test.testsuitename }}</td>
-                <td>
-                    {% set status_class = 'badge-blue' %}
-                    {% if test.teststatus == 'Passed' %}{% set status_class = 'badge-green' %}
-                    {% elseif test.teststatus == 'Failed' %}{% set status_class = 'badge-red' %}
-                    {% elseif test.teststatus == 'Running' %}{% set status_class = 'badge-yellow' %}
-                    {% endif %}
-                    <span class="badge {{ status_class }}">{{ test.teststatus|default('Not Started') }}</span>
-                </td>
-                <td>{{ test.assignedto|default('Unassigned') }}</td>
-                <td>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <button class="badge badge-green" style="border: none; cursor: pointer;">Pass</button>
-                        <button class="badge badge-red" style="border: none; cursor: pointer;">Fail</button>
+        {% for test in tests %}
+            <div class="project-card" style="cursor: default; padding: 2rem;">
+                <form action="{{ path('app_project_test_run_save_results', {id: project.project_id, runId: testRun.testsetid, assocId: test.testset_testsuite_associd}) }}" method="post" style="margin: 0;">
+                    
+                    {# Header Bar #}
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1.25rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
+                                <span class="badge badge-purple" style="font-size: 0.95rem;">#{{ test.testid }}</span>
+                                <h2 style="font-size: 1.4rem; margin: 0; color: var(--text-color); font-weight: 700;">{{ test.testsuitename }}</h2>
+                            </div>
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">Assigned Tester: <strong style="color: var(--text-color);">{{ test.assignedto|default('Unassigned') }}</strong></span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            {% set status_class = 'badge-blue' %}
+                            {% if test.teststatus == 'Passed' %}{% set status_class = 'badge-green' %}
+                            {% elseif test.teststatus == 'Failed' %}{% set status_class = 'badge-red' %}
+                            {% elseif test.teststatus == 'WIP' or test.teststatus == 'Running' %}{% set status_class = 'badge-yellow' %}
+                            {% endif %}
+                            <span class="badge {{ status_class }}" style="font-size: 1rem; padding: 0.4rem 1rem; font-weight: 600;">Current Status: {{ test.teststatus|default('Not Started') }}</span>
+                        </div>
                     </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+                    {# Execution Parameters Form Grid #}
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.05rem; color: var(--primary); margin-top: 0; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem;">Session Parameters</h3>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 500;">Assigned Tester</label>
+                                <select name="assigned_to" class="form-control" style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%;">
+                                    <option value="">— Select Tester —</option>
+                                    {% for user in users|default([]) %}
+                                        <option value="{{ user.username }}" {% if test.assignedto == user.username %}selected{% endif %}>{{ user.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 500;">Overall Test Status <span style="color: #ef4444;">*</span></label>
+                                <select name="test_status" class="form-control" style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%; font-weight: 600;" required>
+                                    <option value="Passed" {% if test.teststatus == 'Passed' %}selected{% endif %}>Passed</option>
+                                    <option value="Failed" {% if test.teststatus == 'Failed' %}selected{% endif %}>Failed</option>
+                                    <option value="WIP" {% if test.teststatus == 'WIP' or test.teststatus == 'Running' %}selected{% endif %}>WIP / Running</option>
+                                    <option value="Blocked" {% if test.teststatus == 'Blocked' %}selected{% endif %}>Blocked</option>
+                                    <option value="Not Started" {% if test.teststatus == 'Not Started' %}selected{% endif %}>Not Started</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 500;">Duration (minutes)</label>
+                                <input type="number" name="duration" class="form-control" value="15" min="0" style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%;">
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 500;">Operating System</label>
+                                <select name="os" class="form-control" style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%;">
+                                    <option value="Windows 11" {% if test.latest_run.os|default('') == 'Windows 11' %}selected{% endif %}>Windows 11</option>
+                                    <option value="Windows 10" {% if test.latest_run.os|default('') == 'Windows 10' %}selected{% endif %}>Windows 10</option>
+                                    <option value="Linux" {% if test.latest_run.os|default('') == 'Linux' %}selected{% endif %}>Linux</option>
+                                    <option value="macOS" {% if test.latest_run.os|default('') == 'macOS' %}selected{% endif %}>macOS</option>
+                                    <option value="iOS" {% if test.latest_run.os|default('') == 'iOS' %}selected{% endif %}>iOS</option>
+                                    <option value="Android" {% if test.latest_run.os|default('') == 'Android' %}selected{% endif %}>Android</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 500;">Test Environment</label>
+                                <select name="environment" class="form-control" style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%;">
+                                    <option value="QA" {% if test.latest_run.environment|default('') == 'QA' %}selected{% endif %}>QA Environment</option>
+                                    <option value="Staging" {% if test.latest_run.environment|default('') == 'Staging' %}selected{% endif %}>Staging</option>
+                                    <option value="Production" {% if test.latest_run.environment|default('') == 'Production' %}selected{% endif %}>Production</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 500;">Root Cause / Failed Reason</label>
+                                <input type="text" name="root_cause" class="form-control" placeholder="e.g. Defect #102, Environment Down" value="{{ test.root_cause|default('') }}" style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%;">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 500;">Overall Session Comments</label>
+                            <textarea name="comments" class="form-control" rows="2" placeholder="Record overall session observations..." style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%; font-family: inherit;">{{ test.run_comments|default('') }}</textarea>
+                        </div>
+                    </div>
+
+                    {# Execution Steps Table #}
+                    <h3 style="font-size: 1.15rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>📋 Individual Execution Steps</span>
+                        <span class="badge badge-blue" style="font-size: 0.8rem;">{{ test.steps|default([])|length }} steps</span>
+                    </h3>
+
+                    {% if test.steps is defined and test.steps|length > 0 %}
+                        <div class="table-container" style="margin: 0 0 2rem 0; overflow-x: auto;">
+                            <table style="margin: 0; min-width: 900px;">
+                                <thead>
+                                    <tr>
+                                        <th width="60">Step #</th>
+                                        <th width="22%">Action</th>
+                                        <th width="18%">Inputs / Params</th>
+                                        <th width="22%">Expected Result</th>
+                                        <th width="25%">Actual Result</th>
+                                        <th style="min-width: 150px; width: 150px;">Step Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for step in test.steps %}
+                                    <tr style="background: rgba(255,255,255,0.01);">
+                                        <td style="font-weight: 600; color: var(--primary); vertical-align: top; padding-top: 1rem;">{{ step.teststep_number }}</td>
+                                        <td style="white-space: pre-wrap; font-weight: 500; vertical-align: top; padding-top: 1rem;">{{ step.action }}</td>
+                                        <td style="white-space: pre-wrap; color: var(--text-muted); font-family: monospace; font-size: 0.9rem; vertical-align: top; padding-top: 1rem;">{{ step.inputs|default('—') }}</td>
+                                        <td style="white-space: pre-wrap; color: #cbd5e1; vertical-align: top; padding-top: 1rem;">{{ step.expected_result }}</td>
+                                        
+                                        <td style="vertical-align: top;">
+                                            <textarea name="actual_result_{{ step.teststepid }}" class="form-control" rows="2" placeholder="Record step actual outcome..." style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%; font-size: 0.9rem; resize: vertical;">{{ step.actual_result|default('') }}</textarea>
+                                        </td>
+
+                                        <td style="vertical-align: top;">
+                                            {% set cur_step_status = step.step_status|default('') %}
+                                            <select name="step_status_{{ step.teststepid }}" class="form-control" onchange="this.style.color = (this.value === 'Pass' ? '#22c55e' : (this.value === 'Fail' ? '#ef4444' : (this.value === 'Info' ? '#3b82f6' : '#94a3b8')))" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); color: {% if cur_step_status == 'Pass' %}#22c55e{% elseif cur_step_status == 'Fail' %}#ef4444{% elseif cur_step_status == 'Info' %}#3b82f6{% else %}#94a3b8{% endif %}; font-weight: 600; width: 100%; min-width: 140px;">
+                                                <option value="" style="color: #94a3b8;" {% if cur_step_status == '' %}selected{% endif %}>— Select —</option>
+                                                <option value="Pass" style="color: #22c55e;" {% if cur_step_status == 'Pass' %}selected{% endif %}>Pass</option>
+                                                <option value="Fail" style="color: #ef4444;" {% if cur_step_status == 'Fail' %}selected{% endif %}>Fail</option>
+                                                <option value="Info" style="color: #3b82f6;" {% if cur_step_status == 'Info' %}selected{% endif %}>Info / N/A</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div style="background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1); text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                            No manual steps defined for this test case. <a href="{{ path('app_project_test_steps', {id: project.project_id, testId: test.testid}) }}" style="color: var(--primary); text-decoration: underline;">Add steps here</a>.
+                        </div>
+                    {% endif %}
+
+                    {# Form Submit Bar #}
+                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 1rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.5rem;">
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">All step outcomes will be recorded in the verify history log.</span>
+                        <button type="submit" class="btn btn-primary" style="padding: 0.85rem 2rem; font-size: 1rem; font-weight: 600; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
+                            💾 Save Test Results & Step Records
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        {% endfor %}
     {% else %}
-    <div class="empty-state">
-        <p>No tests found in this test run.</p>
-    </div>
+        <div class="empty-state">
+            <p>No tests found in this test run.</p>
+        </div>
     {% endif %}
 </div>
 {% endblock %}

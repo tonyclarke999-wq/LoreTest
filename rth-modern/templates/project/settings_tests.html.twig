@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Settings - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div>
+        <h1>Test Settings</h1>
+        <p class="subtitle">Configure test categorization lookups for {{ project.project_name }}</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 900px;">
+    {# --- Test Types --- #}
+    <div class="project-card" style="cursor: default;">
+        <h2 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--primary);">Test Types</h2>
+        
+        <form method="post" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+            <input type="hidden" name="action" value="add_type">
+            <input type="text" name="type_name" class="form-control" placeholder="New Test Type (e.g. Security, Integration)..." required style="padding: 0.375rem 0.75rem; font-size: 0.85rem;">
+            <button type="submit" class="badge badge-green" style="border: none; cursor: pointer;">+ Add</button>
+        </form>
+
+        <div class="table-container">
+            <table>
+                <tbody>
+                    {% for tp in types %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ tp.testtype }}</td>
+                        <td width="40" style="text-align: right;">
+                            <form method="post" style="margin: 0; display: inline;">
+                                <input type="hidden" name="action" value="remove_type">
+                                <input type="hidden" name="id" value="{{ tp.testtypeid }}">
+                                <button type="submit" style="background: none; border: none; color: #fca5a5; cursor: pointer; padding: 0;" title="Remove" onclick="return confirm('Remove this test type?');">✕</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="2" style="color: var(--text-muted); font-size: 0.85rem;">No test types.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# --- Test Areas --- #}
+    <div class="project-card" style="cursor: default;">
+        <h2 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--primary);">Test Areas</h2>
+        
+        <form method="post" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+            <input type="hidden" name="action" value="add_area">
+            <input type="text" name="area_name" class="form-control" placeholder="New Test Area (e.g. Authentication, Checkout)..." required style="padding: 0.375rem 0.75rem; font-size: 0.85rem;">
+            <button type="submit" class="badge badge-green" style="border: none; cursor: pointer;">+ Add</button>
+        </form>
+
+        <div class="table-container">
+            <table>
+                <tbody>
+                    {% for area in areas %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ area.areatestedname }}</td>
+                        <td width="40" style="text-align: right;">
+                            <form method="post" style="margin: 0; display: inline;">
+                                <input type="hidden" name="action" value="remove_area">
+                                <input type="hidden" name="id" value="{{ area.areatestedid }}">
+                                <button type="submit" style="background: none; border: none; color: #fca5a5; cursor: pointer; padding: 0;" title="Remove" onclick="return confirm('Remove this test area?');">✕</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="2" style="color: var(--text-muted); font-size: 0.85rem;">No test areas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

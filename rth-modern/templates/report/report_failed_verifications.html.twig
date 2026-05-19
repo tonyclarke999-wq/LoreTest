@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Failed Verifications Report - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header" style="margin-bottom: 2rem;">
+    <div>
+        <h1>Failed Verifications</h1>
+        <p class="subtitle">View detailed information on all failed verifications for a selected Test Set.</p>
+    </div>
+</div>
+
+{{ include('report/_filters.html.twig', { filter_type: 'testset' }) }}
+
+{% if selected_testset %}
+    <div class="table-container">
+        <table style="width: 100%; text-align: left; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Test Case</th>
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Step #</th>
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Expected Result</th>
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Actual Result</th>
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results %}
+                <tr style="border-bottom: 1px solid var(--glass-border);">
+                    <td style="padding: 1rem 1.25rem; color: var(--text-main); font-weight: 500;">{{ row.testsuitename }}</td>
+                    <td style="padding: 1rem 1.25rem; color: var(--text-main);">{{ row.stepnumber }}</td>
+                    <td style="padding: 1rem 1.25rem; color: var(--text-muted); max-width: 250px; overflow-wrap: break-word;">{{ row.expectedresult }}</td>
+                    <td style="padding: 1rem 1.25rem; color: var(--danger); max-width: 250px; overflow-wrap: break-word;">{{ row.actualresult }}</td>
+                    <td style="padding: 1rem 1.25rem; color: var(--text-main);">{{ row.logtimestamp|date('Y-m-d H:i') }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="padding: 2rem; text-align: center; color: var(--success);">No failed verifications found for this test set! 🎉</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+
+{% endblock %}

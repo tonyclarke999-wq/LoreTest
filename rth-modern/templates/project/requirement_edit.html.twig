@@ -13,17 +13,47 @@
             <h1>Edit Requirement #{{ requirement.reqid }}</h1>
             <p class="subtitle">Updating requirement for {{ project.project_name }}</p>
         </div>
-        <a href="{{ path('app_project_requirements', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to List</a>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{{ path('app_project_requirement_detail', {id: project.project_id, reqId: requirement.reqid}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to Detail</a>
+            <a href="{{ path('app_project_requirements', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to List</a>
+        </div>
     </div>
 </div>
 
-<div class="project-card" style="max-width: 800px;">
-    <form method="post">
+<div class="project-card" style="max-width: 900px;">
+    <form method="post" enctype="multipart/form-data">
+        {# --- Row 1: Name --- #}
         <div class="form-group">
-            <label for="name">Requirement Name</label>
+            <label for="name">Requirement Name <span style="color: #f87171;">*</span></label>
             <input type="text" id="name" name="name" class="form-control" value="{{ requirement.reqname }}" required>
         </div>
 
+        {# --- Record or File indicator --- #}
+        {% if requirement.recordorfile == 'F' %}
+        <div class="form-group">
+            <label>Content Type</label>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span class="badge badge-blue">📄 File-based Requirement</span>
+                {% if requirement.filename %}
+                    <a href="{{ path('app_project_requirement_download', {id: project.project_id, reqId: requirement.reqid}) }}" class="badge badge-green" style="text-decoration: none;">⬇ Download Current File</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="upload_file">Replace File</label>
+            <input type="file" id="upload_file" name="upload_file" class="form-control" style="padding: 0.5rem;">
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Leave empty to keep current file. Max: 25MB</p>
+        </div>
+        {% else %}
+        {# --- Detail (Record type) --- #}
+        <div class="form-group">
+            <label for="detail">Detailed Description (v{{ requirement.version|default('1.0') }})</label>
+            <textarea id="detail" name="detail" class="form-control" style="min-height: 200px;">{{ requirement.detail }}</textarea>
+        </div>
+        {% endif %}
+
+        {# --- Row 3: Priority, Type, Status --- #}
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
             <div class="form-group">
                 <label for="priority">Priority</label>
@@ -34,32 +64,96 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="type">Requirement Type</label>
-                <select id="type" name="type" class="form-control" required>
-                    <option value="1" {% if requirement.type == 1 %}selected{% endif %}>Use Case</option>
-                    <option value="2" {% if requirement.type == 2 %}selected{% endif %}>Functional Spec</option>
-                    <option value="3" {% if requirement.type == 3 %}selected{% endif %}>Technical Spec</option>
+                <label for="type">Document Type</label>
+                <select id="type" name="type" class="form-control">
+                    <option value="0">— Select —</option>
+                    {% for dt in docTypes %}
+                        <option value="{{ dt.reqdoctypeid }}" {% if requirement.type == dt.reqdoctypeid %}selected{% endif %}>{{ dt.reqdoctypename }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="form-group">
                 <label for="status">Status</label>
                 <select id="status" name="status" class="form-control" required>
-                    <option value="Draft" {% if requirement.status == 'Draft' %}selected{% endif %}>Draft</option>
-                    <option value="New" {% if requirement.status == 'New' %}selected{% endif %}>New</option>
-                    <option value="Approved" {% if requirement.status == 'Approved' %}selected{% endif %}>Approved</option>
-                    <option value="Rejected" {% if requirement.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                    {% set statuses = ['New', 'Draft', 'Approved', 'Rejected', 'Not Testable', 'Obsolete'] %}
+                    {% for s in statuses %}
+                        <option value="{{ s }}" {% if requirement.status == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
 
+        {# --- Row 4: Area Covered, Assigned To, Change Request --- #}
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="area_covered">Area Covered</label>
+                <select id="area_covered" name="area_covered" class="form-control">
+                    <option value="0">— None —</option>
+                    {% for area in areas %}
+                        <option value="{{ area.reqareacoverageid }}" {% if requirement.areacovered == area.reqareacoverageid %}selected{% endif %}>{{ area.areacoverage }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="assigned_to">Assigned To</label>
+                <select id="assigned_to" name="assigned_to" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for user in users %}
+                        <option value="{{ user.username }}" {% if requirement.assignedto == user.username %}selected{% endif %}>{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="defect_id">Change Request / Defect ID</label>
+                <input type="number" id="defect_id" name="defect_id" class="form-control" value="{{ requirement.defect_id|default(0) }}" min="0">
+            </div>
+        </div>
+
+        {# --- Row 5: Assign to Release, Parent Requirement --- #}
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="assign_release">Assign to Release</label>
+                <select id="assign_release" name="assign_release" class="form-control">
+                    <option value="0">— None —</option>
+                    {% for rel in releases %}
+                        <option value="{{ rel.releaseid }}" {% if selectedRelease == rel.releaseid %}selected{% endif %}>{{ rel.releasename }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="parent_req">Parent Requirement</label>
+                <select id="parent_req" name="parent_req" class="form-control">
+                    <option value="0">— None (top level) —</option>
+                    {% for req in allRequirements %}
+                        {% if req.reqid != requirement.reqid %}
+                            <option value="{{ req.reqid }}" {% if requirement.parent == req.reqid %}selected{% endif %}>#{{ req.reqid }} — {{ req.reqname }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        {# --- Row 6: Functionality (multi-select) --- #}
+        {% if functionalities|length > 0 %}
         <div class="form-group">
-            <label for="detail">Detailed Description (v{{ requirement.version }})</label>
-            <textarea id="detail" name="detail" class="form-control" style="min-height: 200px;">{{ requirement.detail }}</textarea>
+            <label for="functionality">Functionality <span style="font-size: 0.75rem; color: var(--text-muted);">(Hold Ctrl/Cmd to select multiple)</span></label>
+            <select id="functionality" name="functionality[]" class="form-control" multiple style="min-height: 120px;">
+                {% for func in functionalities %}
+                    <option value="{{ func.functionalityid }}" {% if func.functionalityid in selectedFunctionalities %}selected{% endif %}>{{ func.functionalityname }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        {# --- Row 7: Reason for Change --- #}
+        <div class="form-group">
+            <label for="reason_for_change">Reason for Change</label>
+            <textarea id="reason_for_change" name="reason_for_change" class="form-control" style="min-height: 80px;">{{ requirement.reasonforchange }}</textarea>
         </div>
 
         <div style="margin-top: 2rem; display: flex; gap: 1rem;">
             <button type="submit" class="btn-primary">Save Changes</button>
-            <a href="{{ path('app_project_requirements', {id: project.project_id}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none;">Cancel</a>
+            <a href="{{ path('app_project_requirement_detail', {id: project.project_id, reqId: requirement.reqid}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none;">Cancel</a>
         </div>
     </form>
 </div>

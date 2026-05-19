@@ -10,21 +10,30 @@
 <div class="page-header">
     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
         <div>
-            <h1>Report Bug</h1>
-            <p class="subtitle">Reporting a new defect for {{ project.project_name }}</p>
+            <h1>Report New Defect</h1>
+            <p class="subtitle">Submitting a comprehensive defect report for {{ project.project_name }}</p>
         </div>
-        <a href="{{ path('app_project_bugs', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to List</a>
+        <a href="{{ path('app_project_bugs', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to Defect List</a>
     </div>
 </div>
 
-<div class="project-card" style="max-width: 800px;">
+<div class="project-card" style="max-width: 1000px;">
     <form method="post">
+        {# Section 1: Core Information #}
+        <h3 style="color: var(--primary); margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">1. Core Defect Information</h3>
         <div class="form-group">
-            <label for="summary">Bug Summary</label>
-            <input type="text" id="summary" name="summary" class="form-control" placeholder="e.g., Application crashes on login" required>
+            <label for="summary">Bug Summary <span style="color: #f87171;">*</span></label>
+            <input type="text" id="summary" name="summary" class="form-control" placeholder="e.g., Application crashes during checkout payment step" required>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div class="form-group">
+            <label for="description">Detailed Steps to Reproduce & Description <span style="color: #f87171;">*</span></label>
+            <textarea id="description" name="description" class="form-control" style="min-height: 220px;" placeholder="1. Navigate to...&#10;2. Click on...&#10;3. Notice error..." required></textarea>
+        </div>
+
+        {# Section 2: Categorization & Severity #}
+        <h3 style="color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">2. Categorization & Severity</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1.5rem;">
             <div class="form-group">
                 <label for="priority">Priority</label>
                 <select id="priority" name="priority" class="form-control" required>
@@ -41,18 +50,105 @@
                     <option value="Critical" selected>Critical</option>
                     <option value="Major">Major</option>
                     <option value="Minor">Minor</option>
+                    <option value="Trivial">Trivial</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="category">Defect Category</label>
+                <select id="category" name="category" class="form-control" required>
+                    <option value="">— Select Category —</option>
+                    {% for cat in lookups.categories %}
+                        <option value="{{ cat.categoryid }}">{{ cat.categoryname }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="component">System Component</label>
+                <select id="component" name="component" class="form-control" required>
+                    <option value="">— Select Component —</option>
+                    {% for comp in lookups.components %}
+                        <option value="{{ comp.componentid }}">{{ comp.componentname }}</option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
 
-        <div class="form-group">
-            <label for="description">Steps to Reproduce / Description</label>
-            <textarea id="description" name="description" class="form-control" style="min-height: 200px;" placeholder="Provide detailed steps to reproduce the bug..."></textarea>
+        {# Section 3: Ownership & Release Governance #}
+        <h3 style="color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">3. Ownership & Release Governance</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="assignedto">Assigned QA / Tester</label>
+                <select id="assignedto" name="assignedto" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for u in lookups.users %}
+                        <option value="{{ u.username }}">{{ u.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="assignedtodeveloper">Assigned Developer</label>
+                <select id="assignedtodeveloper" name="assignedtodeveloper" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for u in lookups.users %}
+                        <option value="{{ u.username }}">{{ u.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
-        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
-            <button type="submit" class="btn-primary">Report Bug</button>
-            <a href="{{ path('app_project_bugs', {id: project.project_id}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none;">Cancel</a>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="foundinrelease">Found In Release</label>
+                <select id="foundinrelease" name="foundinrelease" class="form-control">
+                    <option value="">— Unknown / N/A —</option>
+                    {% for rel in lookups.releases %}
+                        <option value="{{ rel.releasename }}">{{ rel.releasename }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="assigntorelease">Target Release (Fix By)</label>
+                <select id="assigntorelease" name="assigntorelease" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for rel in lookups.releases %}
+                        <option value="{{ rel.releasename }}">{{ rel.releasename }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="discoveryperiod">Discovery Phase</label>
+                <select id="discoveryperiod" name="discoveryperiod" class="form-control">
+                    <option value="System Testing" selected>System Testing</option>
+                    <option value="Integration Testing">Integration Testing</option>
+                    <option value="User Acceptance (UAT)">User Acceptance (UAT)</option>
+                    <option value="Production / Post-Release">Production / Post-Release</option>
+                    <option value="Unit / Dev Testing">Unit / Dev Testing</option>
+                    <option value="Requirement / Design Review">Requirement / Design Review</option>
+                </select>
+            </div>
+        </div>
+
+        {# Section 4: Traceability #}
+        <h3 style="color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">4. Test Traceability</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="testid">Originating Test Verification Run</label>
+                <select id="testid" name="testid" class="form-control">
+                    <option value="0">— No Verification Link —</option>
+                    {% for v in lookups.verifications %}
+                        <option value="{{ v.verifyresultsid }}">Verification #{{ v.verifyresultsid }} (Run {{ v.ts_uniquerunid }} - Step {{ v.stepnumber }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="reqid">Originating Requirement ID</label>
+                <input type="number" id="reqid" name="reqid" class="form-control" value="0" placeholder="Requirement ID if applicable">
+            </div>
+        </div>
+
+        <div style="margin-top: 3rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn-primary" style="padding: 0.75rem 2rem; font-weight: 600;">Report Defect</button>
+            <a href="{{ path('app_project_bugs', {id: project.project_id}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none; padding: 0.75rem 2rem;">Cancel</a>
         </div>
     </form>
 </div>

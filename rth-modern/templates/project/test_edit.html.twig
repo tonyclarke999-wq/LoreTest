@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Test Case - {{ project.project_name }}{% endblock %}
+{% block title %}Edit Test Case #{{ test.testid }} - {{ project.project_name }}{% endblock %}
 
 {% block sidebar %}
     {{ include('project/_sidebar.html.twig') }}
@@ -13,18 +13,39 @@
             <h1>Edit Test Case #{{ test.testid }}</h1>
             <p class="subtitle">Updating test parameters for {{ project.project_name }}</p>
         </div>
-        <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to List</a>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none;">Back to List</a>
+            <a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" class="badge badge-purple" style="text-decoration: none;">View Detail</a>
+        </div>
     </div>
 </div>
 
-<div class="project-card" style="max-width: 800px;">
+<div class="project-card" style="max-width: 1000px;">
     <form method="post">
+        {# Section 1: Core Identification #}
+        <h3 style="color: var(--primary); margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">1. Core Identification</h3>
         <div class="form-group">
-            <label for="name">Test Name</label>
+            <label for="name">Test Name <span style="color: #f87171;">*</span></label>
             <input type="text" id="name" name="name" class="form-control" value="{{ test.testsuitename }}" required>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="testtype">Test Type</label>
+                <select id="testtype" name="testtype" class="form-control" required>
+                    {% for type in lookups.types %}
+                        <option value="{{ type.testtype }}" {% if test.testtype == type.testtype %}selected{% endif %}>{{ type.testtype }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="areatested">Test Area</label>
+                <select id="areatested" name="areatested" class="form-control" required>
+                    {% for area in lookups.areas %}
+                        <option value="{{ area.areatestedname }}" {% if test.areatested == area.areatestedname %}selected{% endif %}>{{ area.areatestedname }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <div class="form-group">
                 <label for="priority">Priority</label>
                 <select id="priority" name="priority" class="form-control" required>
@@ -36,23 +57,135 @@
             <div class="form-group">
                 <label for="status">Status</label>
                 <select id="status" name="status" class="form-control" required>
-                    <option value="Ready" {% if test.status == 'Ready' %}selected{% endif %}>Ready</option>
-                    <option value="Draft" {% if test.status == 'Draft' %}selected{% endif %}>Draft</option>
-                    <option value="Passed" {% if test.status == 'Passed' %}selected{% endif %}>Passed</option>
-                    <option value="Failed" {% if test.status == 'Failed' %}selected{% endif %}>Failed</option>
-                    <option value="Retired" {% if test.status == 'Retired' %}selected{% endif %}>Retired</option>
+                    {% for st in lookups.statuses %}
+                        <option value="{{ st }}" {% if test.status == st %}selected{% endif %}>{{ st }}</option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
 
-        <div class="form-group">
-            <label for="description">Test Description</label>
-            <textarea id="description" name="description" class="form-control" style="min-height: 150px;">{{ test.purpose }}</textarea>
+        {# Section 2: Ownership & Roles #}
+        <h3 style="color: var(--primary); margin: 2rem 0 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">2. Ownership & Roles</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="baowner">BA Owner</label>
+                <select id="baowner" name="baowner" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for u in lookups.users %}
+                        <option value="{{ u.username }}" {% if test.baowner == u.username %}selected{% endif %}>{{ u.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="scripter">QA Owner (Scripter)</label>
+                <select id="scripter" name="scripter" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for u in lookups.users %}
+                        <option value="{{ u.username }}" {% if test.scripter == u.username %}selected{% endif %}>{{ u.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="tester">Tester</label>
+                <select id="tester" name="tester" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for u in lookups.users %}
+                        <option value="{{ u.username }}" {% if test.tester == u.username %}selected{% endif %}>{{ u.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+            <div class="form-group">
+                <label for="assignedto">Assigned To</label>
+                <select id="assignedto" name="assignedto" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for u in lookups.users %}
+                        <option value="{{ u.username }}" {% if test.assignedto == u.username %}selected{% endif %}>{{ u.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="assignedby">Assigned By</label>
+                <select id="assignedby" name="assignedby" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for u in lookups.users %}
+                        <option value="{{ u.username }}" {% if test.assignedby == u.username %}selected{% endif %}>{{ u.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
-        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
-            <button type="submit" class="btn-primary">Save Changes</button>
-            <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none;">Cancel</a>
+        {# Section 3: Schedule & Effort #}
+        <h3 style="color: var(--primary); margin: 2rem 0 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">3. Schedule & Effort</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="dateassigned">Date Assigned</label>
+                <input type="date" id="dateassigned" name="dateassigned" class="form-control" value="{{ test.dateassigned }}">
+            </div>
+            <div class="form-group">
+                <label for="expdatecomplete">Expected Complete</label>
+                <input type="date" id="expdatecomplete" name="expdatecomplete" class="form-control" value="{{ test.expdatecomplete }}">
+            </div>
+            <div class="form-group">
+                <label for="actdatecomplete">Actual Complete</label>
+                <input type="date" id="actdatecomplete" name="actdatecomplete" class="form-control" value="{{ test.actdatecomplete }}">
+            </div>
+            <div class="form-group">
+                <label for="duration">Duration (mins)</label>
+                <input type="number" id="duration" name="duration" class="form-control" value="{{ test.duration }}" placeholder="e.g. 45">
+            </div>
+        </div>
+
+        {# Section 4: Execution Parameters & Flags #}
+        <h3 style="color: var(--primary); margin: 2rem 0 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">4. Execution Parameters</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; background: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" name="steps" value="1" {% if test.steps == 'Y' %}checked{% endif %}>
+                    <span>Manual Steps (Steps)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" name="script" value="1" {% if test.script == 'Y' %}checked{% endif %}>
+                    <span>Automated Script (Script)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" name="loadrunner" value="1" {% if test.loadrunner == 'Y' %}checked{% endif %}>
+                    <span>LoadRunner Enabled</span>
+                </label>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" name="autopass" value="1" {% if test.autopass == 'Y' %}checked{% endif %}>
+                    <span>Auto Pass Enabled</span>
+                </label>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" name="email_ba_owner" value="1" {% if test.email_ba_owner == 'Y' %}checked{% endif %}>
+                    <span>Email BA Owner on Status Change</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" name="email_qa_owner" value="1" {% if test.email_qa_owner == 'Y' %}checked{% endif %}>
+                    <span>Email QA Owner on Status Change</span>
+                </label>
+            </div>
+        </div>
+
+        {# Section 5: Narrative #}
+        <h3 style="color: var(--primary); margin: 2rem 0 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">5. Narrative & Documentation</h3>
+        <div class="form-group">
+            <label for="purpose">Test Purpose & Objective</label>
+            <textarea id="purpose" name="purpose" class="form-control" style="min-height: 120px;">{{ test.purpose }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="comments">Comments & Additional Notes</label>
+            <textarea id="comments" name="comments" class="form-control" style="min-height: 100px;">{{ test.comments }}</textarea>
+        </div>
+
+        <div style="margin-top: 2.5rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">Save Changes</button>
+            <a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none; padding: 0.75rem 2rem; font-size: 1rem;">Cancel</a>
         </div>
     </form>
 </div>

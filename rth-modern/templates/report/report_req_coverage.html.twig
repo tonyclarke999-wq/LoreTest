@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Requirements Coverage Report - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header" style="margin-bottom: 2rem;">
+    <div>
+        <h1>Requirements Coverage</h1>
+        <p class="subtitle">View the requirements coverage for a selected Test Set.</p>
+    </div>
+</div>
+
+{{ include('report/_filters.html.twig', { filter_type: 'testset' }) }}
+
+{% if selected_testset %}
+    <div class="table-container">
+        <table style="width: 100%; text-align: left; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Requirement</th>
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Covering Test Case</th>
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Test Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results %}
+                <tr style="border-bottom: 1px solid var(--glass-border);">
+                    <td style="padding: 1rem 1.25rem; color: var(--text-main); font-weight: 500;">
+                        <a href="{{ path('app_project_requirements', {id: project.project_id}) }}?q={{ row.reqname }}" style="color: var(--primary-light); text-decoration: none;">
+                            {{ row.reqname }}
+                        </a>
+                    </td>
+                    <td style="padding: 1rem 1.25rem; color: var(--text-main);">
+                        {{ row.testsuitename ?: '<span style="color: var(--text-disabled); font-style: italic;">No Tests Linked</span>'|raw }}
+                    </td>
+                    <td style="padding: 1rem 1.25rem;">
+                        {% if not row.testsuitename %}
+                            <span class="badge badge-purple">Not Covered</span>
+                        {% elseif row.teststatus == 'Passed' %}
+                            <span class="badge badge-green">{{ row.teststatus }}</span>
+                        {% elseif row.teststatus == 'Failed' %}
+                            <span class="badge badge-red">{{ row.teststatus }}</span>
+                        {% elseif row.teststatus == 'WIP' %}
+                            <span class="badge badge-yellow">{{ row.teststatus }}</span>
+                        {% else %}
+                            <span class="badge badge-blue">{{ row.teststatus ?: 'Not Executed' }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" style="padding: 2rem; text-align: center; color: var(--text-muted);">No requirements found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+
+{% endblock %}

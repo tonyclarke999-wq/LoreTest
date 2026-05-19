@@ -34,8 +34,8 @@
         <tbody>
             {% for test in tests %}
             <tr>
-                <td style="color: var(--primary); font-weight: 600;">#{{ test.testid }}</td>
-                <td style="font-weight: 500;">{{ test.testsuitename }}</td>
+                <td style="font-weight: 600;"><a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" style="color: var(--primary); text-decoration: none;">#{{ test.testid }}</a></td>
+                <td style="font-weight: 500;"><a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" style="color: inherit; text-decoration: none;">{{ test.testsuitename }}</a></td>
                 <td>{{ test.testtype }}</td>
                 <td>
                     {% set priority_class = 'badge-blue' %}
@@ -55,6 +55,7 @@
                 </td>
                 <td>{{ test.assignedto|default('Unassigned') }}</td>
                 <td style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" class="badge badge-purple" style="text-decoration: none;">Detail</a>
                     <a href="{{ path('app_project_test_edit', {id: project.project_id, testId: test.testid}) }}" class="badge badge-blue" style="text-decoration: none;">Edit</a>
                     <a href="{{ path('app_project_test_steps', {id: project.project_id, testId: test.testid}) }}" class="badge badge-green" style="text-decoration: none;">Steps</a>
                     {% if test.status != 'Retired' %}

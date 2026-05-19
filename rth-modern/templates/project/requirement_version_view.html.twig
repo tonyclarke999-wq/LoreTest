@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Version {{ version.version }} - Requirement #{{ requirement.reqid }} - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Requirement #{{ requirement.reqid }} — Version {{ version.version }}</h1>
+            <p class="subtitle">{{ requirement.reqname }}
+                {% if version.latest == 'Y' %}
+                    <span class="badge badge-green" style="margin-left: 0.5rem;">Current Version</span>
+                {% else %}
+                    <span class="badge badge-yellow" style="margin-left: 0.5rem;">Historical — Latest is v{{ latestVersionNum }}</span>
+                {% endif %}
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <a href="{{ path('app_project_requirement_history', {id: project.project_id, reqId: requirement.reqid}) }}" class="badge badge-blue" style="text-decoration: none; display: flex; align-items: center;">Back to History</a>
+            <a href="{{ path('app_project_requirement_detail', {id: project.project_id, reqId: requirement.reqid}) }}" class="badge badge-blue" style="text-decoration: none; display: flex; align-items: center;">Back to Detail</a>
+        </div>
+    </div>
+</div>
+
+<div class="project-card" style="max-width: 1000px; cursor: default;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem 2rem;">
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Version</div>
+            <span class="badge badge-blue" style="font-size: 0.9rem;">v{{ version.version }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Status</div>
+            {% set status_class = 'badge-yellow' %}
+            {% if version.status == 'Approved' %}{% set status_class = 'badge-green' %}
+            {% elseif version.status == 'Draft' %}{% set status_class = 'badge-blue' %}
+            {% elseif version.status == 'Rejected' %}{% set status_class = 'badge-red' %}
+            {% endif %}
+            <span class="badge {{ status_class }}">{{ version.status|default('—') }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Author</div>
+            <span>{{ version.author }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Created</div>
+            <span style="font-size: 0.875rem;">{{ version.timestamp }}</span>
+        </div>
+
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Assigned To</div>
+            <span>{{ version.assignedto|default('—') }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Change Request</div>
+            {% if version.defect_id and version.defect_id > 0 %}
+                <span class="badge badge-red">Bug #{{ version.defect_id }}</span>
+            {% else %}
+                <span style="color: var(--text-muted);">—</span>
+            {% endif %}
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Last Updated</div>
+            <span style="font-size: 0.875rem;">{{ version.lastupdated|default('—') }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Updated By</div>
+            <span>{{ version.lastupdatedby|default('—') }}</span>
+        </div>
+    </div>
+
+    {# --- Reason for Change --- #}
+    {% if version.reasonforchange %}
+    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border);">
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Reason for Change</div>
+        <div style="background: rgba(15, 23, 42, 0.3); padding: 1rem; border-radius: 0.75rem; line-height: 1.6;">{{ version.reasonforchange|raw }}</div>
+    </div>
+    {% endif %}
+
+    {# --- Detail or File --- #}
+    {% if requirement.recordorfile == 'F' %}
+        {% if version.filename %}
+        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Attached File</div>
+            <span style="color: var(--text-muted);">{{ version.filename }}</span>
+            {% if version.latest == 'Y' %}
+                <a href="{{ path('app_project_requirement_download', {id: project.project_id, reqId: requirement.reqid}) }}" class="btn-primary" style="text-decoration: none; display: inline-block; font-size: 0.875rem; margin-left: 1rem;">⬇ Download</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        {% if version.detail %}
+        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Detailed Description</div>
+            <div style="background: rgba(15, 23, 42, 0.3); padding: 1.25rem; border-radius: 0.75rem; line-height: 1.6; white-space: pre-wrap;">{{ version.detail|raw }}</div>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

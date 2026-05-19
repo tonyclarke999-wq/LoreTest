@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Discussions - Requirement #{{ requirement.reqid }} - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Discussions</h1>
+            <p class="subtitle">Requirement #{{ requirement.reqid }} — {{ requirement.reqname }}</p>
+        </div>
+        <a href="{{ path('app_project_requirement_detail', {id: project.project_id, reqId: requirement.reqid}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to Detail</a>
+    </div>
+</div>
+
+{# --- Existing Discussions --- #}
+{% if discussions|length > 0 %}
+<div class="table-container" style="margin-bottom: 2rem;">
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Author</th>
+                <th>Assigned To</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th width="80">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for disc in discussions %}
+            <tr>
+                <td style="font-weight: 500;">
+                    <a href="{{ path('app_project_requirement_discussion_view', {id: project.project_id, reqId: requirement.reqid, discId: disc.discussionid}) }}" style="color: var(--primary); text-decoration: none;">
+                        {{ disc.discsubject }}
+                    </a>
+                </td>
+                <td>{{ disc.author }}</td>
+                <td>{{ disc.assignto|default('—') }}</td>
+                <td style="font-size: 0.85rem; color: var(--text-muted);">{{ disc.date }}</td>
+                <td>
+                    {% if disc.status == 'CLOSED' %}
+                        <span class="badge badge-red">Closed</span>
+                    {% else %}
+                        <span class="badge badge-green">Open</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path('app_project_requirement_discussion_view', {id: project.project_id, reqId: requirement.reqid, discId: disc.discussionid}) }}" class="badge badge-blue" style="text-decoration: none;">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="project-card" style="cursor: default; margin-bottom: 2rem; text-align: center; padding: 2rem;">
+    <p style="color: var(--text-muted);">No discussions yet for this requirement.</p>
+</div>
+{% endif %}
+
+{# --- New Discussion Form --- #}
+<div class="project-card" style="max-width: 800px; cursor: default;">
+    <h2 style="font-size: 1.25rem; margin-bottom: 1.25rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Start New Discussion</h2>
+
+    <form method="post">
+        <div class="form-group">
+            <label for="subject">Subject <span style="color: #f87171;">*</span></label>
+            <input type="text" id="subject" name="subject" class="form-control" placeholder="Discussion topic..." required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="assign_to">Assign To</label>
+                <select id="assign_to" name="assign_to" class="form-control">
+                    <option value="">— Nobody —</option>
+                    {% for user in users %}
+                        <option value="{{ user.username }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="discussion">Discussion <span style="color: #f87171;">*</span></label>
+            <textarea id="discussion" name="discussion" class="form-control" style="min-height: 150px;" placeholder="Describe the topic for discussion..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary">Create Discussion</button>
+    </form>
+</div>
+{% endblock %}

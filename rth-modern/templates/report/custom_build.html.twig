@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Custom Report Builder - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header" style="margin-bottom: 2rem;">
+    <div>
+        <h1>Custom Report Builder</h1>
+        <p class="subtitle">Select an entity, choose your columns, and generate a simplified custom report.</p>
+    </div>
+</div>
+
+<div class="project-card" style="max-width: 800px;">
+    <form action="{{ path('app_report_custom_view', {id: project.project_id}) }}" method="POST">
+        
+        <div style="margin-bottom: 1.5rem;">
+            <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600;">1. Select Data Source</label>
+            <select name="entity" id="entitySelect" class="form-control" style="width: 100%; padding: 0.75rem; background: var(--surface); color: var(--text-main); border: 1px solid var(--glass-border); border-radius: var(--radius-sm);" onchange="updateColumns()">
+                <option value="testsuite">Test Cases (testsuite)</option>
+                <option value="bug">Bugs (bug)</option>
+                <option value="requirement">Requirements (requirement)</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600;">2. Select Columns to Display</label>
+            
+            <!-- Test Suite Columns -->
+            <div id="cols-testsuite" class="col-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="testid" checked> Test ID</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="testsuitename" checked> Test Name</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="status" checked> Status</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="priority"> Priority</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="areatested"> Area Tested</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="assignedto"> Assigned To</label>
+            </div>
+
+            <!-- Bug Columns -->
+            <div id="cols-bug" class="col-group" style="display: none; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="bugid" checked disabled> Bug ID</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="summary" checked disabled> Summary</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="status" checked disabled> Status</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="severity"> Severity</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="assignedto"> Assigned To</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="date_submitted"> Date Submitted</label>
+            </div>
+
+            <!-- Requirement Columns -->
+            <div id="cols-requirement" class="col-group" style="display: none; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="reqid" checked disabled> Requirement ID</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="reqname" checked disabled> Name</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="status" checked disabled> Status</label>
+                <label style="color: var(--text-muted);"><input type="checkbox" name="columns[]" value="author"> Author</label>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600;">3. Filter by Status (Optional)</label>
+            <select name="status" class="form-control" style="width: 100%; padding: 0.75rem; background: var(--surface); color: var(--text-main); border: 1px solid var(--glass-border); border-radius: var(--radius-sm);">
+                <option value="Any">-- Any Status --</option>
+                <option value="Passed">Passed</option>
+                <option value="Failed">Failed</option>
+                <option value="Closed">Closed</option>
+                <option value="Open">Open</option>
+                <option value="WIP">WIP</option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem; border: none; border-radius: var(--radius-sm); background: var(--primary); color: white; cursor: pointer; font-weight: 600;">Generate Custom Report</button>
+        </div>
+    </form>
+</div>
+
+<script>
+function updateColumns() {
+    const entity = document.getElementById('entitySelect').value;
+    document.querySelectorAll('.col-group').forEach(el => {
+        el.style.display = 'none';
+        // Disable checkboxes in hidden groups so they don't submit
+        el.querySelectorAll('input[type=checkbox]').forEach(cb => cb.disabled = true);
+    });
+    
+    const activeGroup = document.getElementById('cols-' + entity);
+    activeGroup.style.display = 'grid';
+    // Enable checkboxes in active group
+    activeGroup.querySelectorAll('input[type=checkbox]').forEach(cb => cb.disabled = false);
+}
+// Initialize on load
+updateColumns();
+</script>
+
+{% endblock %}

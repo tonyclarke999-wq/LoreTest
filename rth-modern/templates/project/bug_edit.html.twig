@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Bug - {{ project.project_name }}{% endblock %}
+{% block title %}Edit Defect #{{ bug.bugid }} - {{ project.project_name }}{% endblock %}
 
 {% block sidebar %}
     {{ include('project/_sidebar.html.twig') }}
@@ -10,20 +10,32 @@
 <div class="page-header">
     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
         <div>
-            <h1>Edit Bug #{{ bug.bugid }}</h1>
-            <p class="subtitle">Updating defect details for {{ project.project_name }}</p>
+            <h1>Edit Defect #{{ bug.bugid }}</h1>
+            <p class="subtitle">Updating comprehensive defect parameters for {{ project.project_name }}</p>
         </div>
-        <a href="{{ path('app_project_bugs', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to List</a>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{{ path('app_project_bug_detail', {id: project.project_id, bugId: bug.bugid}) }}" class="badge badge-green" style="text-decoration: none; padding: 0.5rem 1rem;">View Detail</a>
+            <a href="{{ path('app_project_bugs', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; padding: 0.5rem 1rem;">Back to Defect List</a>
+        </div>
     </div>
 </div>
 
-<div class="project-card" style="max-width: 800px;">
+<div class="project-card" style="max-width: 1000px;">
     <form method="post">
+        {# Section 1: Core Information #}
+        <h3 style="color: var(--primary); margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">1. Core Defect Information</h3>
         <div class="form-group">
-            <label for="summary">Bug Summary</label>
+            <label for="summary">Bug Summary <span style="color: #f87171;">*</span></label>
             <input type="text" id="summary" name="summary" class="form-control" value="{{ bug.summary }}" required>
         </div>
 
+        <div class="form-group">
+            <label for="description">Detailed Description & Steps to Reproduce <span style="color: #f87171;">*</span></label>
+            <textarea id="description" name="description" class="form-control" style="min-height: 220px;" required>{{ bug.description }}</textarea>
+        </div>
+
+        {# Section 2: Categorization & Status #}
+        <h3 style="color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">2. Categorization, Severity & Status</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
             <div class="form-group">
                 <label for="priority">Priority</label>
@@ -45,9 +57,11 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="status">Status</label>
+                <label for="status">Defect Status</label>
                 <select id="status" name="status" class="form-control" required>
                     <option value="New" {% if bug.status == 'New' %}selected{% endif %}>New</option>
+                    <option value="Assigned" {% if bug.status == 'Assigned' %}selected{% endif %}>Assigned</option>
+                    <option value="WIP" {% if bug.status == 'WIP' %}selected{% endif %}>WIP</option>
                     <option value="Confirmed" {% if bug.status == 'Confirmed' %}selected{% endif %}>Confirmed</option>
                     <option value="Resolved" {% if bug.status == 'Resolved' %}selected{% endif %}>Resolved</option>
                     <option value="Closed" {% if bug.status == 'Closed' %}selected{% endif %}>Closed</option>
@@ -56,14 +70,123 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label for="description">Detailed Description & Steps to Reproduce</label>
-            <textarea id="description" name="description" class="form-control" style="min-height: 200px;">{{ bug.description }}</textarea>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+            <div class="form-group">
+                <label for="category">Defect Category</label>
+                <select id="category" name="category" class="form-control" required>
+                    <option value="">— Select Category —</option>
+                    {% for cat in lookups.categories %}
+                        <option value="{{ cat.categoryid }}" {% if bug.category == cat.categoryid %}selected{% endif %}>{{ cat.categoryname }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="component">System Component</label>
+                <select id="component" name="component" class="form-control" required>
+                    <option value="">— Select Component —</option>
+                    {% for comp in lookups.components %}
+                        <option value="{{ comp.componentid }}" {% if bug.component == comp.componentid %}selected{% endif %}>{{ comp.componentname }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="closedreasoncode">Closed Reason Code</label>
+                <select id="closedreasoncode" name="closedreasoncode" class="form-control">
+                    <option value="">— N/A (Not Closed) —</option>
+                    <option value="Fixed" {% if bug.closedreasoncode == 'Fixed' %}selected{% endif %}>Fixed successfully</option>
+                    <option value="Duplicate" {% if bug.closedreasoncode == 'Duplicate' %}selected{% endif %}>Duplicate defect</option>
+                    <option value="Cannot Reproduce" {% if bug.closedreasoncode == 'Cannot Reproduce' %}selected{% endif %}>Cannot Reproduce</option>
+                    <option value="Works As Designed" {% if bug.closedreasoncode == 'Works As Designed' %}selected{% endif %}>Works As Designed</option>
+                    <option value="Obsolete / Cancelled" {% if bug.closedreasoncode == 'Obsolete / Cancelled' %}selected{% endif %}>Obsolete / Cancelled</option>
+                </select>
+            </div>
         </div>
 
-        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
-            <button type="submit" class="btn-primary">Save Changes</button>
-            <a href="{{ path('app_project_bugs', {id: project.project_id}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none;">Cancel</a>
+        {# Section 3: Ownership & Release Governance #}
+        <h3 style="color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">3. Ownership & Release Governance</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="assignedto">Assigned QA / Tester</label>
+                <select id="assignedto" name="assignedto" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for u in lookups.users %}
+                        <option value="{{ u.username }}" {% if bug.assignedto == u.username %}selected{% endif %}>{{ u.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="assignedtodeveloper">Assigned Developer</label>
+                <select id="assignedtodeveloper" name="assignedtodeveloper" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for u in lookups.users %}
+                        <option value="{{ u.username }}" {% if bug.assignedtodeveloper == u.username %}selected{% endif %}>{{ u.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="foundinrelease">Found In Release</label>
+                <select id="foundinrelease" name="foundinrelease" class="form-control">
+                    <option value="">— Unknown / N/A —</option>
+                    {% for rel in lookups.releases %}
+                        <option value="{{ rel.releasename }}" {% if bug.foundinrelease == rel.releasename %}selected{% endif %}>{{ rel.releasename }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="assigntorelease">Target Release (Fix By)</label>
+                <select id="assigntorelease" name="assigntorelease" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for rel in lookups.releases %}
+                        <option value="{{ rel.releasename }}" {% if bug.assigntorelease == rel.releasename %}selected{% endif %}>{{ rel.releasename }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="implementedinrelease">Implemented In Release</label>
+                <select id="implementedinrelease" name="implementedinrelease" class="form-control">
+                    <option value="">— Not Implemented Yet —</option>
+                    {% for rel in lookups.releases %}
+                        <option value="{{ rel.releasename }}" {% if bug.implementedinrelease == rel.releasename %}selected{% endif %}>{{ rel.releasename }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="discoveryperiod">Discovery Phase</label>
+                <select id="discoveryperiod" name="discoveryperiod" class="form-control">
+                    <option value="System Testing" {% if bug.discoveryperiod == 'System Testing' %}selected{% endif %}>System Testing</option>
+                    <option value="Integration Testing" {% if bug.discoveryperiod == 'Integration Testing' %}selected{% endif %}>Integration Testing</option>
+                    <option value="User Acceptance (UAT)" {% if bug.discoveryperiod == 'User Acceptance (UAT)' %}selected{% endif %}>User Acceptance (UAT)</option>
+                    <option value="Production / Post-Release" {% if bug.discoveryperiod == 'Production / Post-Release' %}selected{% endif %}>Production / Post-Release</option>
+                    <option value="Unit / Dev Testing" {% if bug.discoveryperiod == 'Unit / Dev Testing' %}selected{% endif %}>Unit / Dev Testing</option>
+                    <option value="Requirement / Design Review" {% if bug.discoveryperiod == 'Requirement / Design Review' %}selected{% endif %}>Requirement / Design Review</option>
+                </select>
+            </div>
+        </div>
+
+        {# Section 4: Traceability #}
+        <h3 style="color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem;">4. Test Traceability</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="testid">Originating Test Verification Run</label>
+                <select id="testid" name="testid" class="form-control">
+                    <option value="0">— No Verification Link —</option>
+                    {% for v in lookups.verifications %}
+                        <option value="{{ v.verifyresultsid }}" {% if bug.testid == v.verifyresultsid %}selected{% endif %}>Verification #{{ v.verifyresultsid }} (Run {{ v.ts_uniquerunid }} - Step {{ v.stepnumber }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="reqid">Originating Requirement ID</label>
+                <input type="number" id="reqid" name="reqid" class="form-control" value="{{ bug.reqid|default(0) }}">
+            </div>
+        </div>
+
+        <div style="margin-top: 3rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn-primary" style="padding: 0.75rem 2rem; font-weight: 600;">Save Changes</button>
+            <a href="{{ path('app_project_bug_detail', {id: project.project_id, bugId: bug.bugid}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none; padding: 0.75rem 2rem;">Cancel</a>
         </div>
     </form>
 </div>

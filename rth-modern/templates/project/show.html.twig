@@ -18,24 +18,24 @@
 </div>
 
 <div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-label">Requirements</div>
-        <div class="stat-value">{{ stats.requirements }}</div>
+    <div class="stat-card" style="border-top: 3px solid var(--primary);">
+        <div class="stat-label"><span style="margin-right: 0.5rem; font-size: 1.1rem;">📋</span> Requirements</div>
+        <div class="stat-value" style="color: var(--primary-light);">{{ stats.requirements }}</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Test Cases</div>
-        <div class="stat-value">{{ stats.tests }}</div>
+    <div class="stat-card" style="border-top: 3px solid #38bdf8;">
+        <div class="stat-label"><span style="margin-right: 0.5rem; font-size: 1.1rem;">🧪</span> Test Cases</div>
+        <div class="stat-value" style="color: #38bdf8;">{{ stats.tests }}</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Open Bugs</div>
-        <div class="stat-value">{{ stats.bugs }}</div>
+    <div class="stat-card" style="border-top: 3px solid #f43f5e;">
+        <div class="stat-label"><span style="margin-right: 0.5rem; font-size: 1.1rem;">🐛</span> Open Bugs</div>
+        <div class="stat-value" style="color: #f43f5e;">{{ stats.bugs }}</div>
     </div>
 </div>
 
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
     <!-- Bug Severity Chart -->
     <div class="project-card">
-        <h3>Bug Severity Distribution</h3>
+        <h3 style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.15rem; color: var(--text-main);"><span style="font-size: 1.25rem;">📊</span> Bug Severity Distribution</h3>
         <div style="height: 300px; display: flex; align-items: center; justify-content: center; margin-top: 1rem;">
             <canvas id="bugChart"></canvas>
         </div>
@@ -43,7 +43,7 @@
 
     <!-- Test Status Chart -->
     <div class="project-card">
-        <h3>Test Status Overview</h3>
+        <h3 style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.15rem; color: var(--text-main);"><span style="font-size: 1.25rem;">📈</span> Test Status Overview</h3>
         <div style="height: 300px; display: flex; align-items: center; justify-content: center; margin-top: 1rem;">
             <canvas id="testChart"></canvas>
         </div>

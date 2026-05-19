@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Custom Report - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header" style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Custom {{ entity|capitalize }} Report</h1>
+            <p class="subtitle">Generated report based on your selected criteria.</p>
+        </div>
+        <a href="{{ path('app_report_custom_build', {id: project.project_id}) }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; border: 1px solid var(--glass-border); border-radius: var(--radius-sm); color: var(--text-main); text-decoration: none;">&larr; Back to Builder</a>
+    </div>
+</div>
+
+<div class="table-container">
+    <table style="width: 100%; text-align: left; border-collapse: collapse;">
+        <thead>
+            <tr>
+                {% for col in columns %}
+                    <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">
+                        {{ col|replace({'_': ' '})|title }}
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in results %}
+            <tr style="border-bottom: 1px solid var(--glass-border);">
+                {% for col in columns %}
+                    <td style="padding: 1rem 1.25rem; color: var(--text-main);">
+                        {% if col == 'status' %}
+                            {% if row[col] == 'Passed' %}
+                                <span class="badge badge-green">{{ row[col] }}</span>
+                            {% elseif row[col] == 'Failed' %}
+                                <span class="badge badge-red">{{ row[col] }}</span>
+                            {% elseif row[col] == 'WIP' %}
+                                <span class="badge badge-yellow">{{ row[col] }}</span>
+                            {% else %}
+                                <span class="badge badge-blue">{{ row[col] ?: 'N/A' }}</span>
+                            {% endif %}
+                        {% else %}
+                            {{ row[col] }}
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="{{ columns|length }}" style="padding: 2rem; text-align: center; color: var(--text-muted);">No records found matching this criteria.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
