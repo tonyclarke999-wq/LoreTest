@@ -33,6 +33,7 @@
             <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none;">Back to List</a>
             <a href="{{ path('app_project_test_edit', {id: project.project_id, testId: test.testid}) }}" class="badge badge-blue" style="text-decoration: none;">Edit</a>
             <a href="{{ path('app_project_test_steps', {id: project.project_id, testId: test.testid}) }}" class="badge badge-green" style="text-decoration: none;">Steps</a>
+            <a href="{{ path('app_project_test_copy', {id: project.project_id, testId: test.testid}) }}" class="badge badge-purple" style="text-decoration: none;">Copy to</a>
             {% if test.status != 'Retired' %}
             <form action="{{ path('app_project_test_retire', {id: project.project_id, testId: test.testid}) }}" method="post" style="margin: 0; display: inline;">
                 <button type="submit" class="badge badge-red" style="border: none; cursor: pointer; background: rgba(239, 68, 68, 0.1);">Retire</button>

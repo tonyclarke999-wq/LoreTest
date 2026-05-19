@@ -13,7 +13,16 @@
             <h1>Test Cases</h1>
             <p class="subtitle">Managing {{ tests|length }} test cases for {{ project.project_name }}</p>
         </div>
-        <a href="{{ path('app_project_test_new', {id: project.project_id}) }}" class="btn-primary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.875rem;">Add Test Case</a>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <a href="{{ path('app_project_test_export_select', {id: project.project_id}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid rgba(255,255,255,0.15); text-decoration: none; padding: 0.5rem 1rem; font-size: 0.875rem; display: flex; align-items: center; gap: 0.35rem;">
+                <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
+                <span>Export CSV</span>
+            </a>
+            <a href="{{ path('app_project_test_new', {id: project.project_id}) }}" class="btn-primary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.875rem; display: flex; align-items: center; gap: 0.35rem;">
+                <span class="material-symbols-outlined" style="font-size: 16px;">add</span>
+                <span>Add Test Case</span>
+            </a>
+        </div>
     </div>
 </div>
 
@@ -28,15 +37,19 @@
                 <th>Priority</th>
                 <th>Status</th>
                 <th>Assigned To</th>
-                <th width="200">Actions</th>
+                <th width="180">Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for test in tests %}
             <tr>
-                <td style="font-weight: 600;"><a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" style="color: var(--primary); text-decoration: none;">#{{ test.testid }}</a></td>
-                <td style="font-weight: 500;"><a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" style="color: inherit; text-decoration: none;">{{ test.testsuitename }}</a></td>
-                <td>{{ test.testtype }}</td>
+                <td style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--primary);">
+                    <a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" style="color: var(--primary); text-decoration: none;">TC-{{ test.testid }}</a>
+                </td>
+                <td style="font-weight: 500;">
+                    <a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" style="color: var(--text-main); text-decoration: none;">{{ test.testsuitename }}</a>
+                </td>
+                <td><span class="badge badge-purple">{{ test.testtype }}</span></td>
                 <td>
                     {% set priority_class = 'badge-blue' %}
                     {% if test.priority == 'High' %}{% set priority_class = 'badge-red' %}
@@ -46,25 +59,37 @@
                 </td>
                 <td>
                     {% set status_class = 'badge-yellow' %}
-                    {% if test.status == 'Passed' or test.status == 'Approved' %}{% set status_class = 'badge-green' %}
-                    {% elseif test.status == 'Failed' %}{% set status_class = 'badge-red' %}
+                    {% if test.status == 'Passed' or test.status == 'Approved' or test.status == 'Completed' %}{% set status_class = 'badge-green' %}
+                    {% elseif test.status == 'Failed' or test.status == 'Retired' %}{% set status_class = 'badge-red' %}
                     {% elseif test.status == 'Ready' %}{% set status_class = 'badge-blue' %}
-                    {% elseif test.status == 'Retired' %}{% set status_class = 'badge-red' %}
                     {% endif %}
                     <span class="badge {{ status_class }}">{{ test.status }}</span>
                 </td>
-                <td>{{ test.assignedto|default('Unassigned') }}</td>
-                <td style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" class="badge badge-purple" style="text-decoration: none;">Detail</a>
-                    <a href="{{ path('app_project_test_edit', {id: project.project_id, testId: test.testid}) }}" class="badge badge-blue" style="text-decoration: none;">Edit</a>
-                    <a href="{{ path('app_project_test_steps', {id: project.project_id, testId: test.testid}) }}" class="badge badge-green" style="text-decoration: none;">Steps</a>
+                <td style="color: var(--text-muted); font-size: 13px;">{{ test.assignedto|default('Unassigned') }}</td>
+                <td style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end;">
+                    <a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" style="color: var(--text-muted); transition: color 0.2s;" title="Detail">
+                        <span class="material-symbols-outlined hover:text-primary">visibility</span>
+                    </a>
+                    <a href="{{ path('app_project_test_edit', {id: project.project_id, testId: test.testid}) }}" style="color: var(--text-muted); transition: color 0.2s;" title="Edit">
+                        <span class="material-symbols-outlined hover:text-warning">edit</span>
+                    </a>
+                    <a href="{{ path('app_project_test_steps', {id: project.project_id, testId: test.testid}) }}" style="color: var(--text-muted); transition: color 0.2s;" title="Steps">
+                        <span class="material-symbols-outlined hover:text-primary">format_list_bulleted</span>
+                    </a>
+                    <a href="{{ path('app_project_test_copy', {id: project.project_id, testId: test.testid}) }}" style="color: var(--text-muted); transition: color 0.2s;" title="Copy to Project">
+                        <span class="material-symbols-outlined hover:text-primary">content_copy</span>
+                    </a>
                     {% if test.status != 'Retired' %}
                     <form action="{{ path('app_project_test_retire', {id: project.project_id, testId: test.testid}) }}" method="post" style="margin: 0;">
-                        <button type="submit" class="badge badge-red" style="border: none; cursor: pointer; font-family: inherit; font-size: inherit; background: rgba(239, 68, 68, 0.1);">Retire</button>
+                        <button type="submit" style="background: none; border: none; cursor: pointer; color: var(--text-muted); transition: color 0.2s;" title="Retire">
+                            <span class="material-symbols-outlined hover:text-warning">archive</span>
+                        </button>
                     </form>
                     {% endif %}
                     <form action="{{ path('app_project_test_delete', {id: project.project_id, testId: test.testid}) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this test case?');" style="margin: 0;">
-                        <button type="submit" class="badge badge-red" style="border: none; cursor: pointer; font-family: inherit; font-size: inherit;">Delete</button>
+                        <button type="submit" style="background: none; border: none; cursor: pointer; color: var(--text-muted); transition: color 0.2s;" title="Delete">
+                            <span class="material-symbols-outlined hover:text-danger">delete</span>
+                        </button>
                     </form>
                 </td>
             </tr>

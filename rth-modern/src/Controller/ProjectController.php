@@ -225,7 +225,7 @@ final class ProjectController extends AbstractController
         ]);
     }
 
-    #[Route('/project/{id}/tests/{testId}', name: 'app_project_test_detail', methods: ['GET'])]
+    #[Route('/project/{id}/tests/{testId}', name: 'app_project_test_detail', requirements: ['testId' => '\d+'], methods: ['GET'])]
     #[IsGranted('ROLE_USER')]
     public function testDetail(int $id, int $testId, Connection $connection): Response
     {
@@ -389,6 +389,191 @@ final class ProjectController extends AbstractController
         ], ['testid' => $testId, 'project_id' => $id]);
 
         return $this->redirectToRoute('app_project_tests', ['id' => $id]);
+    }
+
+    #[Route('/project/{id}/tests/{testId}/copy', name: 'app_project_test_copy', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function testCopy(int $id, int $testId, Request $request, Connection $connection): Response
+    {
+        $project = $connection->fetchAssociative('SELECT * FROM project WHERE project_id = ?', [$id]);
+        $test = $connection->fetchAssociative('SELECT * FROM testsuite WHERE testid = ? AND project_id = ?', [$testId, $id]);
+
+        if (!$project || !$test) {
+            throw $this->createNotFoundException('Test case not found');
+        }
+
+        if ($request->isMethod('POST')) {
+            $targetProjectId = (int) $request->request->get('target_project_id');
+            $targetProject = $connection->fetchAssociative('SELECT * FROM project WHERE project_id = ?', [$targetProjectId]);
+
+            if (!$targetProject) {
+                $this->addFlash('error', 'Target project not found');
+                return $this->redirectToRoute('app_project_test_copy', ['id' => $id, 'testId' => $testId]);
+            }
+
+            $newTestData = $test;
+            unset($newTestData['testid']);
+            $newTestData['project_id'] = $targetProjectId;
+            $newTestData['datecreated'] = date('Y-m-d H:i:s');
+            $newTestData['lastupdated'] = date('Y-m-d H:i:s');
+            $newTestData['lastupdatedby'] = $this->getUser()->getUserIdentifier();
+            $newTestData['uniqueid'] = uniqid();
+
+            if ($targetProjectId === $id) {
+                $newTestData['testsuitename'] .= ' - Copy';
+            }
+
+            $connection->insert('testsuite', $newTestData);
+            $newTestId = (int) $connection->lastInsertId();
+
+            $steps = $connection->fetchAllAssociative('SELECT * FROM teststep WHERE testid = ? ORDER BY teststep_number ASC', [$testId]);
+            foreach ($steps as $step) {
+                $newStepData = $step;
+                unset($newStepData['teststepid']);
+                $newStepData['testid'] = $newTestId;
+                $connection->insert('teststep', $newStepData);
+            }
+
+            $this->addFlash('success', 'Test case successfully copied!');
+            return $this->redirectToRoute('app_project_test_edit', ['id' => $targetProjectId, 'testId' => $newTestId]);
+        }
+
+        $projects = $connection->fetchAllAssociative('SELECT * FROM project ORDER BY project_name ASC');
+
+        return $this->render('project/test_copy.html.twig', [
+            'project' => $project,
+            'test' => $test,
+            'projects' => $projects,
+        ]);
+    }
+
+    #[Route('/project/{id}/tests/export', name: 'app_project_test_export_select', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function testExportSelect(int $id, Request $request, Connection $connection): Response
+    {
+        $project = $connection->fetchAssociative('SELECT * FROM project WHERE project_id = ?', [$id]);
+        if (!$project) {
+            throw $this->createNotFoundException('Project not found');
+        }
+
+        if ($request->isMethod('POST')) {
+            $testIds = $request->request->all('test_ids');
+            if (empty($testIds)) {
+                $this->addFlash('error', 'Please select at least one test case to export.');
+                return $this->redirectToRoute('app_project_test_export_select', ['id' => $id]);
+            }
+
+            $output = fopen('php://temp', 'r+');
+            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($output, [
+                'Test ID', 'Test Name', 'Type', 'Area', 'Priority', 'Status', 'Purpose', 'Comments',
+                'BA Owner', 'QA Owner', 'Tester', 'Assigned To', 'Assigned By', 'Date Assigned',
+                'Expected Complete', 'Actual Complete', 'Duration (mins)', 'Auto Pass',
+                'Manual Steps', 'Automated Script', 'LoadRunner',
+                'Step Number', 'Action', 'Inputs', 'Expected Result', 'Step Type'
+            ]);
+
+            foreach ($testIds as $testId) {
+                $test = $connection->fetchAssociative('SELECT * FROM testsuite WHERE testid = ? AND project_id = ?', [(int)$testId, $id]);
+                if (!$test) {
+                    continue;
+                }
+
+                $steps = $connection->fetchAllAssociative('SELECT * FROM teststep WHERE testid = ? ORDER BY teststep_number ASC', [(int)$testId]);
+
+                if (empty($steps)) {
+                    fputcsv($output, [
+                        'TC-' . $test['testid'],
+                        $test['testsuitename'],
+                        $test['testtype'],
+                        $test['areatested'],
+                        $test['priority'],
+                        $test['status'],
+                        $test['purpose'],
+                        $test['comments'],
+                        $test['baowner'],
+                        $test['scripter'],
+                        $test['tester'],
+                        $test['assignedto'],
+                        $test['assignedby'],
+                        $test['dateassigned'],
+                        $test['expdatecomplete'],
+                        $test['actdatecomplete'],
+                        $test['duration'],
+                        $test['autopass'],
+                        $test['steps'],
+                        $test['script'],
+                        $test['loadrunner'],
+                        '', '', '', '', ''
+                    ]);
+                } else {
+                    foreach ($steps as $index => $step) {
+                        if ($index === 0) {
+                            fputcsv($output, [
+                                'TC-' . $test['testid'],
+                                $test['testsuitename'],
+                                $test['testtype'],
+                                $test['areatested'],
+                                $test['priority'],
+                                $test['status'],
+                                $test['purpose'],
+                                $test['comments'],
+                                $test['baowner'],
+                                $test['scripter'],
+                                $test['tester'],
+                                $test['assignedto'],
+                                $test['assignedby'],
+                                $test['dateassigned'],
+                                $test['expdatecomplete'],
+                                $test['actdatecomplete'],
+                                $test['duration'],
+                                $test['autopass'],
+                                $test['steps'],
+                                $test['script'],
+                                $test['loadrunner'],
+                                $step['teststep_number'],
+                                $step['action'],
+                                $step['inputs'],
+                                $step['expected_result'],
+                                $step['steptype']
+                            ]);
+                        } else {
+                            fputcsv($output, [
+                                '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                                $step['teststep_number'],
+                                $step['action'],
+                                $step['inputs'],
+                                $step['expected_result'],
+                                $step['steptype']
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            rewind($output);
+            $csvContent = stream_get_contents($output);
+            fclose($output);
+
+            $filename = sprintf('test_cases_export_%s_%s.csv', $project['project_name'], date('Ymd_His'));
+            $filename = str_replace(' ', '_', $filename);
+
+            $response = new Response($csvContent);
+            $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+            $response->headers->set('Content-Disposition', sprintf('attachment; filename="%s"', $filename));
+            $response->headers->set('Pragma', 'no-cache');
+            $response->headers->set('Expires', '0');
+
+            return $response;
+        }
+
+        $tests = $connection->fetchAllAssociative('SELECT * FROM testsuite WHERE project_id = ? AND deleted = \'N\' ORDER BY testid ASC', [$id]);
+
+        return $this->render('project/test_export_select.html.twig', [
+            'project' => $project,
+            'tests' => $tests,
+        ]);
     }
 
     #[Route('/project/{id}/bugs', name: 'app_project_bugs')]

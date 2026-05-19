@@ -1,53 +1,68 @@
 <aside class="sidebar">
-    <div class="sidebar-logo">RTH Modern</div>
-    <nav class="sidebar-nav">
+    {% if project is defined and project is not null %}
+        <div style="padding: 0 0.5rem 1.5rem 0.5rem; margin-bottom: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--surface-high); border-radius: var(--radius-lg);">
+                <div style="width: 2.5rem; height: 2.5rem; background: rgba(192, 193, 255, 0.2); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                    <span class="material-symbols-outlined">analytics</span>
+                </div>
+                <div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">{{ project.project_name }}</div>
+                    <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.03em; color: var(--text-muted); text-transform: uppercase;">Workspace</div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <nav class="sidebar-nav" style="padding: 0 0.5rem;">
         <a href="{{ path('app_home') }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_home' ? 'active' : '' }}">
-            <span style="margin-right: 0.75rem;">🏠</span><span>Home</span>
+            <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">home</span><span>Home</span>
         </a>
+        
         {% if project is defined and project is not null %}
-            <div style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; padding-left: 0.5rem;">Project Workspace</div>
             <a href="{{ path('app_project_show', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_show' ? 'active' : '' }}">
-                <span style="margin-right: 0.75rem;">📊</span><span>Dashboard</span>
+                <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">dashboard</span><span>Dashboard</span>
             </a>
             <a href="{{ path('app_project_requirements', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_requirements' ? 'active' : '' }}">
-                <span style="margin-right: 0.75rem;">📋</span><span>Requirements</span>
+                <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">assignment</span><span>Requirements</span>
             </a>
             <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_tests' ? 'active' : '' }}">
-                <span style="margin-right: 0.75rem;">🧪</span><span>Test Cases</span>
+                <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">inventory_2</span><span>Test Cases</span>
             </a>
             <a href="{{ path('app_project_test_runs', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_test_runs' ? 'active' : '' }}">
-                <span style="margin-right: 0.75rem;">⚡</span><span>Test Runs</span>
+                <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">play_circle</span><span>Test Runs</span>
             </a>
             <a href="{{ path('app_project_bugs', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_bugs' or app.request.attributes.get('_route') == 'app_project_bug_detail' ? 'active' : '' }}">
-                <span style="margin-right: 0.75rem;">🐛</span><span>Bugs</span>
+                <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">bug_report</span><span>Bugs</span>
             </a>
             <a href="{{ path('app_project_reports', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') starts with 'app_project_report' and app.request.attributes.get('_route') != 'app_project_report' ? 'active' : '' }}">
-                <span style="margin-right: 0.75rem;">📈</span><span>Reporting</span>
+                <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">analytics</span><span>Reporting</span>
             </a>
-            <a href="{{ path('app_project_settings_requirements', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_settings_requirements' ? 'active' : '' }}">
-                <span style="margin-right: 0.75rem;">⚙️</span><span>Req Settings</span>
-            </a>
-            <a href="{{ path('app_project_settings_tests', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_settings_tests' ? 'active' : '' }}">
-                <span style="margin-right: 0.75rem;">🛠️</span><span>Test Settings</span>
-            </a>
+            <div style="margin-top: 1rem;">
+                <a href="{{ path('app_project_settings_requirements', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_settings_requirements' ? 'active' : '' }}">
+                    <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">settings</span><span>Req Settings</span>
+                </a>
+                <a href="{{ path('app_project_settings_tests', {id: project.project_id}) }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_project_settings_tests' ? 'active' : '' }}">
+                    <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">settings_applications</span><span>Test Settings</span>
+                </a>
+            </div>
         {% endif %}
 
         {% if is_granted('ROLE_ADMIN') %}
-            <div style="margin-top: 2rem; margin-bottom: 0.5rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; padding-left: 0.5rem;">Governance</div>
+            <div style="margin-top: 2rem; margin-bottom: 0.5rem; font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em; padding-left: 1rem;">Governance</div>
             <a href="{{ path('app_admin_users') }}" class="nav-item {{ app.request.attributes.get('_route') starts with 'app_admin_user' ? 'active' : '' }}">
-                <span style="margin-right: 0.75rem;">👥</span><span>User Management</span>
+                <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">group</span><span>User Management</span>
             </a>
             <a href="{{ path('app_admin_releases') }}" class="nav-item {{ app.request.attributes.get('_route') starts with 'app_admin_release' or app.request.attributes.get('_route') starts with 'app_admin_build' ? 'active' : '' }}">
-                <span style="margin-right: 0.75rem;">🚀</span><span>Releases & Builds</span>
+                <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">rocket_launch</span><span>Releases & Builds</span>
             </a>
         {% endif %}
     </nav>
-    <div style="border-top: 1px solid var(--glass-border); padding-top: 1rem; margin-top: auto;">
+    <div style="border-top: 1px solid var(--glass-border); padding: 1rem 0.5rem 0 0.5rem; margin-top: auto;">
         <a href="{{ path('app_profile') }}" class="nav-item {{ app.request.attributes.get('_route') == 'app_profile' ? 'active' : '' }}">
-            <span style="margin-right: 0.75rem;">👤</span><span>Profile</span>
+            <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">person</span><span>Profile</span>
         </a>
         <a href="{{ path('app_logout') }}" class="nav-item">
-            <span style="margin-right: 0.75rem;">🚪</span><span>Logout</span>
+            <span class="material-symbols-outlined" style="margin-right: 0.75rem; font-size: 20px;">logout</span><span>Logout</span>
         </a>
     </div>
 </aside>

@@ -52,8 +52,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const bugCtx = document.getElementById('bugChart').getContext('2d');
+    document.addEventListener('turbo:load', function() {
+        const bugCanvas = document.getElementById('bugChart');
+        const testCanvas = document.getElementById('testChart');
+        if (!bugCanvas || !testCanvas) return; // safety check under Turbo
+
+        const bugCtx = bugCanvas.getContext('2d');
         new Chart(bugCtx, {
             type: 'doughnut',
             data: {
@@ -82,7 +86,7 @@
             }
         });
 
-        const testCtx = document.getElementById('testChart').getContext('2d');
+        const testCtx = testCanvas.getContext('2d');
         new Chart(testCtx, {
             type: 'bar',
             data: {
