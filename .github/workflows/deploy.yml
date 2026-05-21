@@ -102,6 +102,8 @@ jobs:
     needs: deploy-preprod
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET
@@ -115,4 +117,30 @@ jobs:
       - name: Run Playwright Tests
         env:
           BASE_URL: ${{ secrets.PREPROD_URL }}
-        run: dotnet test LoreTest.Playwright/LoreTest.Playwright.csproj --no-build --verbosity normal
+        run: dotnet test LoreTest.Playwright/LoreTest.Playwright.csproj --no-build --verbosity normal --logger trx --results-directory LoreTest.Playwright/bin/Debug/net10.0/allure-results
+
+      - name: Load Allure Report History
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Build Allure Report
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        id: allure-report
+        with:
+          allure_results: LoreTest.Playwright/bin/Debug/net10.0/allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+
+      - name: Deploy Allure Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-history
+
