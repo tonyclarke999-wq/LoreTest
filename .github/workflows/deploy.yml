@@ -109,6 +109,7 @@ jobs:
       - name: Run Playwright Tests
         env:
           BASE_URL: ${{ secrets.PREPROD_URL || 'http://localhost:5002' }}
+          PLAYWRIGHT_BROWSERS_PATH: C:\actions-runner\_work\ms-playwright
         run: dotnet test LoreTest.Playwright/LoreTest.Playwright.csproj --no-build --verbosity normal --logger trx --results-directory LoreTest.Playwright/bin/Debug/net10.0/allure-results
       - name: Upload Allure Results Artifact
         uses: actions/upload-artifact@v4
