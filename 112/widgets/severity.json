@@ -1,0 +1,1 @@
+[{"uid":"19307938cac1dfc1","name":"CreateUser_WithoutChangingLanguage_ShouldSucceed","time":{"start":1779445530640,"stop":1779445548095,"duration":17455},"status":"passed","severity":"normal"},{"uid":"549665b430e061e7","name":"HomePage_ShouldLoadSuccessfully","time":{"start":1779445530640,"stop":1779445542925,"duration":12285},"status":"passed","severity":"normal"}]
