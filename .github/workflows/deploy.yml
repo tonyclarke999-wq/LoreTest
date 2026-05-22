@@ -106,8 +106,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build Playwright Tests
         run: dotnet build LoreTest.Playwright/LoreTest.Playwright.csproj
-      - name: Install Playwright Browsers
-        run: pwsh LoreTest.Playwright/bin/Debug/net10.0/playwright.ps1 install
       - name: Run Playwright Tests
         env:
           BASE_URL: ${{ secrets.PREPROD_URL || 'http://localhost:5002' }}
