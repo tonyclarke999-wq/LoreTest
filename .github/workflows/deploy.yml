@@ -24,7 +24,7 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
       - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test LoreTest.Tests/LoreTest.Tests.csproj --no-build --verbosity normal
 
   build-and-push:
     needs: test
