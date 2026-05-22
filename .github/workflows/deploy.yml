@@ -99,8 +99,8 @@ jobs:
           docker compose -f docker-compose.preprod.yml up -d
 
   playwright-tests:
-    needs: deploy-preprod
-    if: github.ref == 'refs/heads/main'
+    needs: [deploy-preprod, deploy-test]
+    if: always() && (needs.deploy-preprod.result == 'success' || needs.deploy-test.result == 'success')
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
@@ -108,7 +108,7 @@ jobs:
         run: dotnet build LoreTest.Playwright/LoreTest.Playwright.csproj
       - name: Run Playwright Tests
         env:
-          BASE_URL: ${{ secrets.PREPROD_URL || 'http://localhost:5002' }}
+          BASE_URL: ${{ github.ref == 'refs/heads/main' && (secrets.PREPROD_URL || 'http://localhost:5002') || (secrets.TEST_URL || 'http://localhost:5001') }}
           PLAYWRIGHT_BROWSERS_PATH: C:\actions-runner\_work\ms-playwright
         run: dotnet test LoreTest.Playwright/LoreTest.Playwright.csproj --no-build --verbosity normal --logger trx --results-directory LoreTest.Playwright/bin/Debug/net10.0/allure-results
       - name: Upload Allure Results Artifact
