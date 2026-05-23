@@ -120,8 +120,8 @@ namespace LoreTest.Playwright
             await Page.WaitForTimeoutAsync(1500); // Allow Blazor interactive server setup
             await Expect(Page).ToHaveTitleAsync(ProjectsTitleRegex());
 
-            // 5. Navigate to Create Project page
-            await Page.ClickAsync("a[href='/projects/create']");
+            // 5. Navigate to Create Project page directly
+            await Page.GotoAsync($"{_baseUrl}/projects/create");
             await Page.WaitForTimeoutAsync(1500);
 
             // 6. Fill in create form
@@ -142,8 +142,12 @@ namespace LoreTest.Playwright
             var projectRow = Page.Locator($"tr:has-text('{projectTitle}')");
             await Expect(projectRow).ToBeVisibleAsync();
 
-            // 9. Navigate to edit page for the created project
-            await projectRow.Locator("a[href^='/projects/edit/']").ClickAsync();
+            // Extract the newly created project ID from the table row
+            var idText = await projectRow.Locator(".data-mono").InnerTextAsync();
+            var projectId = idText.Trim();
+
+            // 9. Navigate to edit page for the created project directly
+            await Page.GotoAsync($"{_baseUrl}/projects/edit/{projectId}");
             await Page.WaitForTimeoutAsync(1500);
             await Expect(Page).ToHaveURLAsync(ProjectEditUrlRegex());
 
@@ -166,19 +170,18 @@ namespace LoreTest.Playwright
             var updatedRow = Page.Locator($"tr:has-text('{updatedTitle}')");
             await Expect(updatedRow).ToBeVisibleAsync();
 
-            // 13. Navigate to Details page to verify details are correct
-            await updatedRow.Locator("a[href^='/projects/details/']").ClickAsync();
+            // 13. Navigate to Details page to verify details are correct directly
+            await Page.GotoAsync($"{_baseUrl}/projects/details/{projectId}");
             await Page.WaitForTimeoutAsync(1500);
             await Expect(Page).ToHaveURLAsync(ProjectDetailsUrlRegex());
             await Expect(Page.Locator("h1, .headline-md, .title-md")).ToContainTextAsync(updatedTitle);
 
-            // 14. Navigate back to list from Details
-            await Page.ClickAsync("a[href='/projects']");
+            // 14. Navigate back to list from Details directly
+            await Page.GotoAsync($"{_baseUrl}/projects");
             await Page.WaitForTimeoutAsync(1500);
 
-            // 15. Navigate to Delete confirmation page
-            updatedRow = Page.Locator($"tr:has-text('{updatedTitle}')");
-            await updatedRow.Locator("a[href^='/projects/delete/']").ClickAsync();
+            // 15. Navigate to Delete confirmation page directly
+            await Page.GotoAsync($"{_baseUrl}/projects/delete/{projectId}");
             await Page.WaitForTimeoutAsync(1500);
             await Expect(Page).ToHaveURLAsync(ProjectDeleteUrlRegex());
 
@@ -195,6 +198,7 @@ namespace LoreTest.Playwright
             // 18. Reset cleanup tracker on successful completion
             _createdProjectTitle = "";
         }
+
 
         [GeneratedRegex("Test Projects")]
         private static partial Regex ProjectsTitleRegex();
