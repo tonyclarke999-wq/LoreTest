@@ -133,7 +133,7 @@ namespace LoreTest.Playwright
             await Page.FillAsync(".ql-editor", projectDescription); // Quill rich editor contains a .ql-editor editable div
 
             // 7. Click submit to create
-            await Page.ClickAsync("form button[type='submit']");
+            await Page.ClickAsync("form button.btn-primary");
 
             // 8. Verify redirection back to index and that the new project is listed
             await Page.WaitForTimeoutAsync(1500);
@@ -159,7 +159,8 @@ namespace LoreTest.Playwright
             await Page.FillAsync(".ql-editor", updatedDescription);
 
             // 11. Click save
-            await Page.ClickAsync("form button[type='submit']");
+            await Page.ClickAsync("form button.btn-primary");
+
 
 
             // 12. Verify redirect and updated details in list
