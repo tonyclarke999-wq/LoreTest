@@ -1,0 +1,8 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","11374","HomePage_ShouldLoadSuccessfully","","Sun May 24 20:40:38 UTC 2026","passed","Sun May 24 20:40:49 UTC 2026","","LoreTest.Playwright.E2ETests","LoreTest.Playwright.E2ETests",""
+"","6392","CreateUser_WithoutChangingLanguage_ShouldSucceed","","Sun May 24 20:41:59 UTC 2026","passed","Sun May 24 20:42:05 UTC 2026","","LoreTest.Playwright.UserCreationTests","LoreTest.Playwright.UserCreationTests",""
+"","22577","Test03_CreateTestCasesAndSteps_ShouldSucceed","","Sun May 24 20:41:06 UTC 2026","passed","Sun May 24 20:41:28 UTC 2026","","LoreTest.Playwright.ProjectTests","LoreTest.Playwright.ProjectTests",""
+"","15129","Test05_DeleteAllInOrder_ShouldSucceed","","Sun May 24 20:41:44 UTC 2026","passed","Sun May 24 20:41:59 UTC 2026","","LoreTest.Playwright.ProjectTests","LoreTest.Playwright.ProjectTests",""
+"","11948","Test01_CreateAndUpdate_ShouldSucceed","","Sun May 24 20:40:49 UTC 2026","passed","Sun May 24 20:41:01 UTC 2026","","LoreTest.Playwright.ProjectTests","LoreTest.Playwright.ProjectTests",""
+"","4771","Test02_CreateTestSuite_ShouldSucceed","","Sun May 24 20:41:01 UTC 2026","passed","Sun May 24 20:41:06 UTC 2026","","LoreTest.Playwright.ProjectTests","LoreTest.Playwright.ProjectTests",""
+"","15342","Test04_ExecuteTestRun_ShouldRecordCorrectly","","Sun May 24 20:41:28 UTC 2026","passed","Sun May 24 20:41:44 UTC 2026","","LoreTest.Playwright.ProjectTests","LoreTest.Playwright.ProjectTests",""
