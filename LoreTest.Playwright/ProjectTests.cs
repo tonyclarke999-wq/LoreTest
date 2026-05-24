@@ -5,16 +5,17 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace LoreTest.Playwright
 {
     [TestClass]
+    [DoNotParallelize]
     public partial class ProjectTests : PageTest
     {
         private string _baseUrl = "";
-        private string _createdProjectTitle = "";
+        private static string _createdProjectTitle = "";
+        private static string _createdProjectId = "";
 
         [TestInitialize]
         public async Task Setup()
         {
             _baseUrl = Environment.GetEnvironmentVariable("BASE_URL") ?? "http://localhost:5001";
-            _createdProjectTitle = "";
 
             // Start Playwright Tracing
             await Context.Tracing.StartAsync(new()
@@ -61,12 +62,12 @@ namespace LoreTest.Playwright
                 Console.WriteLine($"Failed to stop tracing: {ex.Message}");
             }
 
-            // 3. E2E CRUD Cleanup: Delete the newly created project via UI if it still exists
-            if (!string.IsNullOrEmpty(_createdProjectTitle))
+            // 3. E2E CRUD Cleanup: Delete the newly created project via UI if it still exists and the test failed
+            if (!isPassed && !string.IsNullOrEmpty(_createdProjectTitle))
             {
                 try
                 {
-                    Console.WriteLine($"E2E CRUD Cleanup: Attempting to delete project '{_createdProjectTitle}'");
+                    Console.WriteLine($"E2E CRUD Cleanup: Attempting to delete project '{_createdProjectTitle}' due to test failure.");
                     await Page.GotoAsync($"{_baseUrl}/projects");
                     await Page.WaitForTimeoutAsync(1500);
 
@@ -98,11 +99,16 @@ namespace LoreTest.Playwright
                 {
                     Console.WriteLine($"Failed to clean up test project: {ex.Message}");
                 }
+                finally
+                {
+                    _createdProjectTitle = "";
+                    _createdProjectId = "";
+                }
             }
         }
 
         [TestMethod]
-        public async Task ProjectCRUD_ShouldSucceed()
+        public async Task Test01_CreateAndUpdate_ShouldSucceed()
         {
             // 1. Navigate to Login Page
             await Page.GotoAsync($"{_baseUrl}/Account/Login");
@@ -144,10 +150,10 @@ namespace LoreTest.Playwright
 
             // Extract the newly created project ID from the table row
             var idText = await projectRow.Locator(".data-mono").InnerTextAsync();
-            var projectId = idText.Trim();
+            _createdProjectId = idText.Trim();
 
             // 9. Navigate to edit page for the created project directly
-            await Page.GotoAsync($"{_baseUrl}/projects/edit/{projectId}");
+            await Page.GotoAsync($"{_baseUrl}/projects/edit/{_createdProjectId}");
             await Page.WaitForTimeoutAsync(1500);
             await Expect(Page).ToHaveURLAsync(ProjectEditUrlRegex());
 
@@ -161,8 +167,6 @@ namespace LoreTest.Playwright
             // 11. Click save
             await Page.ClickAsync("form button.btn-primary");
 
-
-
             // 12. Verify redirect and updated details in list
             await Page.WaitForTimeoutAsync(1500);
             await Expect(Page).ToHaveURLAsync(ProjectsUrlRegex());
@@ -173,32 +177,47 @@ namespace LoreTest.Playwright
             await Expect(updatedRow).ToBeVisibleAsync();
 
             // 13. Navigate to Details page to verify details are correct directly
-            await Page.GotoAsync($"{_baseUrl}/projects/details/{projectId}");
+            await Page.GotoAsync($"{_baseUrl}/projects/details/{_createdProjectId}");
             await Page.WaitForTimeoutAsync(1500);
             await Expect(Page).ToHaveURLAsync(ProjectDetailsUrlRegex());
             await Expect(Page.Locator("h1, .headline-md, .title-md")).ToContainTextAsync(updatedTitle);
+        }
 
-            // 14. Navigate back to list from Details directly
-            await Page.GotoAsync($"{_baseUrl}/projects");
-            await Page.WaitForTimeoutAsync(1500);
+        [TestMethod]
+        public async Task Test02_Delete_ShouldSucceed()
+        {
+            // Ensure we have a project ID to delete
+            Assert.IsFalse(string.IsNullOrEmpty(_createdProjectId), "No project was created in the previous step.");
 
-            // 15. Navigate to Delete confirmation page directly
-            await Page.GotoAsync($"{_baseUrl}/projects/delete/{projectId}");
+            // 1. Navigate to Login Page
+            await Page.GotoAsync($"{_baseUrl}/Account/Login");
+
+            // 2. Fill in credentials and submit
+            await Page.FillAsync("input[id='Input.Email']", "tonyclarke999@gmail.com");
+            await Page.FillAsync("input[id='Input.Password']", "Password1-");
+            await Page.ClickAsync("button[type='submit']");
+
+            // 3. Verify logged in successfully
+            await Expect(Page.Locator("span.nav-text:has-text('Logout')")).ToBeVisibleAsync();
+
+            // 4. Navigate to Delete confirmation page directly
+            await Page.GotoAsync($"{_baseUrl}/projects/delete/{_createdProjectId}");
             await Page.WaitForTimeoutAsync(1500);
             await Expect(Page).ToHaveURLAsync(ProjectDeleteUrlRegex());
 
-            // 16. Click the actual Delete button to confirm deletion
+            // 5. Click the actual Delete button to confirm deletion
             await Page.ClickAsync("button.btn-danger");
 
-            // 17. Verify redirect and that project is no longer visible in list
+            // 6. Verify redirect and that project is no longer visible in list
             await Page.WaitForTimeoutAsync(1500);
             await Expect(Page).ToHaveURLAsync(ProjectsUrlRegex());
 
-            var deletedRow = Page.Locator($"tr:has-text('{updatedTitle}')");
+            var deletedRow = Page.Locator($"tr:has-text('{_createdProjectTitle}')");
             await Expect(deletedRow).Not.ToBeVisibleAsync();
 
-            // 18. Reset cleanup tracker on successful completion
+            // 7. Reset cleanup tracker on successful completion
             _createdProjectTitle = "";
+            _createdProjectId = "";
         }
 
 
