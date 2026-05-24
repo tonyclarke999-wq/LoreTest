@@ -29,17 +29,18 @@ namespace LoreTest.Playwright
 
             // Determine the results directory and ensure it exists
             string resultsDir = Path.Combine(Directory.GetCurrentDirectory(), "allure-results");
+            string targetDir = Path.Combine(resultsDir, Environment.MachineName);
             try
             {
-                if (!Directory.Exists(resultsDir))
+                if (!Directory.Exists(targetDir))
                 {
-                    Directory.CreateDirectory(resultsDir);
+                    Directory.CreateDirectory(targetDir);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to create allure-results directory: {ex.Message}");
-                resultsDir = Directory.GetCurrentDirectory();
+                targetDir = resultsDir;
             }
 
             // 1. Capture Screenshot on Failure
@@ -47,7 +48,7 @@ namespace LoreTest.Playwright
             {
                 try
                 {
-                    var screenshotPath = Path.Combine(resultsDir, $"screenshot_{testName}.png");
+                    var screenshotPath = Path.Combine(targetDir, $"screenshot_{testName}.png");
                     await Page.ScreenshotAsync(new() { Path = screenshotPath, FullPage = true });
                     TestContext.AddResultFile(screenshotPath);
                 }
@@ -60,7 +61,7 @@ namespace LoreTest.Playwright
             // 2. Stop Tracing and attach to MSTest TestContext
             try
             {
-                var tracePath = Path.Combine(resultsDir, $"trace_{testName}.zip");
+                var tracePath = Path.Combine(targetDir, $"trace_{testName}.zip");
                 await Context.Tracing.StopAsync(new() { Path = tracePath });
                 if (File.Exists(tracePath))
                 {
