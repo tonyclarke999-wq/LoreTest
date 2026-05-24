@@ -83,7 +83,7 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && canEdit && testSuite != null && !quillReady)
+        if (canEdit && testSuite != null && !quillReady)
         {
             quillReady = true;
             await JSRuntime.InvokeVoidAsync("eval", @"

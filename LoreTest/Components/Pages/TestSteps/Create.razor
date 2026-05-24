@@ -125,7 +125,7 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && canEdit && testCase != null && !quillReady)
+        if (canEdit && testCase != null && !quillReady)
         {
             quillReady = true;
             await InitQuill();

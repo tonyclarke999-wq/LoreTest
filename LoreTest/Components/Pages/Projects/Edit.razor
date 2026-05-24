@@ -83,6 +83,7 @@ else
     private string? errorMessage;
     private bool isFetchingJira = false;
     private string? jiraUrl;
+    private bool quillReady = false;
 
     private async Task FetchJiraDetails()
     {
@@ -152,8 +153,9 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && Input != null)
+        if (Input != null && !quillReady)
         {
+            quillReady = true;
             await JSRuntime.InvokeVoidAsync("eval", @"
                 if (!window.quillInitialized) {
                     window.initQuill = function(element, initialContent) {

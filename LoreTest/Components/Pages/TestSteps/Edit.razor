@@ -106,7 +106,7 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && canEdit && step != null && !quillReady)
+        if (canEdit && step != null && !quillReady)
         {
             quillReady = true;
             await JSRuntime.InvokeVoidAsync("eval", @"
