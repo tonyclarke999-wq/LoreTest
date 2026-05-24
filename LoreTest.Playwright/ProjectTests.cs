@@ -36,10 +36,18 @@ namespace LoreTest.Playwright
             var testName = TestContext.TestName;
             var isPassed = TestContext.CurrentTestOutcome == UnitTestOutcome.Passed;
 
-            // Determine the results directory (fallback to current directory if allure-results doesn't exist)
+            // Determine the results directory and ensure it exists
             string resultsDir = Path.Combine(Directory.GetCurrentDirectory(), "allure-results");
-            if (!Directory.Exists(resultsDir))
+            try
             {
+                if (!Directory.Exists(resultsDir))
+                {
+                    Directory.CreateDirectory(resultsDir);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to create allure-results directory: {ex.Message}");
                 resultsDir = Directory.GetCurrentDirectory();
             }
 
