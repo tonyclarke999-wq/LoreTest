@@ -36,7 +36,7 @@ namespace LoreTest.Playwright
             var isPassed = TestContext.CurrentTestOutcome == UnitTestOutcome.Passed;
 
             // Determine the results directory and ensure it exists
-            string resultsDir = Path.Combine(Directory.GetCurrentDirectory(), "allure-results");
+            string resultsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "allure-results");
             string targetDir = Path.Combine(resultsDir, Environment.MachineName);
             try
             {
