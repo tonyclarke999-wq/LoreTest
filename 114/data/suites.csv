@@ -1,4 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","39385","ProjectCRUD_ShouldSucceed","","Sat May 23 22:02:38 UTC 2026","failed","Sat May 23 22:03:18 UTC 2026","","LoreTest.Playwright.ProjectTests","LoreTest.Playwright.ProjectTests",""
-"","22480","HomePage_ShouldLoadSuccessfully","","Sat May 23 22:02:38 UTC 2026","passed","Sat May 23 22:03:01 UTC 2026","","LoreTest.Playwright.E2ETests","LoreTest.Playwright.E2ETests",""
-"","30208","CreateUser_WithoutChangingLanguage_ShouldSucceed","","Sat May 23 22:02:38 UTC 2026","passed","Sat May 23 22:03:09 UTC 2026","","LoreTest.Playwright.UserCreationTests","LoreTest.Playwright.UserCreationTests",""
