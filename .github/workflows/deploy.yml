@@ -131,23 +131,161 @@ jobs:
         with:
           name: allure-results
           path: allure-results
-      - name: Fix Cross-Platform Path Separators in TRX
+      - name: Convert TRX to Native Allure JSON Results
         run: |
-          cat << 'EOF' > fix-trx.py
-          import os, re
+          cat << 'EOF' > convert-trx.py
+          import os
+          import xml.etree.ElementTree as ET
+          import json
+          import uuid
+          import shutil
+          from datetime import datetime
+
           results_dir = 'allure-results'
-          if os.path.exists(results_dir):
-              for f in os.listdir(results_dir):
-                  if f.endswith('.trx'):
-                      p = os.path.join(results_dir, f)
-                      print(f"Fixing paths in: {p}")
-                      with open(p, 'r', encoding='utf-8') as file:
-                          c = file.read()
-                      c = re.sub(r'path="([^"]+)"', lambda m: 'path="' + m.group(1).replace('\\', '/') + '"', c)
-                      with open(p, 'w', encoding='utf-8') as file:
-                          file.write(c)
+          if not os.path.exists(results_dir):
+              print("No allure-results directory found.")
+              exit(0)
+
+          # XML namespace for TRX
+          ns = {'trx': 'http://microsoft.com/schemas/VisualStudio/TeamTest/2010'}
+
+          def parse_iso_time(time_str):
+              if not time_str:
+                  return int(datetime.now().timestamp() * 1000)
+              clean_str = time_str
+              if '+' in time_str:
+                  clean_str = time_str.split('+')[0]
+              elif '-' in time_str[10:]:
+                  clean_str = time_str.rsplit('-', 1)[0]
+              
+              try:
+                  dt = datetime.fromisoformat(clean_str)
+                  return int(dt.timestamp() * 1000)
+              except:
+                  return int(datetime.now().timestamp() * 1000)
+
+          for f in os.listdir(results_dir):
+              if f.endswith('.trx'):
+                  trx_path = os.path.join(results_dir, f)
+                  print(f"Converting TRX: {trx_path}")
+                  try:
+                      tree = ET.parse(trx_path)
+                      root = tree.getroot()
+                      
+                      # Find all UnitTests to map testId to className and fullName
+                      test_definitions = {}
+                      for ut in root.findall('.//trx:UnitTest', ns):
+                          test_id = ut.get('id')
+                          tm = ut.find('.//trx:TestMethod', ns)
+                          if tm is not None:
+                              test_definitions[test_id] = {
+                                  'className': tm.get('className'),
+                                  'name': tm.get('name')
+                              }
+                      
+                      # Process results
+                      for utr in root.findall('.//trx:UnitTestResult', ns):
+                          test_id = utr.get('testId')
+                          exec_id = utr.get('executionId') or str(uuid.uuid4())
+                          test_name = utr.get('testName')
+                          outcome = utr.get('outcome')
+                          
+                          status = 'broken'
+                          if outcome == 'Passed':
+                              status = 'passed'
+                          elif outcome == 'Failed':
+                              status = 'failed'
+                          elif outcome == 'Timeout' or outcome == 'Aborted':
+                              status = 'broken'
+                          
+                          start_time = parse_iso_time(utr.get('startTime'))
+                          stop_time = parse_iso_time(utr.get('endTime'))
+                          
+                          class_name = ""
+                          full_name = test_name
+                          if test_id in test_definitions:
+                              class_name = test_definitions[test_id]['className']
+                              full_name = f"{class_name}.{test_name}"
+                          
+                          # Extract attachments
+                          attachments = []
+                          res_files = utr.find('.//trx:ResultFiles', ns)
+                          if res_files is not None:
+                              for rf in res_files.findall('.//trx:ResultFile', ns):
+                                  rel_path = rf.get('path')
+                                  if rel_path:
+                                      clean_rel = rel_path.replace('\\', '/')
+                                      file_name = os.path.basename(clean_rel)
+                                      
+                                      # Deep search for file_name inside results_dir
+                                      found_path = None
+                                      for r, d, files in os.walk(results_dir):
+                                          if file_name in files:
+                                              found_path = os.path.join(r, file_name)
+                                              break
+                                      
+                                      if found_path:
+                                          dest_path = os.path.join(results_dir, file_name)
+                                          if found_path != dest_path:
+                                              shutil.copy2(found_path, dest_path)
+                                          
+                                          mime_type = 'application/octet-stream'
+                                          if file_name.endswith('.zip'):
+                                              mime_type = 'application/zip'
+                                          elif file_name.endswith('.png'):
+                                              mime_type = 'image/png'
+                                          
+                                          attachments.append({
+                                              'name': 'trace' if file_name.endswith('.zip') else 'screenshot',
+                                              'source': file_name,
+                                              'type': mime_type
+                                          })
+                                          print(f"  Mapped attachment: {file_name}")
+                          
+                          allure_result = {
+                              "uuid": exec_id,
+                              "historyId": full_name,
+                              "fullName": full_name,
+                              "name": test_name,
+                              "status": status,
+                              "stage": "finished",
+                              "steps": [],
+                              "attachments": attachments,
+                              "parameters": [],
+                              "start": start_time,
+                              "stop": stop_time,
+                              "labels": [
+                                  {"name": "suite", "value": class_name},
+                                  {"name": "testClass", "value": class_name},
+                                  {"name": "package", "value": class_name}
+                              ]
+                          }
+                          
+                          err_info = utr.find('.//trx:ErrorInfo', ns)
+                          if err_info is not None:
+                              msg_elem = err_info.find('.//trx:Message', ns)
+                              trace_elem = err_info.find('.//trx:StackTrace', ns)
+                              
+                              status_details = {}
+                              if msg_elem is not None and msg_elem.text:
+                                  status_details["message"] = msg_elem.text
+                              if trace_elem is not None and trace_elem.text:
+                                  status_details["trace"] = trace_elem.text
+                              
+                              if status_details:
+                                  allure_result["statusDetails"] = status_details
+                          
+                          result_json_path = os.path.join(results_dir, f"{exec_id}-result.json")
+                          with open(result_json_path, 'w', encoding='utf-8') as rf:
+                              json.dump(allure_result, rf, indent=2, ensure_ascii=False)
+                          
+                      os.remove(trx_path)
+                      print(f"Successfully converted and deleted TRX: {trx_path}")
+                      
+                  except Exception as e:
+                      print(f"Failed to convert TRX {trx_path}: {e}")
           EOF
-          python fix-trx.py
+          python convert-trx.py
       - name: Load Allure Report History
         uses: actions/checkout@v4
         continue-on-error: true
