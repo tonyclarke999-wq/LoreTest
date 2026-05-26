@@ -2,4 +2,5 @@
   <Project Path="LoreTest/LoreTest.csproj" />
   <Project Path="LoreTest.Tests/LoreTest.Tests.csproj" />
   <Project Path="LoreTest.Playwright/LoreTest.Playwright.csproj" />
+  <Project Path="LoreTest.Specs/LoreTest.Specs.csproj" />
 </Solution>
