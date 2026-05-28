@@ -73,6 +73,9 @@
   <data name="Bugs" xml:space="preserve">
     <value>Fehler</value>
   </data>
+  <data name="Reporting" xml:space="preserve">
+    <value>Berichte</value>
+  </data>
   <data name="Logout" xml:space="preserve">
     <value>Abmelden</value>
   </data>

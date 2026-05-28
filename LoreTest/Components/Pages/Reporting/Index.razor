@@ -1,0 +1,763 @@
+@page "/reporting"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject IStringLocalizer<SharedResource> L
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>Reporting Dashboard</PageTitle>
+
+<div class="container-fluid py-4" id="reporting-dashboard">
+    <!-- Header with smooth gradient backdrop -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 rounded-4 shadow-sm border-0 position-relative overflow-hidden" 
+                 style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white;">
+                <div class="position-absolute top-0 end-0 opacity-10" style="font-size: 8rem; transform: translate(20px, -20px); pointer-events: none;">
+                    <span class="material-symbols-outlined">analytics</span>
+                </div>
+                <h1 class="headline-md fw-bold mb-2">QA Reporting Hub</h1>
+                <p class="body-md mb-0 text-white-50">Consolidated analytics, advanced grouping, and complete traceability across projects, suites, test runs, and defects.</p>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="d-flex justify-content-center align-items-center py-5">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">@L["Loading"]</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Premium Metrics Summary Grid -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card h-100 border-0 shadow-sm rounded-3 metric-card overflow-hidden" 
+                     style="transition: transform 0.2s; border-left: 5px solid #2a5298 !important;"
+                     onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="p-3 bg-primary bg-opacity-10 rounded-3 me-3 text-primary">
+                            <span class="material-symbols-outlined">folder</span>
+                        </div>
+                        <div>
+                            <div class="label-caps text-muted mb-1">Projects</div>
+                            <div class="title-lg fw-bold text-dark">@projectsList.Count</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-6 col-md-3">
+                <div class="card h-100 border-0 shadow-sm rounded-3 metric-card overflow-hidden" 
+                     style="transition: transform 0.2s; border-left: 5px solid #17a2b8 !important;"
+                     onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="p-3 bg-info bg-opacity-10 rounded-3 me-3 text-info">
+                            <span class="material-symbols-outlined">layers</span>
+                        </div>
+                        <div>
+                            <div class="label-caps text-muted mb-1">Suites</div>
+                            <div class="title-lg fw-bold text-dark">@suitesList.Count</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <div class="card h-100 border-0 shadow-sm rounded-3 metric-card overflow-hidden" 
+                     style="transition: transform 0.2s; border-left: 5px solid #28a745 !important;"
+                     onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="p-3 bg-success bg-opacity-10 rounded-3 me-3 text-success">
+                            <span class="material-symbols-outlined">playlist_add_check</span>
+                        </div>
+                        <div>
+                            <div class="label-caps text-muted mb-1">Test Cases</div>
+                            <div class="title-lg fw-bold text-dark">@casesList.Count</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <div class="card h-100 border-0 shadow-sm rounded-3 metric-card overflow-hidden" 
+                     style="transition: transform 0.2s; border-left: 5px solid #dc3545 !important;"
+                     onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="p-3 bg-danger bg-opacity-10 rounded-3 me-3 text-danger">
+                            <span class="material-symbols-outlined">bug_report</span>
+                        </div>
+                        <div>
+                            <div class="label-caps text-muted mb-1">Active Bugs</div>
+                            <div class="title-lg fw-bold text-dark">@bugsList.Count(b => b.Status != BugStatus.Closed)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Premium Tabs Navigation -->
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+                <ul class="nav nav-tabs border-0 flex-nowrap overflow-auto" id="reporting-tabs" role="tablist">
+                    <li class="nav-item me-2" role="presentation">
+                        <button class="nav-link border-0 px-4 py-3 fw-bold @(currentTab == "Projects" ? "active text-primary" : "text-muted")" 
+                                id="tab-projects" @onclick='() => SwitchTab("Projects")'
+                                style="border-bottom: 3px solid @(currentTab == "Projects" ? "#2a5298" : "transparent") !important; border-radius: 0; background: transparent;">
+                            <div class="d-flex align-items-center">
+                                <span class="material-symbols-outlined me-2">folder</span>
+                                <span>Projects</span>
+                            </div>
+                        </button>
+                    </li>
+                    <li class="nav-item me-2" role="presentation">
+                        <button class="nav-link border-0 px-4 py-3 fw-bold @(currentTab == "TestSuites" ? "active text-primary" : "text-muted")" 
+                                id="tab-testsuites" @onclick='() => SwitchTab("TestSuites")'
+                                style="border-bottom: 3px solid @(currentTab == "TestSuites" ? "#2a5298" : "transparent") !important; border-radius: 0; background: transparent;">
+                            <div class="d-flex align-items-center">
+                                <span class="material-symbols-outlined me-2">layers</span>
+                                <span>Test Suites</span>
+                            </div>
+                        </button>
+                    </li>
+                    <li class="nav-item me-2" role="presentation">
+                        <button class="nav-link border-0 px-4 py-3 fw-bold @(currentTab == "TestCases" ? "active text-primary" : "text-muted")" 
+                                id="tab-testcases" @onclick='() => SwitchTab("TestCases")'
+                                style="border-bottom: 3px solid @(currentTab == "TestCases" ? "#2a5298" : "transparent") !important; border-radius: 0; background: transparent;">
+                            <div class="d-flex align-items-center">
+                                <span class="material-symbols-outlined me-2">playlist_add_check</span>
+                                <span>Test Cases</span>
+                            </div>
+                        </button>
+                    </li>
+                    <li class="nav-item me-2" role="presentation">
+                        <button class="nav-link border-0 px-4 py-3 fw-bold @(currentTab == "TestRuns" ? "active text-primary" : "text-muted")" 
+                                id="tab-testruns" @onclick='() => SwitchTab("TestRuns")'
+                                style="border-bottom: 3px solid @(currentTab == "TestRuns" ? "#2a5298" : "transparent") !important; border-radius: 0; background: transparent;">
+                            <div class="d-flex align-items-center">
+                                <span class="material-symbols-outlined me-2">play_circle</span>
+                                <span>Test Runs</span>
+                            </div>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link border-0 px-4 py-3 fw-bold @(currentTab == "Bugs" ? "active text-primary" : "text-muted")" 
+                                id="tab-bugs" @onclick='() => SwitchTab("Bugs")'
+                                style="border-bottom: 3px solid @(currentTab == "Bugs" ? "#2a5298" : "transparent") !important; border-radius: 0; background: transparent;">
+                            <div class="d-flex align-items-center">
+                                <span class="material-symbols-outlined me-2">bug_report</span>
+                                <span>Bugs</span>
+                            </div>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="card-body p-4 bg-light border-top" style="border-top: 1px solid rgba(0,0,0,.08) !important;">
+                @if (currentTab == "Projects")
+                {
+                    <!-- Projects Report Section -->
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-12 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-0 shadow-sm"><span class="material-symbols-outlined">search</span></span>
+                                <input type="text" class="form-control border-0 shadow-sm" id="project-search" placeholder="Search projects by title..." @bind-value="projectSearchQuery" @bind-value:event="oninput" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive bg-white rounded-3 shadow-sm p-3">
+                        <table class="table table-hover align-middle mb-0" id="projects-report-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 80px;">ID</th>
+                                    <th>Project Title</th>
+                                    <th>Jira Key / Reference</th>
+                                    <th>Suites</th>
+                                    <th>Total Cases</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var filtered = projectsList.Where(p => string.IsNullOrWhiteSpace(projectSearchQuery) || p.Title.Contains(projectSearchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
+                                }
+                                @if (!filtered.Any())
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted">No projects match the criteria.</td>
+                                    </tr>
+                                }
+                                @foreach (var project in filtered)
+                                {
+                                    <tr>
+                                        <td class="data-mono font-monospace">#@project.Id</td>
+                                        <td class="fw-bold">@project.Title</td>
+                                        <td>
+                                            @if (!string.IsNullOrWhiteSpace(project.JiraReference))
+                                            {
+                                                <span class="badge bg-secondary">@project.JiraReference</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small">None</span>
+                                            }
+                                        </td>
+                                        <td>@project.TestSuites.Count</td>
+                                        <td>@project.TestSuites.Sum(s => s.TestCases.Count)</td>
+                                        <td class="text-muted small">@((MarkupString)(project.Description ?? "No description provided."))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else if (currentTab == "TestSuites")
+                {
+                    <!-- Test Suites Report Section -->
+                    <div class="row mb-3 g-2 align-items-center">
+                        <div class="col-12 col-md-4">
+                            <select class="form-select border-0 shadow-sm" id="suite-project-filter" @bind="suiteProjectFilter">
+                                <option value="">All Projects</option>
+                                @foreach (var project in projectsList)
+                                {
+                                    <option value="@project.Id">@project.Title</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-0 shadow-sm"><span class="material-symbols-outlined">search</span></span>
+                                <input type="text" class="form-control border-0 shadow-sm" id="suite-title-search" placeholder="Search suites by title..." @bind-value="suiteTitleSearch" @bind-value:event="oninput" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive bg-white rounded-3 shadow-sm p-3" id="testsuites-report-table">
+                        @{
+                            var filteredSuites = suitesList
+                                .Where(s => string.IsNullOrEmpty(suiteProjectFilter) || s.TestProjectId.ToString() == suiteProjectFilter)
+                                .Where(s => string.IsNullOrEmpty(suiteTitleSearch) || s.Title.Contains(suiteTitleSearch, StringComparison.OrdinalIgnoreCase))
+                                .GroupBy(s => s.Project)
+                                .ToList();
+                        }
+                        @if (!filteredSuites.Any())
+                        {
+                            <div class="text-center py-4 text-muted">No test suites match the criteria.</div>
+                        }
+                        else
+                        {
+                            @foreach (var group in filteredSuites)
+                            {
+                                var proj = group.Key;
+                                var isExpanded = IsProjectExpanded(proj?.Id ?? 0);
+                                <div class="mb-3 border rounded-3 overflow-hidden">
+                                    <div class="project-group-header p-3 bg-light d-flex align-items-center justify-content-between style-cursor-pointer" 
+                                         style="cursor: pointer; user-select: none;" @onclick="() => ToggleProject(proj?.Id ?? 0)">
+                                        <div class="d-flex align-items-center">
+                                            <span class="material-symbols-outlined me-2 text-primary">folder</span>
+                                            <span class="fw-bold fs-5">Project: @(proj?.Title ?? "Unassigned")</span>
+                                            <span class="badge bg-secondary ms-2">@group.Count() Suites</span>
+                                        </div>
+                                        <span class="material-symbols-outlined transition-transform" style="transform: rotate(@(isExpanded ? "0deg" : "180deg")); transition: transform 0.2s;">
+                                            expand_less
+                                        </span>
+                                    </div>
+                                    
+                                    @if (isExpanded)
+                                    {
+                                        <div class="p-2 bg-white">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th style="width: 80px;">Suite ID</th>
+                                                        <th>Suite Name</th>
+                                                        <th>Test Cases</th>
+                                                        <th>Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var suite in group)
+                                                    {
+                                                        <tr>
+                                                            <td class="data-mono font-monospace">#@suite.Id</td>
+                                                            <td class="fw-bold text-secondary">@suite.Title</td>
+                                                            <td><span class="badge bg-info">@suite.TestCases.Count Cases</span></td>
+                                                            <td class="text-muted small">@((MarkupString)(suite.Description ?? "No description."))</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+                else if (currentTab == "TestCases")
+                {
+                    <!-- Test Cases Report Section -->
+                    <div class="row mb-3 g-2 align-items-center">
+                        <div class="col-12 col-md-3">
+                            <select class="form-select border-0 shadow-sm" id="case-suite-filter" @bind="caseSuiteFilter">
+                                <option value="">All Suites</option>
+                                @foreach (var suite in suitesList)
+                                {
+                                    <option value="@suite.Id">@suite.Title</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <select class="form-select border-0 shadow-sm" id="case-priority-filter" @bind="casePriorityFilter">
+                                <option value="">All Priorities</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <select class="form-select border-0 shadow-sm" id="case-status-filter" @bind="caseStatusFilter">
+                                <option value="">All Statuses</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Pass">Pass</option>
+                                <option value="Fail">Fail</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-0 shadow-sm"><span class="material-symbols-outlined">search</span></span>
+                                <input type="text" class="form-control border-0 shadow-sm" id="case-title-search" placeholder="Search case title..." @bind-value="caseTitleSearch" @bind-value:event="oninput" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive bg-white rounded-3 shadow-sm p-3" id="testcases-report-table">
+                        @{
+                            var filteredCases = casesList
+                                .Where(c => string.IsNullOrEmpty(caseSuiteFilter) || c.TestSuiteId.ToString() == caseSuiteFilter)
+                                .Where(c => string.IsNullOrEmpty(casePriorityFilter) || c.Priority == casePriorityFilter)
+                                .Where(c => string.IsNullOrEmpty(caseStatusFilter) || c.Status == caseStatusFilter)
+                                .Where(c => string.IsNullOrEmpty(caseTitleSearch) || c.Title.Contains(caseTitleSearch, StringComparison.OrdinalIgnoreCase))
+                                .GroupBy(c => c.TestSuite)
+                                .ToList();
+                        }
+                        @if (!filteredCases.Any())
+                        {
+                            <div class="text-center py-4 text-muted">No test cases match the criteria.</div>
+                        }
+                        else
+                        {
+                            @foreach (var group in filteredCases)
+                            {
+                                var suite = group.Key;
+                                var isExpanded = IsSuiteExpanded(suite?.Id ?? 0);
+                                <div class="mb-3 border rounded-3 overflow-hidden">
+                                    <div class="suite-group-header p-3 bg-light d-flex align-items-center justify-content-between style-cursor-pointer" 
+                                         style="cursor: pointer; user-select: none;" @onclick="() => ToggleSuite(suite?.Id ?? 0)">
+                                        <div class="d-flex align-items-center">
+                                            <span class="material-symbols-outlined me-2 text-info">layers</span>
+                                            <span class="fw-bold fs-5">Suite: @(suite?.Title ?? "Unassigned")</span>
+                                            <span class="text-muted ms-2 small">(Project: @(suite?.Project?.Title ?? "Unknown"))</span>
+                                            <span class="badge bg-secondary ms-2">@group.Count() Cases</span>
+                                        </div>
+                                        <span class="material-symbols-outlined transition-transform" style="transform: rotate(@(isExpanded ? "0deg" : "180deg")); transition: transform 0.2s;">
+                                            expand_less
+                                        </span>
+                                    </div>
+                                    
+                                    @if (isExpanded)
+                                    {
+                                        <div class="p-2 bg-white">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th style="width: 80px;">Case ID</th>
+                                                        <th>Case Title</th>
+                                                        <th>Priority</th>
+                                                        <th>Status</th>
+                                                        <th>Steps Count</th>
+                                                        <th>Defect ID</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var testcase in group)
+                                                    {
+                                                        <tr>
+                                                            <td class="data-mono font-monospace">#@testcase.Id</td>
+                                                            <td class="fw-bold text-dark">@testcase.Title</td>
+                                                            <td>
+                                                                <span class="badge @(testcase.Priority == "High" ? "bg-danger" : testcase.Priority == "Medium" ? "bg-warning text-dark" : "bg-info")">
+                                                                    @testcase.Priority
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge @(testcase.Status == "Pass" ? "bg-success" : testcase.Status == "Fail" ? "bg-danger" : "bg-secondary")">
+                                                                    @testcase.Status
+                                                                </span>
+                                                            </td>
+                                                            <td><span class="badge bg-light text-dark">@testcase.TestSteps.Count Steps</span></td>
+                                                            <td>
+                                                                @if (!string.IsNullOrEmpty(testcase.DefectId))
+                                                                {
+                                                                    <a href="bugs/details/@testcase.DefectId" class="text-danger fw-bold"><span class="material-symbols-outlined small align-middle">bug_report</span> @testcase.DefectId</a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="text-muted small">-</span>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+                else if (currentTab == "TestRuns")
+                {
+                    <!-- Test Runs Grouped by Test Case -->
+                    <div class="row mb-3 g-2 align-items-center">
+                        <div class="col-12 col-md-4">
+                            <select class="form-select border-0 shadow-sm" id="run-status-filter" @bind="runStatusFilter">
+                                <option value="">All Statuses</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Pass">Pass</option>
+                                <option value="Fail">Fail</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <select class="form-select border-0 shadow-sm" id="run-case-filter" @bind="runCaseFilter">
+                                <option value="">All Test Cases</option>
+                                @foreach (var tc in casesList)
+                                {
+                                    <option value="@tc.Id">@tc.Title</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-0 shadow-sm"><span class="material-symbols-outlined">search</span></span>
+                                <input type="text" class="form-control border-0 shadow-sm" id="run-search" placeholder="Search by user or notes..." @bind-value="runSearchQuery" @bind-value:event="oninput" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive bg-white rounded-3 shadow-sm p-3" id="testruns-report-table">
+                        @{
+                            var filteredResults = caseResults
+                                .Where(cr => string.IsNullOrEmpty(runStatusFilter) || cr.Status == runStatusFilter)
+                                .Where(cr => string.IsNullOrEmpty(runCaseFilter) || cr.TestCaseId.ToString() == runCaseFilter)
+                                .Where(cr => string.IsNullOrEmpty(runSearchQuery) || 
+                                            (cr.TestRun != null && cr.TestRun.User != null && cr.TestRun.User.UserName != null && cr.TestRun.User.UserName.Contains(runSearchQuery, StringComparison.OrdinalIgnoreCase)) ||
+                                            cr.StepResults.Any(sr => sr.ActualResult != null && sr.ActualResult.Contains(runSearchQuery, StringComparison.OrdinalIgnoreCase)))
+                                .GroupBy(cr => cr.TestCase)
+                                .ToList();
+                        }
+                        @if (!filteredResults.Any())
+                        {
+                            <div class="text-center py-4 text-muted">No test execution runs match the criteria.</div>
+                        }
+                        else
+                        {
+                            @foreach (var group in filteredResults)
+                            {
+                                var testcase = group.Key;
+                                var isExpanded = IsCaseExpanded(testcase?.Id ?? 0);
+                                <div class="mb-3 border rounded-3 overflow-hidden">
+                                    <div class="case-group-header p-3 bg-light d-flex align-items-center justify-content-between style-cursor-pointer" 
+                                         style="cursor: pointer; user-select: none;" @onclick="() => ToggleCase(testcase?.Id ?? 0)">
+                                        <div class="d-flex align-items-center">
+                                            <span class="material-symbols-outlined me-2 text-success">playlist_add_check</span>
+                                            <span class="fw-bold fs-5">Case: @(testcase?.Title ?? "Unassigned")</span>
+                                            <span class="text-muted ms-2 small">(Suite: @(testcase?.TestSuite?.Title ?? "Unknown"))</span>
+                                            <span class="badge bg-secondary ms-2">@group.Count() Executions</span>
+                                        </div>
+                                        <span class="material-symbols-outlined transition-transform" style="transform: rotate(@(isExpanded ? "0deg" : "180deg")); transition: transform 0.2s;">
+                                            expand_less
+                                        </span>
+                                    </div>
+                                    
+                                    @if (isExpanded)
+                                    {
+                                        <div class="p-2 bg-white">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th style="width: 100px;">Run ID</th>
+                                                        <th>Status</th>
+                                                        <th>Execution Time</th>
+                                                        <th>Notes / Actual Result</th>
+                                                        <th>Run By</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var result in group.OrderByDescending(r => r.TestRun?.StartTime))
+                                                    {
+                                                        <tr>
+                                                            <td class="data-mono font-monospace">Run #@(result.TestRun?.RunNumber ?? result.TestRunId)</td>
+                                                            <td>
+                                                                <span class="badge @(result.Status == "Pass" ? "bg-success" : result.Status == "Fail" ? "bg-danger" : "bg-secondary")">
+                                                                    @result.Status
+                                                                </span>
+                                                            </td>
+                                                            <td>@(result.TestRun?.StartTime.ToString("yyyy-MM-dd HH:mm:ss") ?? "N/A")</td>
+                                                            <td class="small text-muted">@(result.StepResults.Any(sr => !string.IsNullOrEmpty(sr.ActualResult)) ? string.Join("; ", result.StepResults.Where(sr => !string.IsNullOrEmpty(sr.ActualResult)).Select(sr => sr.ActualResult)) : "-")</td>
+                                                            <td class="small">@(result.TestRun?.User?.UserName ?? "Unknown")</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+                else if (currentTab == "Bugs")
+                {
+                    <!-- Bugs Report Section -->
+                    <div class="row mb-3 g-2 align-items-center">
+                        <div class="col-12 col-md-3">
+                            <select class="form-select border-0 shadow-sm" id="bug-project-filter" @bind="bugProjectFilter">
+                                <option value="">All Projects</option>
+                                @foreach (var p in projectsList)
+                                {
+                                    <option value="@p.Id">@p.Title</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <select class="form-select border-0 shadow-sm" id="bug-status-filter" @bind="bugStatusFilter">
+                                <option value="">All Statuses</option>
+                                @foreach (BugStatus status in Enum.GetValues(typeof(BugStatus)))
+                                {
+                                    <option value="@status">@status.ToString()</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <select class="form-select border-0 shadow-sm" id="bug-severity-filter" @bind="bugSeverityFilter">
+                                <option value="">All Severities</option>
+                                @foreach (BugSeverity severity in Enum.GetValues(typeof(BugSeverity)))
+                                {
+                                    <option value="@severity">@severity.ToString()</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <select class="form-select border-0 shadow-sm" id="bug-priority-filter" @bind="bugPriorityFilter">
+                                <option value="">All Priorities</option>
+                                @foreach (BugPriority priority in Enum.GetValues(typeof(BugPriority)))
+                                {
+                                    <option value="@priority">@priority.ToString()</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-0 shadow-sm"><span class="material-symbols-outlined">search</span></span>
+                                <input type="text" class="form-control border-0 shadow-sm" id="bug-title-search" placeholder="Search bugs title/desc..." @bind-value="bugTitleSearch" @bind-value:event="oninput" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive bg-white rounded-3 shadow-sm p-3">
+                        <table class="table table-hover align-middle mb-0" id="bugs-report-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 80px;">Bug ID</th>
+                                    <th>Title</th>
+                                    <th>Project</th>
+                                    <th>Severity</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Reporter</th>
+                                    <th>Assignee</th>
+                                    <th>Reported Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var filteredBugs = bugsList
+                                        .Where(b => string.IsNullOrEmpty(bugProjectFilter) || b.ProjectId.ToString() == bugProjectFilter)
+                                        .Where(b => string.IsNullOrEmpty(bugStatusFilter) || b.Status.ToString() == bugStatusFilter)
+                                        .Where(b => string.IsNullOrEmpty(bugSeverityFilter) || b.Severity.ToString() == bugSeverityFilter)
+                                        .Where(b => string.IsNullOrEmpty(bugPriorityFilter) || b.Priority.ToString() == bugPriorityFilter)
+                                        .Where(b => string.IsNullOrEmpty(bugTitleSearch) || 
+                                                    b.Title.Contains(bugTitleSearch, StringComparison.OrdinalIgnoreCase) || 
+                                                    b.Description.Contains(bugTitleSearch, StringComparison.OrdinalIgnoreCase))
+                                        .ToList();
+                                }
+                                @if (!filteredBugs.Any())
+                                {
+                                    <tr>
+                                        <td colspan="9" class="text-center py-4 text-muted">No bugs match the criteria.</td>
+                                    </tr>
+                                }
+                                @foreach (var bug in filteredBugs)
+                                {
+                                    <tr>
+                                        <td class="data-mono font-monospace">#@bug.Id</td>
+                                        <td class="fw-bold">
+                                            <a href="bugs/details/@bug.Id" class="text-dark">@bug.Title</a>
+                                        </td>
+                                        <td>
+                                            @if (bug.Project != null)
+                                            {
+                                                <span class="badge bg-light text-dark">@bug.Project.Title</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small">None</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge @(bug.Severity == BugSeverity.Critical ? "bg-danger" : bug.Severity == BugSeverity.Major ? "bg-warning text-dark" : "bg-info")">
+                                                @bug.Severity
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(bug.Priority == BugPriority.High ? "bg-danger" : bug.Priority == BugPriority.Medium ? "bg-warning text-dark" : "bg-info")">
+                                                @bug.Priority
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(bug.Status == BugStatus.Closed ? "bg-success" : bug.Status == BugStatus.Resolved ? "bg-info" : "bg-secondary")">
+                                                @bug.Status
+                                            </span>
+                                        </td>
+                                        <td class="small">@(bug.Reporter?.UserName ?? "System")</td>
+                                        <td class="small">@(bug.Assignee?.UserName ?? "Unassigned")</td>
+                                        <td class="small text-muted">@bug.ReportedDate.ToString("yyyy-MM-dd")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private string currentTab = "Projects";
+
+    // Data lists cached in memory
+    private List<TestProject> projectsList = new();
+    private List<TestSuite> suitesList = new();
+    private List<TestCase> casesList = new();
+    private List<TestRunCaseResult> caseResults = new();
+    private List<Bug> bugsList = new();
+
+    // Filters for tab: Projects
+    private string projectSearchQuery = string.Empty;
+
+    // Filters for tab: TestSuites
+    private string suiteProjectFilter = string.Empty;
+    private string suiteTitleSearch = string.Empty;
+
+    // Filters for tab: TestCases
+    private string caseSuiteFilter = string.Empty;
+    private string casePriorityFilter = string.Empty;
+    private string caseStatusFilter = string.Empty;
+    private string caseTitleSearch = string.Empty;
+
+    // Filters for tab: TestRuns
+    private string runStatusFilter = string.Empty;
+    private string runCaseFilter = string.Empty;
+    private string runSearchQuery = string.Empty;
+
+    // Filters for tab: Bugs
+    private string bugProjectFilter = string.Empty;
+    private string bugStatusFilter = string.Empty;
+    private string bugSeverityFilter = string.Empty;
+    private string bugPriorityFilter = string.Empty;
+    private string bugTitleSearch = string.Empty;
+
+    // Collapsible states
+    private HashSet<int> collapsedProjects = new();
+    private HashSet<int> collapsedSuites = new();
+    private HashSet<int> collapsedCases = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        
+        projectsList = await DbContext.TestProjects
+            .Include(p => p.TestSuites)
+                .ThenInclude(s => s.TestCases)
+            .ToListAsync();
+
+        suitesList = await DbContext.TestSuites
+            .Include(s => s.Project)
+            .Include(s => s.TestCases)
+            .ToListAsync();
+
+        casesList = await DbContext.TestCases
+            .Include(c => c.TestSuite)
+                .ThenInclude(s => s!.Project)
+            .Include(c => c.TestSteps)
+            .ToListAsync();
+
+        caseResults = await DbContext.TestRunCaseResults
+            .Include(cr => cr.TestRun)
+                .ThenInclude(tr => tr!.User)
+            .Include(cr => cr.TestCase)
+                .ThenInclude(c => c!.TestSuite)
+            .Include(cr => cr.StepResults)
+            .ToListAsync();
+
+        bugsList = await DbContext.Bugs
+            .Include(b => b.Project)
+            .Include(b => b.Reporter)
+            .Include(b => b.Assignee)
+            .ToListAsync();
+
+        isLoading = false;
+    }
+
+    private void SwitchTab(string tabName)
+    {
+        currentTab = tabName;
+    }
+
+    private bool IsProjectExpanded(int id) => !collapsedProjects.Contains(id);
+    private void ToggleProject(int id)
+    {
+        if (collapsedProjects.Contains(id))
+            collapsedProjects.Remove(id);
+        else
+            collapsedProjects.Add(id);
+    }
+
+    private bool IsSuiteExpanded(int id) => !collapsedSuites.Contains(id);
+    private void ToggleSuite(int id)
+    {
+        if (collapsedSuites.Contains(id))
+            collapsedSuites.Remove(id);
+        else
+            collapsedSuites.Add(id);
+    }
+
+    private bool IsCaseExpanded(int id) => !collapsedCases.Contains(id);
+    private void ToggleCase(int id)
+    {
+        if (collapsedCases.Contains(id))
+            collapsedCases.Remove(id);
+        else
+            collapsedCases.Add(id);
+    }
+}
