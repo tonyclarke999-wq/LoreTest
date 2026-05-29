@@ -39,13 +39,17 @@ else
                 <div class="card-body p-4 p-md-5">
                     @if (canCreateJiraBug && string.IsNullOrEmpty(bug.JiraBugReference))
                     {
-                        <div class="card bg-light border-0 mb-4">
-                            <div class="card-body d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="body-md fw-bold">Sync with Jira</div>
-                                    <div class="body-sm text-muted">This bug is not yet synced with Jira. Create a ticket now?</div>
+                        <div class="card border border-warning shadow-sm mb-4">
+                            <div class="card-header bg-warning text-dark fw-bold d-flex align-items-center">
+                                <span class="material-symbols-outlined me-2">sync</span> Sync with Jira
+                            </div>
+                            <div class="card-body bg-light">
+                                <div class="mb-3">
+                                    <label for="jiraKey" class="form-label fw-bold">Jira Project Key or Parent Issue Reference</label>
+                                    <input id="jiraKey" type="text" class="form-control" @bind="jiraProjectOrIssueKey" placeholder="e.g. PROJ or PROJ-123" />
+                                    <div class="form-text">Specify the Jira project key (like 'PROJ') or link it to a parent issue (like 'PROJ-123').</div>
                                 </div>
-                                <button type="button" class="btn btn-primary d-flex align-items-center" @onclick="CreateJiraBug" disabled="@isCreatingJiraBug">
+                                <button type="button" class="btn btn-primary w-100 fw-bold py-2 d-flex align-items-center justify-content-center" @onclick="CreateJiraBug" disabled="@(isCreatingJiraBug || string.IsNullOrWhiteSpace(jiraProjectOrIssueKey))">
                                     @if (isCreatingJiraBug)
                                     {
                                         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -150,6 +154,7 @@ else
     private bool isCreatingJiraBug = false;
     private string? jiraBugError;
     private string? jiraBaseUrl;
+    private string jiraProjectOrIssueKey = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -159,15 +164,10 @@ else
         var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
         jiraBaseUrl = settings?.JiraBaseUrl;
 
-        if (bug?.ProjectId != null)
+        if (bug != null && settings != null && !string.IsNullOrWhiteSpace(settings.JiraApiToken) && !string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
         {
-            var project = bug.Project;
-            if (project != null && !string.IsNullOrWhiteSpace(project.JiraReference) && 
-                settings != null && !string.IsNullOrWhiteSpace(settings.JiraApiToken) && 
-                !string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
-            {
-                canCreateJiraBug = true;
-            }
+            canCreateJiraBug = true;
+            jiraProjectOrIssueKey = bug.Project?.JiraReference ?? "";
         }
     }
 
@@ -185,9 +185,9 @@ else
         try
         {
             var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
-            if (settings == null || bug.Project == null) return;
+            if (settings == null) return;
 
-            string newJiraKey = await JiraService.CreateBugAsync(bug, bug.Project.JiraReference!, settings);
+            string newJiraKey = await JiraService.CreateBugAsync(bug, jiraProjectOrIssueKey, settings);
             bug.JiraBugReference = newJiraKey;
             
             DbContext.Bugs.Update(bug);

@@ -217,17 +217,29 @@ else
                         <div class="alert alert-success">Bug created successfully!</div>
                         @if (canCreateJiraBug)
                         {
-                            <button type="button" class="btn btn-primary mb-3 w-100" @onclick="CreateJiraBug" disabled="@isCreatingJiraBug">
-                                @if (isCreatingJiraBug)
-                                {
-                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                }
-                                Create JIRA Bug
-                            </button>
+                            <div class="card border border-warning shadow-sm mb-3">
+                                <div class="card-header bg-warning text-dark fw-bold d-flex align-items-center">
+                                    <span class="material-symbols-outlined me-2">sync</span> Sync with Jira
+                                </div>
+                                <div class="card-body bg-light">
+                                    <div class="mb-3">
+                                        <label for="jiraKey" class="form-label fw-bold">Jira Project Key or Parent Issue Reference</label>
+                                        <input id="jiraKey" type="text" class="form-control" @bind="jiraProjectOrIssueKey" placeholder="e.g. PROJ or PROJ-123" />
+                                        <div class="form-text">Specify the Jira project key (like 'PROJ') or link it to a parent issue (like 'PROJ-123').</div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary w-100 fw-bold py-2 d-flex align-items-center justify-content-center" @onclick="CreateJiraBug" disabled="@(isCreatingJiraBug || string.IsNullOrWhiteSpace(jiraProjectOrIssueKey))">
+                                        @if (isCreatingJiraBug)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        }
+                                        Create JIRA Bug
+                                    </button>
+                                </div>
+                            </div>
                         }
                         @if (!string.IsNullOrEmpty(jiraBugError))
                         {
-                            <div class="alert alert-danger">@jiraBugError</div>
+                            <div class="alert alert-danger mb-3">@jiraBugError</div>
                         }
                         @if (!string.IsNullOrEmpty(newBug.JiraBugReference))
                         {
@@ -270,6 +282,7 @@ else
     private bool isCreatingJiraBug = false;
     private string? jiraBugError;
     private string? jiraBaseUrl;
+    private string jiraProjectOrIssueKey = "";
     private Bug newBug = new();
 
     private class FlatStep
@@ -402,6 +415,7 @@ else
         isBugCreated = false;
         canCreateJiraBug = false;
         jiraBugError = null;
+        jiraProjectOrIssueKey = testRun?.Project?.JiraReference ?? "";
         showBugModal = true;
     }
 
@@ -425,13 +439,10 @@ else
         isBugCreated = true;
         SetStepStatus("Fail");
 
-        if (testRun?.Project != null && !string.IsNullOrWhiteSpace(testRun.Project.JiraReference))
+        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+        if (settings != null && !string.IsNullOrWhiteSpace(settings.JiraApiToken) && !string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
         {
-            var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
-            if (settings != null && !string.IsNullOrWhiteSpace(settings.JiraApiToken) && !string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
-            {
-                canCreateJiraBug = true;
-            }
+            canCreateJiraBug = true;
         }
     }
 
@@ -442,9 +453,9 @@ else
         try
         {
             var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
-            if (settings == null || testRun?.Project == null) return;
+            if (settings == null) return;
 
-            string newJiraKey = await JiraService.CreateBugAsync(newBug, testRun.Project.JiraReference!, settings);
+            string newJiraKey = await JiraService.CreateBugAsync(newBug, jiraProjectOrIssueKey, settings);
             newBug.JiraBugReference = newJiraKey;
             
             // Save to database

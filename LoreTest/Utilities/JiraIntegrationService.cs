@@ -78,7 +78,7 @@ namespace LoreTest.Utilities
             return null;
         }
 
-        public async Task<string> CreateBugAsync(LoreTest.Data.Bug bug, string parentJiraReference, LoreTest.Data.AppSettings settings)
+        public async Task<string> CreateBugAsync(LoreTest.Data.Bug bug, string targetProjectOrIssue, LoreTest.Data.AppSettings settings)
         {
             ArgumentNullException.ThrowIfNull(settings);
 
@@ -89,27 +89,44 @@ namespace LoreTest.Utilities
             if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(baseUrl))
                 throw new ArgumentException("Jira API Token and Base URL must be configured in Admin Settings.");
 
-            // Parse the parent issue key from the reference
-            string parentKey = parentJiraReference.Trim();
-            if (Uri.TryCreate(parentJiraReference, UriKind.Absolute, out var uri))
+            // Parse the parent issue/project from the reference
+            string target = targetProjectOrIssue.Trim();
+            if (Uri.TryCreate(targetProjectOrIssue, UriKind.Absolute, out var uri))
             {
                 var segments = uri.Segments;
-                parentKey = segments[^1].Trim('/');
+                target = segments[^1].Trim('/');
             }
 
             string projectKey = "";
-            try
+            string parentKey = "";
+
+            if (target.Contains('-'))
             {
-                var (_, _, parentProjectKey) = await FetchIssueDetailsInternalAsync(parentKey, settings);
-                projectKey = parentProjectKey;
+                // It is an issue key (e.g. PROJ-123)
+                parentKey = target;
+                try
+                {
+                    var (_, _, parentProjectKey) = await FetchIssueDetailsInternalAsync(parentKey, settings);
+                    projectKey = parentProjectKey;
+                }
+                catch (Exception ex)
+                {
+                    // Fallback to manual parsing from issue key (e.g., PROJ-123 -> PROJ)
+                    var hyphenIndex = parentKey.IndexOf('-');
+                    if (hyphenIndex > 0)
+                    {
+                        projectKey = parentKey[..hyphenIndex];
+                    }
+                    else
+                    {
+                        throw new Exception($"Could not determine Jira project space from issue key '{parentKey}'. Error: {ex.Message}");
+                    }
+                }
             }
-            catch (Exception ex)
+            else
             {
-                // Fallback to manual parsing if API fetch fails, but log it or handle it
-                var hyphenIndex = parentKey.IndexOf('-');
-                if (hyphenIndex <= 0)
-                    throw new Exception($"Could not determine Jira project space from '{parentKey}'. Error: {ex.Message}");
-                projectKey = parentKey[..hyphenIndex];
+                // It is directly a project key (e.g. PROJ)
+                projectKey = target;
             }
 
             baseUrl = baseUrl.TrimEnd('/');
@@ -162,26 +179,31 @@ namespace LoreTest.Utilities
 
             string newIssueKey = keyProp.GetString() ?? "";
 
-            // Create "Relates to" link
-            string linkUrl = $"{baseUrl}/rest/api/2/issueLink";
-            var linkPayload = new
+            // Create "Relates to" link if we have a parent issue key
+            if (!string.IsNullOrWhiteSpace(parentKey))
             {
-                type = new { name = "Relates" }, // Standard name is often "Relates" or "Relates to"
-                inwardIssue = new { key = parentKey },
-                outwardIssue = new { key = newIssueKey }
-            };
+                try
+                {
+                    string linkUrl = $"{baseUrl}/rest/api/2/issueLink";
+                    var linkPayload = new
+                    {
+                        type = new { name = "Relates" }, // Standard name is often "Relates" or "Relates to"
+                        inwardIssue = new { key = parentKey },
+                        outwardIssue = new { key = newIssueKey }
+                    };
 
-            var linkRequest = new HttpRequestMessage(HttpMethod.Post, linkUrl)
-            {
-                Content = new StringContent(JsonSerializer.Serialize(linkPayload), System.Text.Encoding.UTF8, "application/json")
-            };
-            linkRequest.Headers.Add("Authorization", authHeader);
+                    var linkRequest = new HttpRequestMessage(HttpMethod.Post, linkUrl)
+                    {
+                        Content = new StringContent(JsonSerializer.Serialize(linkPayload), System.Text.Encoding.UTF8, "application/json")
+                    };
+                    linkRequest.Headers.Add("Authorization", authHeader);
 
-            var linkResponse = await _httpClient.SendAsync(linkRequest);
-            if (!linkResponse.IsSuccessStatusCode)
-            {
-                // We don't throw here to avoid failing the whole process if just the link fails, 
-                // but maybe we should log it. For now, let's keep the bug key.
+                    var linkResponse = await _httpClient.SendAsync(linkRequest);
+                }
+                catch
+                {
+                    // Ignore issue linking errors to prevent failing the entire bug creation process
+                }
             }
 
             return newIssueKey;
