@@ -46,17 +46,13 @@ else
             </div>
 
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label fw-semibold">@L["StepDescription"]</label>
                     <div @ref="editorDescription" style="height: 180px;"></div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label fw-semibold">@L["ExpectedResult"]</label>
                     <div @ref="editorExpectedResult" style="height: 180px;"></div>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">@L["ActualResult"] <span class="text-muted small">@L["IfDifferent"]</span></label>
-                    <div @ref="editorActualResult" style="height: 180px;"></div>
                 </div>
             </div>
 
@@ -78,7 +74,6 @@ else
 
     private ElementReference editorDescription;
     private ElementReference editorExpectedResult;
-    private ElementReference editorActualResult;
 
     protected override async Task OnInitializedAsync()
     {
@@ -134,7 +129,6 @@ else
             ");
             await JSRuntime.InvokeVoidAsync("initQuill", editorDescription, step.Description ?? "");
             await JSRuntime.InvokeVoidAsync("initQuill", editorExpectedResult, step.ExpectedResult ?? "");
-            await JSRuntime.InvokeVoidAsync("initQuill", editorActualResult, step.ActualResult ?? "");
         }
     }
 
@@ -144,7 +138,6 @@ else
 
         step.Description = await JSRuntime.InvokeAsync<string>("getQuillContent", editorDescription);
         step.ExpectedResult = await JSRuntime.InvokeAsync<string>("getQuillContent", editorExpectedResult);
-        step.ActualResult = await JSRuntime.InvokeAsync<string>("getQuillContent", editorActualResult);
 
         DbContext.TestSteps.Update(step);
         await DbContext.SaveChangesAsync();

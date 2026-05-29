@@ -125,9 +125,8 @@ else
                 <thead class="table-dark">
                     <tr>
                         <th style="width:5%">#</th>
-                        <th style="width:33%">@L["StepDescription"]</th>
-                        <th style="width:28%">@L["ExpectedResult"]</th>
-                        <th style="width:22%">@L["ActualResult"]</th>
+                        <th style="width:45%">@L["StepDescription"]</th>
+                        <th style="width:38%">@L["ExpectedResult"]</th>
                         <th style="width:12%">@L["Actions"]</th>
                     </tr>
                 </thead>
@@ -138,12 +137,6 @@ else
                             <td class="text-center fw-bold">@step.StepNumber</td>
                             <td>@((MarkupString)(step.Description ?? ""))</td>
                             <td>@((MarkupString)(step.ExpectedResult ?? ""))</td>
-                            <td>
-                                @if (!string.IsNullOrWhiteSpace(step.ActualResult))
-                                { @((MarkupString)(step.ActualResult)) }
-                                else
-                                { <span class="text-muted fst-italic">—</span> }
-                            </td>
                             <td>
                                 <a href="/teststeps/edit/@step.Id" class="btn btn-sm btn-outline-primary">@L["Edit"]</a>
                                 <a href="/teststeps/delete/@step.Id" class="btn btn-sm btn-outline-danger ms-1">@L["Delete"]</a>
@@ -169,17 +162,13 @@ else
                     <input type="number" class="form-control" @bind="newStep.StepNumber" min="1" />
                 </div>
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label fw-semibold">@L["StepDescription"]</label>
                         <div @ref="editorStepDesc" style="height:160px"></div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label fw-semibold">@L["ExpectedResult"]</label>
                         <div @ref="editorExpected" style="height:160px"></div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">@L["ActualResult"] <span class="text-muted small">@L["IfDifferent"]</span></label>
-                        <div @ref="editorActual" style="height:160px"></div>
                     </div>
                 </div>
                 <div style="margin-top:55px">
@@ -210,7 +199,7 @@ else
     private bool caseQuillReady = false;
 
     // Step editors
-    private ElementReference editorStepDesc, editorExpected, editorActual;
+    private ElementReference editorStepDesc, editorExpected;
     private bool stepsQuillReady = false;
 
     private TestStep newStep = new();
@@ -267,7 +256,6 @@ else
             await EnsureQuill();
             await JSRuntime.InvokeVoidAsync("initQuill", editorStepDesc, "");
             await JSRuntime.InvokeVoidAsync("initQuill", editorExpected, "");
-            await JSRuntime.InvokeVoidAsync("initQuill", editorActual, "");
         }
     }
 
@@ -318,7 +306,6 @@ else
         if (!canEdit || testCase == null) return;
         newStep.Description    = await JSRuntime.InvokeAsync<string>("getQuillContent", editorStepDesc);
         newStep.ExpectedResult = await JSRuntime.InvokeAsync<string>("getQuillContent", editorExpected);
-        newStep.ActualResult   = await JSRuntime.InvokeAsync<string>("getQuillContent", editorActual);
         newStep.TestCaseId = Id;
 
         DbContext.TestSteps.Add(newStep);
@@ -327,7 +314,6 @@ else
         // Clear editor content without destroying/recreating Quill (avoids stacking toolbars)
         await JSRuntime.InvokeVoidAsync("clearQuillEditor", editorStepDesc);
         await JSRuntime.InvokeVoidAsync("clearQuillEditor", editorExpected);
-        await JSRuntime.InvokeVoidAsync("clearQuillEditor", editorActual);
 
         await LoadData();
         StateHasChanged();

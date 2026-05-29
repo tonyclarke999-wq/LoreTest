@@ -59,13 +59,7 @@ else
                     @((MarkupString)(step.ExpectedResult))
                 </div>
             }
-            @if (!string.IsNullOrWhiteSpace(step.ActualResult))
-            {
-                <p><strong>@L["ActualResult"]:</strong></p>
-                <div class="border rounded p-2 bg-light">
-                    @((MarkupString)(step.ActualResult))
-                </div>
-            }
+
         </div>
     </div>
 

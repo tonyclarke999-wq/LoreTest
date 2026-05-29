@@ -159,7 +159,6 @@ else
                                 <th style="width: 80px">#</th>
                                 <th>@L["StepDescription"]</th>
                                 <th>@L["ExpectedResult"]</th>
-                                <th>@L["ActualResult"]</th>
                                 @if (canEdit)
                                 {
                                     <th class="text-end" style="width: 120px">@L["Actions"]</th>
@@ -173,16 +172,6 @@ else
                                     <td class="data-mono fw-bold">@step.StepNumber</td>
                                     <td class="body-md">@((MarkupString)(step.Description ?? ""))</td>
                                     <td class="body-md">@((MarkupString)(step.ExpectedResult ?? ""))</td>
-                                    <td>
-                                        @if (!string.IsNullOrWhiteSpace(step.ActualResult))
-                                        {
-                                            <span class="body-md">@((MarkupString)(step.ActualResult))</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted fst-italic opacity-50">—</span>
-                                        }
-                                    </td>
                                     @if (canEdit)
                                     {
                                         <td class="text-end pe-3">
