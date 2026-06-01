@@ -2,6 +2,8 @@
 
 LoreTest is a modern, web-based platform designed for managing test projects, suites, and cases with integrated bug tracking and Jira support.
 
+📖 **Looking for API Reference?** Read the complete [REST API Reference & Usage Guide](LoreTest/Docs/api_documentation.md) to explore endpoints, roles, JWT authentication, and code usage examples.
+
 ## 🚀 Quick Start (Docker)
 
 The easiest way to run LoreTest is using Docker Compose.
