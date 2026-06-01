@@ -4,6 +4,8 @@ LoreTest is a modern, web-based platform designed for managing test projects, su
 
 📖 **Looking for API Reference?** Read the complete [REST API Reference & Usage Guide](LoreTest/Docs/api_documentation.md) to explore endpoints, roles, JWT authentication, and code usage examples.
 
+🛠️ **Installation Guide**: Need step-by-step setup instructions? Read the complete [LoreTest Setup & Installation Guide](LoreTest/Docs/setup_guide.md) to build from source or spin up using Docker Compose.
+
 ## 🚀 Quick Start (Docker)
 
 The easiest way to run LoreTest is using Docker Compose.
