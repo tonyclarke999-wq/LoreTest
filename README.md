@@ -89,6 +89,10 @@ The images contain the app but not your data. To share a "ready-to-go" demo with
 
 LoreTest is built to be secure by default while remaining trivially simple for strangers to spin up as a demo.
 
+For a detailed breakdown of findings, security threats, architectural recommendations, and validation results, refer to our complete documentation:
+* 🛡️ **[Security & Resilience Review Audit Report](LoreTest/Docs/security_review.md)**: Details the active vulnerability assessments and concrete production blueprints (Guide A for rate limiting, Guide B for brute-force lockouts, and Guide C for container security configurations).
+* 📝 **[Security Upgrade Walkthrough](LoreTest/Docs/security_upgrade_walkthrough.md)**: Summarizes our exact code modifications, MSTest additions, and green pipeline verification runs.
+
 ### 1. Out-of-the-Box Demo Mode (Insecure Defaults)
 For local development and quick-start demonstrations, LoreTest includes functional defaults in `appsettings.json` (such as local database connection strings with standard passwords and a local JWT secret key). Anyone cloning this repository can run `dotnet run` or `docker compose up` and it will work instantly with zero configuration.
 
