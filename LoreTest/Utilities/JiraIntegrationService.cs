@@ -78,7 +78,7 @@ namespace LoreTest.Utilities
             return null;
         }
 
-        public async Task<string> CreateBugAsync(LoreTest.Data.Bug bug, string targetProjectOrIssue, LoreTest.Data.AppSettings settings)
+        public virtual async Task<string> CreateBugAsync(LoreTest.Data.Bug bug, string targetProjectOrIssue, LoreTest.Data.AppSettings settings)
         {
             ArgumentNullException.ThrowIfNull(settings);
 

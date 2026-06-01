@@ -83,6 +83,34 @@ The images contain the app but not your data. To share a "ready-to-go" demo with
 
 ---
 
+## 🔒 Security & Secret Management
+
+LoreTest is built to be secure by default while remaining trivially simple for strangers to spin up as a demo.
+
+### 1. Out-of-the-Box Demo Mode (Insecure Defaults)
+For local development and quick-start demonstrations, LoreTest includes functional defaults in `appsettings.json` (such as local database connection strings with standard passwords and a local JWT secret key). Anyone cloning this repository can run `dotnet run` or `docker compose up` and it will work instantly with zero configuration.
+
+### 2. Production Security (Strict Overrides)
+> [!WARNING]
+> **Never use the default database passwords or JWT secret keys committed in the repository in public-facing or production environments.**
+
+For real-world and production deployments, the insecure defaults in `appsettings.json` **MUST** be overridden by injecting secure credentials via **Environment Variables**. ASP.NET Core automatically parses and prioritizes these environment overrides at startup:
+
+| Configuration Path | Environment Variable Override | Purpose |
+| :--- | :--- | :--- |
+| `ConnectionStrings:DefaultConnection` | `ConnectionStrings__DefaultConnection` | Secure connection string to production PostgreSQL |
+| `Jwt:Secret` | `Jwt__Secret` | Cryptographically secure 256-bit JWT signing key |
+
+#### Local Development Secrets (Optional)
+If you wish to secure your secrets locally during active development without committing them to the workspace, you can initialize and set them using the .NET `user-secrets` CLI:
+```powershell
+dotnet user-secrets init
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Password=YourSecurePassword;..."
+dotnet user-secrets set "Jwt:Secret" "YourProductionSecureJWTKeyAtLeast32Chars!"
+```
+
+---
+
 ## 🛠 Features
 - **Dashboard**: Track active test runs and weekly progress at a glance.
 - **Jira Integration**: Automatically create bugs and link them to Jira tickets.
