@@ -1,0 +1,2 @@
+E2E CRUD Cleanup: Attempting to delete testuser_639159129194201891@example.com
+E2E CRUD Cleanup: Successfully deleted testuser_639159129194201891@example.com
