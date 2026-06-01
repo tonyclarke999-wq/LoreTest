@@ -1,0 +1,138 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Export Test Cases - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Export Test Cases to CSV</h1>
+            <p class="subtitle">Select which test cases to include in the CSV export file for {{ project.project_name }}</p>
+        </div>
+        <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Cancel</a>
+    </div>
+</div>
+
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error); color: #ffb4ab; padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; font-size: 13px;">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<div class="project-card" style="margin-top: 1rem;">
+    <form method="post" id="export-form" data-turbo="false">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--primary);">
+                    <input type="checkbox" id="select-all-toggle" style="width: 16px; height: 16px; cursor: pointer;" checked>
+                    <span>Select All Test Cases</span>
+                </label>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);" id="selection-counter">
+                All {{ tests|length }} test cases selected
+            </span>
+        </div>
+
+        {% if tests|length > 0 %}
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 500px; overflow-y: auto; padding-right: 0.5rem; margin-bottom: 2rem;">
+            {% for test in tests %}
+            <div class="test-select-row" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: var(--radius-sm); transition: background 0.2s, border-color 0.2s;">
+                <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer; flex: 1;">
+                    <input type="checkbox" name="test_ids[]" value="{{ test.testid }}" class="test-checkbox" style="width: 16px; height: 16px; cursor: pointer;" checked>
+                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--primary);">TC-{{ test.testid }}</span>
+                    <span style="font-weight: 500; color: var(--text-main); font-size: 13px;">{{ test.testsuitename }}</span>
+                </label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span class="badge badge-purple" style="font-size: 11px;">{{ test.testtype }}</span>
+                    {% set priority_class = 'badge-blue' %}
+                    {% if test.priority == 'High' %}{% set priority_class = 'badge-red' %}
+                    {% elseif test.priority == 'Medium' %}{% set priority_class = 'badge-yellow' %}
+                    {% endif %}
+                    <span class="badge {{ priority_class }}" style="font-size: 11px;">{{ test.priority }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div style="display: flex; gap: 1rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.5rem;">
+            <button type="submit" class="btn-primary" style="padding: 0.65rem 1.75rem; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">download</span>
+                <span>Export CSV File</span>
+            </button>
+            <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none; padding: 0.65rem 1.75rem; font-size: 13px; font-weight: 600; display: flex; align-items: center;">Cancel</a>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+            <p>No test cases are currently defined for this project.</p>
+            <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="btn-primary" style="text-decoration: none; display: inline-block; margin-top: 1rem;">Back to Project</a>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<script>
+    document.addEventListener('turbo:load', function() {
+        const toggleAll = document.getElementById('select-all-toggle');
+        const checkboxes = document.querySelectorAll('.test-checkbox');
+        const counter = document.getElementById('selection-counter');
+
+        if (!toggleAll || checkboxes.length === 0) return;
+
+        function updateCounter() {
+            const checkedCount = document.querySelectorAll('.test-checkbox:checked').length;
+            if (checkedCount === checkboxes.length) {
+                counter.textContent = `All ${checkboxes.length} test cases selected`;
+                toggleAll.checked = true;
+                toggleAll.indeterminate = false;
+            } else if (checkedCount === 0) {
+                counter.textContent = `No test cases selected`;
+                toggleAll.checked = false;
+                toggleAll.indeterminate = false;
+            } else {
+                counter.textContent = `${checkedCount} of ${checkboxes.length} test cases selected`;
+                toggleAll.checked = false;
+                toggleAll.indeterminate = true;
+            }
+        }
+
+        toggleAll.addEventListener('change', function() {
+            const isChecked = toggleAll.checked;
+            checkboxes.forEach(cb => {
+                cb.checked = isChecked;
+                // Update background highlight visually
+                const row = cb.closest('.test-select-row');
+                if (row) {
+                    row.style.background = isChecked ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)';
+                    row.style.borderColor = isChecked ? 'rgba(192, 193, 255, 0.15)' : 'rgba(255,255,255,0.05)';
+                }
+            });
+            updateCounter();
+        });
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                const row = cb.closest('.test-select-row');
+                if (row) {
+                    row.style.background = cb.checked ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)';
+                    row.style.borderColor = cb.checked ? 'rgba(192, 193, 255, 0.15)' : 'rgba(255,255,255,0.05)';
+                }
+                updateCounter();
+            });
+            // Initial styling for pre-checked state
+            const row = cb.closest('.test-select-row');
+            if (row && cb.checked) {
+                row.style.background = 'rgba(255,255,255,0.04)';
+                row.style.borderColor = 'rgba(192, 193, 255, 0.15)';
+            }
+        });
+
+        updateCounter();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{
+  "uuid": "2a0ea1d0-c9a3-4712-b16c-4d858aeb2a85",
+  "historyId": "LoreTest.Playwright.E2ETests.HomePage_ShouldLoadSuccessfully",
+  "fullName": "LoreTest.Playwright.E2ETests.HomePage_ShouldLoadSuccessfully",
+  "name": "HomePage_ShouldLoadSuccessfully",
+  "status": "passed",
+  "stage": "finished",
+  "steps": [],
+  "attachments": [
+    {
+      "name": "trace",
+      "source": "2a0ea1d0-c9a3-4712-b16c-4d858aeb2a85-trace_HomePage_ShouldLoadSuccessfully.zip",
+      "type": "application/zip"
+    }
+  ],
+  "parameters": [],
+  "start": 1779401385744,
+  "stop": 1779401389732,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "LoreTest.Playwright.E2ETests"
+    },
+    {
+      "name": "testClass",
+      "value": "LoreTest.Playwright.E2ETests"
+    },
+    {
+      "name": "package",
+      "value": "LoreTest.Playwright.E2ETests"
+    }
+  ]
+}

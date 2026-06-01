@@ -1,0 +1,38 @@
+{
+  "uuid": "a16641a1-c373-4f2e-9bd2-d6653b86e530",
+  "historyId": "LoreTest.Playwright.UserCreationTests.CreateUser_WithoutChangingLanguage_ShouldSucceed",
+  "fullName": "LoreTest.Playwright.UserCreationTests.CreateUser_WithoutChangingLanguage_ShouldSucceed",
+  "name": "CreateUser_WithoutChangingLanguage_ShouldSucceed",
+  "status": "passed",
+  "stage": "finished",
+  "steps": [],
+  "attachments": [
+    {
+      "name": "Standard Output",
+      "source": "a16641a1-c373-4f2e-9bd2-d6653b86e530-stdout.txt",
+      "type": "text/plain"
+    },
+    {
+      "name": "trace",
+      "source": "a16641a1-c373-4f2e-9bd2-d6653b86e530-trace_CreateUser_WithoutChangingLanguage_ShouldSucceed.zip",
+      "type": "application/zip"
+    }
+  ],
+  "parameters": [],
+  "start": 1779401385744,
+  "stop": 1779401394292,
+  "labels": [
+    {
+      "name": "suite",
+      "value": "LoreTest.Playwright.UserCreationTests"
+    },
+    {
+      "name": "testClass",
+      "value": "LoreTest.Playwright.UserCreationTests"
+    },
+    {
+      "name": "package",
+      "value": "LoreTest.Playwright.UserCreationTests"
+    }
+  ]
+}
