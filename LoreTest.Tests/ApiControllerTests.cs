@@ -287,6 +287,7 @@ namespace LoreTest.Tests
         }
 
         [TestMethod]
+        [Ignore("Local developer database seeder utility - requires active local PostgreSQL database.")]
         public async Task Seeder_DatabaseAdminUser()
         {
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
