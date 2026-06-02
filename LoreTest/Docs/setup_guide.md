@@ -78,7 +78,7 @@ Clone the repository from GitHub:
 git clone https://github.com/tonyclarke999-wq/LoreTest.git
 cd LoreTest
 ```
-*(Alternatively, you can extract the release ZIP archive `loretest-v0.5.zip` to a folder of your choice.)*
+*(Alternatively, you can extract the release ZIP archive `loretest-v0.6.zip` to a folder of your choice.)*
 
 ### Step 2: Spin up a Local Database
 LoreTest requires a PostgreSQL instance. You can easily start one using Docker:
