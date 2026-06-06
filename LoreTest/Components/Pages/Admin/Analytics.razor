@@ -24,26 +24,26 @@
 
     @if (showClearConfirm)
     {
-        <div class="alert alert-warning d-flex justify-content-between align-items-center border-0 shadow-sm mb-4 bg-glass-warning">
+        <div class="alert alert-warning d-flex justify-content-between align-items-center shadow-sm mb-4">
             <div class="d-flex align-items-center gap-3">
                 <span class="material-symbols-outlined text-warning" style="font-size: 32px;">warning</span>
                 <div>
-                    <strong class="text-white">Confirm Log Deletion</strong>
-                    <div class="text-muted-light">Are you sure you want to permanently delete all telemetry logs? This will reset all charts and metrics.</div>
+                    <strong class="text-dark">Confirm Log Deletion</strong>
+                    <div class="text-secondary small">Are you sure you want to permanently delete all telemetry logs? This will reset all charts and metrics.</div>
                 </div>
             </div>
             <div class="d-flex gap-2">
                 <button class="btn btn-sm btn-danger" @onclick="ClearLogsAsync">Yes, Clear Logs</button>
-                <button class="btn btn-sm btn-outline-light" @onclick="() => showClearConfirm = false">Cancel</button>
+                <button class="btn btn-sm btn-outline-secondary" @onclick="() => showClearConfirm = false">Cancel</button>
             </div>
         </div>
     }
 
     @if (successMessage != null)
     {
-        <div class="alert alert-success bg-glass-success border-0 text-white mb-4 d-flex align-items-center gap-2">
-            <span class="material-symbols-outlined">check_circle</span>
-            @successMessage
+        <div class="alert alert-success shadow-sm mb-4 d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-success">check_circle</span>
+            <span class="text-dark">@successMessage</span>
         </div>
     }
 
