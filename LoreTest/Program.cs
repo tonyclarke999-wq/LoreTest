@@ -15,6 +15,16 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Sentry
+builder.WebHost.UseSentry(options =>
+{
+    var dsn = builder.Configuration["Sentry:Dsn"];
+    options.Dsn = dsn;
+    options.InitializeSdk = !string.IsNullOrEmpty(dsn);
+    options.TracesSampleRate = 1.0;
+    options.Debug = builder.Environment.IsDevelopment();
+});
+
 // JWT Configuration
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var secret = jwtSettings.GetValue<string>("Secret") ?? "SuperSecretKeyThatIsAtLeast32CharactersLong!";
@@ -101,6 +111,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddClaimsPrincipalFactory<AdditionalUserClaimsPrincipalFactory>();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<LoreTest.Utilities.UserActivityService>();
 builder.Services.AddScoped<ITranslationService, MockTranslationService>();
 builder.Services.AddHttpClient<LoreTest.Utilities.JiraIntegrationService>();
 

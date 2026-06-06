@@ -13,6 +13,7 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject IStringLocalizer<SharedResource> L
+@inject LoreTest.Utilities.UserActivityService ActivityService
 
 <PageTitle>@L["LoginTitle"]</PageTitle>
 
@@ -138,15 +139,20 @@
         {
             Logger.LogInformation("User logged in.");
             
-            // Set the culture cookie based on user preference
+            // Set the culture cookie based on user preference and log user activity
             var user = await UserManager.FindByEmailAsync(Input.Email);
-            if (user != null && !string.IsNullOrEmpty(user.PreferredLanguage))
+            if (user != null)
             {
-                HttpContext.Response.Cookies.Append(
-                    CookieRequestCultureProvider.DefaultCookieName,
-                    CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(user.PreferredLanguage)),
-                    new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
-                );
+                await ActivityService.LogActivityAsync(user.UserName, user.Id, "Login", "User logged in via local credentials or passkey");
+
+                if (!string.IsNullOrEmpty(user.PreferredLanguage))
+                {
+                    HttpContext.Response.Cookies.Append(
+                        CookieRequestCultureProvider.DefaultCookieName,
+                        CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(user.PreferredLanguage)),
+                        new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+                    );
+                }
             }
             
             RedirectManager.RedirectTo(ReturnUrl);

@@ -11,6 +11,7 @@ namespace LoreTest.Data
         private readonly IServiceProvider _serviceProvider = serviceProvider;
 
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<UserActivity> UserActivities { get; set; }
         public DbSet<TestProject> TestProjects { get; set; }
         public DbSet<TestSuite> TestSuites { get; set; }
         public DbSet<TestCase> TestCases { get; set; }

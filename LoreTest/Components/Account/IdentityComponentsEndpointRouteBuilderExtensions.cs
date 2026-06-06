@@ -46,10 +46,21 @@ namespace LoreTest.Components.Account
             });
 
             accountGroup.MapPost("/Logout", async (
+                HttpContext context,
                 [FromServices] SignInManager<ApplicationUser> signInManager,
+                [FromServices] LoreTest.Utilities.UserActivityService activityService,
                 [FromForm] string returnUrl) =>
             {
+                var username = context.User?.Identity?.Name;
+                var userId = context.User is null ? null : signInManager.UserManager.GetUserId(context.User);
+
                 await signInManager.SignOutAsync();
+
+                if (username != null)
+                {
+                    await activityService.LogActivityAsync(username, userId, "Logout", "User logged out");
+                }
+
                 return TypedResults.LocalRedirect($"~/{returnUrl}");
             });
 

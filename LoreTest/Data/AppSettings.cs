@@ -12,6 +12,10 @@ namespace LoreTest.Data
         [StringLength(100)]
         public string TranslationApi { get; set; } = "Mock"; // e.g. "Google", "Azure", "Mock"
 
+        [Required]
+        [StringLength(50)]
+        public string TelemetryLevel { get; set; } = "LoginOnly"; // e.g. "None", "LoginOnly", "Full"
+
         [StringLength(500)]
         public string? TranslationApiKey { get; set; }
 

@@ -1080,4 +1080,16 @@
   <data name="ImportInstructions" xml:space="preserve">
     <value>The CSV should have columns: Test Suite Title, Test Suite Description, Test Case Title, Test Case Description, Test Step, Test Step Expected Result.</value>
   </data>
+  <data name="TelemetryAndAnalytics" xml:space="preserve">
+    <value>Telemetry &amp; Analytics</value>
+  </data>
+  <data name="TelemetryLevel" xml:space="preserve">
+    <value>Telemetry Level</value>
+  </data>
+  <data name="TelemetryLevelHelp" xml:space="preserve">
+    <value>Select the level of UI usage activity stored in the database. None: disable UI tracking; LoginOnly: log user logins/logouts; Full: log logins, logouts, page views, search inputs, and browser user agents. NOTE: Full logging will cause database growth over time.</value>
+  </data>
+  <data name="SystemAnalytics" xml:space="preserve">
+    <value>System Analytics</value>
+  </data>
 </root>

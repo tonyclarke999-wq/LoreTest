@@ -1,0 +1,428 @@
+@page "/admin/analytics"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@using System.Text.RegularExpressions
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject IStringLocalizer<SharedResource> L
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+<PageTitle>@L["SystemAnalytics"]</PageTitle>
+
+<div class="analytics-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-md mb-1 text-white">@L["SystemAnalytics"]</h1>
+            <p class="text-muted mb-0">Monitor platform usage, user activity, and client distribution.</p>
+        </div>
+        <button class="btn btn-outline-danger d-flex align-items-center gap-2" @onclick="ConfirmClearLogs">
+            <span class="material-symbols-outlined">delete_forever</span>
+            Clear Telemetry Logs
+        </button>
+    </div>
+
+    @if (showClearConfirm)
+    {
+        <div class="alert alert-warning d-flex justify-content-between align-items-center border-0 shadow-sm mb-4 bg-glass-warning">
+            <div class="d-flex align-items-center gap-3">
+                <span class="material-symbols-outlined text-warning" style="font-size: 32px;">warning</span>
+                <div>
+                    <strong class="text-white">Confirm Log Deletion</strong>
+                    <div class="text-muted-light">Are you sure you want to permanently delete all telemetry logs? This will reset all charts and metrics.</div>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-danger" @onclick="ClearLogsAsync">Yes, Clear Logs</button>
+                <button class="btn btn-sm btn-outline-light" @onclick="() => showClearConfirm = false">Cancel</button>
+            </div>
+        </div>
+    }
+
+    @if (successMessage != null)
+    {
+        <div class="alert alert-success bg-glass-success border-0 text-white mb-4 d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span>
+            @successMessage
+        </div>
+    }
+
+    <!-- Metric Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="metric-card bg-purple-gradient text-white">
+                <div class="metric-header">
+                    <span class="metric-title">Active Users (7d)</span>
+                    <span class="material-symbols-outlined metric-icon">group</span>
+                </div>
+                <div class="metric-value">@activeUsersCount</div>
+                <div class="metric-subtext">Unique users in last 7 days</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="metric-card bg-blue-gradient text-white">
+                <div class="metric-header">
+                    <span class="metric-title">Total Page Views</span>
+                    <span class="material-symbols-outlined metric-icon">visibility</span>
+                </div>
+                <div class="metric-value">@totalPageViews</div>
+                <div class="metric-subtext">All-time navigations logged</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="metric-card bg-green-gradient text-white">
+                <div class="metric-header">
+                    <span class="metric-title">Total Test Runs</span>
+                    <span class="material-symbols-outlined metric-icon">play_circle</span>
+                </div>
+                <div class="metric-value">@totalTestRuns</div>
+                <div class="metric-subtext">Collaborative test suite executions</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="metric-card bg-orange-gradient text-white">
+                <div class="metric-header">
+                    <span class="metric-title">Active Projects</span>
+                    <span class="material-symbols-outlined metric-icon">folder</span>
+                </div>
+                <div class="metric-value">@totalProjects</div>
+                <div class="metric-subtext">Total workspace projects</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Top Pages -->
+        <div class="col-12 col-md-6">
+            <div class="glass-panel">
+                <h3 class="panel-title text-white mb-3">
+                    <span class="material-symbols-outlined align-middle me-2 text-primary">trending_up</span>Top Visited Pages
+                </h3>
+                @if (topPages.Count == 0)
+                {
+                    <p class="text-muted p-4 text-center">No page view data available. Turn on "Full" telemetry level to track.</p>
+                }
+                else
+                {
+                    <div class="chart-list">
+                        @foreach (var pg in topPages)
+                        {
+                            var percentage = totalPageViews > 0 ? (int)((double)pg.Count / totalPageViews * 100) : 0;
+                            <div class="chart-item mb-3">
+                                <div class="d-flex justify-content-between text-muted-light mb-1">
+                                    <span class="text-white text-truncate font-monospace" style="max-width: 80%;">@pg.Path</span>
+                                    <span>@pg.Count views (@percentage%)</span>
+                                </div>
+                                <div class="progress bg-dark" style="height: 8px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: @percentage%"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Top Users -->
+        <div class="col-12 col-md-6">
+            <div class="glass-panel">
+                <h3 class="panel-title text-white mb-3">
+                    <span class="material-symbols-outlined align-middle me-2 text-success">analytics</span>Most Active Users
+                </h3>
+                @if (topUsers.Count == 0)
+                {
+                    <p class="text-muted p-4 text-center">No user activity data available.</p>
+                }
+                else
+                {
+                    var maxUserActions = topUsers.FirstOrDefault()?.Count ?? 1;
+                    <div class="chart-list">
+                        @foreach (var user in topUsers)
+                        {
+                            var percentage = (int)((double)user.Count / maxUserActions * 100);
+                            <div class="chart-item mb-3">
+                                <div class="d-flex justify-content-between text-muted-light mb-1">
+                                    <span class="text-white text-truncate" style="max-width: 80%;">@user.Username</span>
+                                    <span>@user.Count actions</span>
+                                </div>
+                                <div class="progress bg-dark" style="height: 8px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: @percentage%"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs List -->
+    <div class="glass-panel">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+            <h3 class="panel-title text-white mb-0">
+                <span class="material-symbols-outlined align-middle me-2 text-warning">list_alt</span>Recent User Activity Logs
+            </h3>
+            
+            <div class="d-flex gap-2 align-items-center">
+                <div class="input-group search-group" style="max-width: 300px;">
+                    <span class="input-group-text bg-dark border-secondary text-muted">
+                        <span class="material-symbols-outlined small">search</span>
+                    </span>
+                    <input type="text" class="form-control bg-dark border-secondary text-white" placeholder="Search logs..." @bind-value="searchTerm" @bind-value:event="oninput" @onkeyup="ApplyFilter" />
+                </div>
+                
+                <button class="btn btn-outline-light d-flex align-items-center gap-1" @onclick="RefreshDataAsync">
+                    <span class="material-symbols-outlined">refresh</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover text-white align-middle">
+                <thead>
+                    <tr class="text-muted border-secondary">
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Details</th>
+                        <th>Browser / Client</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (filteredLogs == null)
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center p-4">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                <span class="ms-2 text-muted">Loading logs...</span>
+                            </td>
+                        </tr>
+                    }
+                    else if (filteredLogs.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted p-4">No activity logs found matching criteria.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var log in filteredLogs)
+                        {
+                            <tr class="border-secondary">
+                                <td class="fw-bold">@log.Username</td>
+                                <td>
+                                    <span class="badge @GetBadgeClass(log.Action)">
+                                        @log.Action
+                                    </span>
+                                </td>
+                                <td class="text-truncate max-w-details" title="@log.Details">
+                                    @log.Details
+                                </td>
+                                <td class="text-muted-light text-truncate max-w-ua" title="@log.UserAgent">
+                                    @FormatUserAgent(log.UserAgent)
+                                </td>
+                                <td class="text-muted-light">
+                                    @log.Timestamp.ToLocalTime().ToString("g")
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int activeUsersCount;
+    private int totalPageViews;
+    private int totalTestRuns;
+    private int totalProjects;
+
+    private List<PageViewModel> topPages = new();
+    private List<UserActivityModel> topUsers = new();
+    private List<UserActivity>? allLogs;
+    private List<UserActivity>? filteredLogs;
+
+    private string searchTerm = "";
+    private bool showClearConfirm;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshDataAsync();
+    }
+
+    private async Task RefreshDataAsync()
+    {
+        successMessage = null;
+        using var db = await DbFactory.CreateDbContextAsync();
+
+        // 1. Gather counts
+        totalTestRuns = await db.TestRuns.CountAsync();
+        totalProjects = await db.TestProjects.CountAsync();
+
+        // Gather unique user logins/pageviews in last 7 days
+        var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+        activeUsersCount = await db.UserActivities
+            .Where(a => a.Timestamp >= sevenDaysAgo && a.Username != "Anonymous")
+            .Select(a => a.Username)
+            .Distinct()
+            .CountAsync();
+
+        // If there were no activities, fallback to counting active ASP.NET Core Identity users
+        if (activeUsersCount == 0)
+        {
+            activeUsersCount = await db.Users.CountAsync();
+        }
+
+        totalPageViews = await db.UserActivities
+            .Where(a => a.Action == "PageView")
+            .CountAsync();
+
+        // 2. Fetch top pages
+        var topPagesQuery = await db.UserActivities
+            .Where(a => a.Action == "PageView" && a.Details != null)
+            .GroupBy(a => a.Details!)
+            .Select(g => new PageViewModel
+            {
+                Path = g.Key,
+                Count = g.Count()
+            })
+            .OrderByDescending(p => p.Count)
+            .Take(5)
+            .ToListAsync();
+        topPages = topPagesQuery;
+
+        // 3. Fetch top users
+        var topUsersQuery = await db.UserActivities
+            .Where(a => a.Username != "Anonymous" && a.Username != null)
+            .GroupBy(a => a.Username!)
+            .Select(g => new UserActivityModel
+            {
+                Username = g.Key,
+                Count = g.Count()
+            })
+            .OrderByDescending(u => u.Count)
+            .Take(5)
+            .ToListAsync();
+        topUsers = topUsersQuery;
+
+        // 4. Fetch last 50 activity logs
+        allLogs = await db.UserActivities
+            .OrderByDescending(a => a.Timestamp)
+            .Take(50)
+            .ToListAsync();
+
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        if (allLogs == null) return;
+
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredLogs = allLogs;
+        }
+        else
+        {
+            filteredLogs = allLogs
+                .Where(l => 
+                    (l.Username != null && l.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    (l.Action != null && l.Action.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    (l.Details != null && l.Details.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    (l.UserAgent != null && l.UserAgent.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+        }
+    }
+
+    private void ConfirmClearLogs()
+    {
+        showClearConfirm = true;
+    }
+
+    private async Task ClearLogsAsync()
+    {
+        showClearConfirm = false;
+        using var db = await DbFactory.CreateDbContextAsync();
+        
+        // Truncate the user activities table
+        await db.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"UserActivities\"");
+        
+        successMessage = "Telemetry database logs cleared successfully.";
+        await RefreshDataAsync();
+    }
+
+    private string GetBadgeClass(string action)
+    {
+        return action.ToLower() switch
+        {
+            "login" => "bg-success text-white",
+            "logout" => "bg-info text-dark",
+            "pageview" => "bg-secondary text-white",
+            "search" => "bg-warning text-dark",
+            _ => "bg-light text-dark"
+        };
+    }
+
+    private string FormatUserAgent(string? userAgent)
+    {
+        if (string.IsNullOrEmpty(userAgent)) return "N/A";
+
+        // Simple parser to extract human-readable OS & Browser from standard user-agent string
+        if (userAgent.Contains("Chrome") && userAgent.Contains("Safari") && !userAgent.Contains("Edg"))
+        {
+            var chromeMatch = Regex.Match(userAgent, @"Chrome/(\d+)");
+            var os = GetOsName(userAgent);
+            return chromeMatch.Success ? $"Chrome {chromeMatch.Groups[1].Value} on {os}" : $"Chrome on {os}";
+        }
+        if (userAgent.Contains("Edg"))
+        {
+            var edgeMatch = Regex.Match(userAgent, @"Edg/(\d+)");
+            var os = GetOsName(userAgent);
+            return edgeMatch.Success ? $"Edge {edgeMatch.Groups[1].Value} on {os}" : $"Edge on {os}";
+        }
+        if (userAgent.Contains("Safari") && !userAgent.Contains("Chrome"))
+        {
+            var safariMatch = Regex.Match(userAgent, @"Version/(\d+)");
+            var os = GetOsName(userAgent);
+            return safariMatch.Success ? $"Safari {safariMatch.Groups[1].Value} on {os}" : $"Safari on {os}";
+        }
+        if (userAgent.Contains("Firefox"))
+        {
+            var ffMatch = Regex.Match(userAgent, @"Firefox/(\d+)");
+            var os = GetOsName(userAgent);
+            return ffMatch.Success ? $"Firefox {ffMatch.Groups[1].Value} on {os}" : $"Firefox on {os}";
+        }
+
+        return userAgent.Length > 30 ? userAgent.Substring(0, 30) + "..." : userAgent;
+    }
+
+    private string GetOsName(string userAgent)
+    {
+        if (userAgent.Contains("Windows NT 10.0")) return "Windows 10/11";
+        if (userAgent.Contains("Windows NT 6.1")) return "Windows 7";
+        if (userAgent.Contains("Macintosh")) return "macOS";
+        if (userAgent.Contains("Linux")) return "Linux";
+        if (userAgent.Contains("Android")) return "Android";
+        if (userAgent.Contains("iPhone") || userAgent.Contains("iPad")) return "iOS";
+        return "Unknown OS";
+    }
+
+    public class PageViewModel
+    {
+        public string Path { get; set; } = "";
+        public int Count { get; set; }
+    }
+
+    public class UserActivityModel
+    {
+        public string Username { get; set; } = "";
+        public int Count { get; set; }
+    }
+}
