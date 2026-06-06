@@ -1,0 +1,65 @@
+Given the user is authenticated as an administrator
+-> done: ProjectSteps.GivenTheUserIsAuthenticatedAsAnAdministrator() (1.1s)
+And they navigate to the Projects page
+-> done: ProjectSteps.GivenTheyNavigateToTheProjectsPage() (1.7s)
+When they create a new project with a unique title and description
+-> done: ProjectSteps.WhenTheyCreateANewProjectWithAUniqueTitleAndDescription() (3.4s)
+Then the new project should be listed on the Projects index page
+-> done: ProjectSteps.ThenTheNewProjectShouldBeListedOnTheProjectsIndexPage() (0.1s)
+And they update the project title and description
+-> done: ProjectSteps.ThenTheyUpdateTheProjectTitleAndDescription() (3.3s)
+Then the updated details should be successfully visible on the details page
+-> done: ProjectSteps.ThenTheUpdatedDetailsShouldBeSuccessfullyVisibleOnTheDetailsPage() (1.7s)
+When they create a test suite inside the project
+-> done: ProjectSteps.WhenTheyCreateATestSuiteInsideTheProject() (3.3s)
+Then the test suite should be visible in the project details
+-> done: ProjectSteps.ThenTheTestSuiteShouldBeVisibleInTheProjectDetails() (0.0s)
+When they add two test cases, each with two test steps
+-> done: ProjectSteps.WhenTheyAddTwoTestCasesEachWithTwoTestSteps() (20.1s)
+Then both test cases should be visible in the test suite details
+-> done: ProjectSteps.ThenBothTestCasesShouldBeVisibleInTheTestSuiteDetails() (1.7s)
+When they start a test run and execute the steps with mixed pass and fail outcomes
+-> done: ProjectSteps.WhenTheyStartATestRunAndExecuteTheStepsWithMixedPassAndFailOutcomes() (12.3s)
+Then the test run pass rate should be "0%"
+-> done: ProjectSteps.ThenTheTestRunPassRateShouldBe("0%") (0.0s)
+And both test cases should display a "FAIL" outcome
+-> done: ProjectSteps.ThenBothTestCasesShouldDisplayAOutcome("FAIL") (0.0s)
+When they delete the created test cases, suite, and project
+-> done: ProjectSteps.WhenTheyDeleteTheCreatedTestCasesSuiteAndProject() (13.2s)
+Then the project should no longer be listed on the Projects page
+-> done: ProjectSteps.ThenTheProjectShouldNoLongerBeListedOnTheProjectsPage() (1.8s)
+Playwright trace saved: C:\actions-runner\_work\LoreTest\LoreTest\LoreTest.Specs\bin\Debug\net10.0\allure-results\CONNIE\trace_Complete_project_lifecycle_from_creation_to_deletion.zip
+
+
+
+TestContext Messages:
+Given the user is authenticated as an administrator
+-> done: ProjectSteps.GivenTheUserIsAuthenticatedAsAnAdministrator() (1.1s)
+And they navigate to the Projects page
+-> done: ProjectSteps.GivenTheyNavigateToTheProjectsPage() (1.7s)
+When they create a new project with a unique title and description
+-> done: ProjectSteps.WhenTheyCreateANewProjectWithAUniqueTitleAndDescription() (3.4s)
+Then the new project should be listed on the Projects index page
+-> done: ProjectSteps.ThenTheNewProjectShouldBeListedOnTheProjectsIndexPage() (0.1s)
+And they update the project title and description
+-> done: ProjectSteps.ThenTheyUpdateTheProjectTitleAndDescription() (3.3s)
+Then the updated details should be successfully visible on the details page
+-> done: ProjectSteps.ThenTheUpdatedDetailsShouldBeSuccessfullyVisibleOnTheDetailsPage() (1.7s)
+When they create a test suite inside the project
+-> done: ProjectSteps.WhenTheyCreateATestSuiteInsideTheProject() (3.3s)
+Then the test suite should be visible in the project details
+-> done: ProjectSteps.ThenTheTestSuiteShouldBeVisibleInTheProjectDetails() (0.0s)
+When they add two test cases, each with two test steps
+-> done: ProjectSteps.WhenTheyAddTwoTestCasesEachWithTwoTestSteps() (20.1s)
+Then both test cases should be visible in the test suite details
+-> done: ProjectSteps.ThenBothTestCasesShouldBeVisibleInTheTestSuiteDetails() (1.7s)
+When they start a test run and execute the steps with mixed pass and fail outcomes
+-> done: ProjectSteps.WhenTheyStartATestRunAndExecuteTheStepsWithMixedPassAndFailOutcomes() (12.3s)
+Then the test run pass rate should be "0%"
+-> done: ProjectSteps.ThenTheTestRunPassRateShouldBe("0%") (0.0s)
+And both test cases should display a "FAIL" outcome
+-> done: ProjectSteps.ThenBothTestCasesShouldDisplayAOutcome("FAIL") (0.0s)
+When they delete the created test cases, suite, and project
+-> done: ProjectSteps.WhenTheyDeleteTheCreatedTestCasesSuiteAndProject() (13.2s)
+Then the project should no longer be listed on the Projects page
+-> done: ProjectSteps.ThenTheProjectShouldNoLongerBeListedOnTheProjectsPage() (1.8s)
