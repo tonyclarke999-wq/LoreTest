@@ -86,7 +86,7 @@ else
                         <div class="mb-3">
                             <label for="jiraApiToken" class="form-label">@L["JiraApiToken"]</label>
                             <InputText id="jiraApiToken" @bind-Value="settings.JiraApiToken" class="form-control" type="password" />
-                            <div class="form-text">@L["JiraApiTokenHelp"]</div>
+                            <div class="form-text">@((MarkupString)L["JiraApiTokenHelp"].Value)</div>
                         </div>
                     </div>
                 </div>

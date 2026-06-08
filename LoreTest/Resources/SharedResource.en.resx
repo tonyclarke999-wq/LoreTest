@@ -962,7 +962,7 @@
     <value>Jira API Token</value>
   </data>
   <data name="JiraApiTokenHelp" xml:space="preserve">
-    <value>Optional. Used to automatically create or update issues in Jira.</value>
+    <value>Optional. Used to automatically create or update issues in Jira.&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;How to get the correct token:&lt;/strong&gt;&lt;br/&gt;1. Open a new tab and go to: &lt;a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank"&gt;https://id.atlassian.com/manage-profile/security/api-tokens&lt;/a&gt;.&lt;br/&gt;2. Click Create API token.&lt;br/&gt;3. Name it (e.g. LoreTest Integration) and copy the generated token.&lt;br/&gt;4. Verify that this new token starts with ATATT....&lt;br/&gt;5. Save this new ATATT... token along with your email tonyclarke999@gmail.com in your LoreTest Admin Settings page.</value>
   </data>
   <data name="JiraBaseUrl" xml:space="preserve">
     <value>Jira Base URL</value>
