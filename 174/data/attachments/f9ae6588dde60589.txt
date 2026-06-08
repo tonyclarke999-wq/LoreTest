@@ -1,0 +1,3 @@
+--- SUBMISSION VALIDATION ERRORS ---
+E2E CRUD Cleanup: Attempting to delete testuser_639165160438946160@example.com
+E2E CRUD Cleanup: Successfully deleted testuser_639165160438946160@example.com
