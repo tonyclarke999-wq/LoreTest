@@ -137,6 +137,18 @@ a:hover {
     border-color: var(--primary);
 }
 
+.btn-outline-secondary {
+    color: #475569;
+    border-color: var(--outline-variant);
+    background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #475569;
+    color: white;
+    border-color: #475569;
+}
+
 .btn-outline-danger {
     color: var(--error);
     border-color: var(--outline-variant);
