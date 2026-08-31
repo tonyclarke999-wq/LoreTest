@@ -1,0 +1,24 @@
+-> Loading plugin C:\actions-runner\_work\LoreTest\LoreTest\LoreTest.Specs\bin\Debug\net10.0\Reqnroll.MSTest.ReqnrollPlugin.dll
+-> Loading plugin C:\actions-runner\_work\LoreTest\LoreTest\LoreTest.Specs\bin\Debug\net10.0\LoreTest.Specs.dll
+-> Using reqnroll.json
+Given the user navigates to the login page
+-> done: LoginSteps.GivenTheUserNavigatesToTheLoginPage() (1.9s)
+When they sign in with administrator credentials
+-> done: LoginSteps.WhenTheySignInWithAdministratorCredentials() (2.7s)
+And they navigate to the home page
+-> done: LoginSteps.WhenTheyNavigateToTheHomePage() (0.9s)
+Then the dashboard title should be displayed
+-> done: LoginSteps.ThenTheDashboardTitleShouldBeDisplayed() (0.1s)
+Playwright trace saved: C:\actions-runner\_work\LoreTest\LoreTest\LoreTest.Specs\bin\Debug\net10.0\allure-results\CONNIE\trace_Home_Page_loads_successfully_after_admin_authentication.zip
+
+
+
+TestContext Messages:
+Given the user navigates to the login page
+-> done: LoginSteps.GivenTheUserNavigatesToTheLoginPage() (1.9s)
+When they sign in with administrator credentials
+-> done: LoginSteps.WhenTheySignInWithAdministratorCredentials() (2.7s)
+And they navigate to the home page
+-> done: LoginSteps.WhenTheyNavigateToTheHomePage() (0.9s)
+Then the dashboard title should be displayed
+-> done: LoginSteps.ThenTheDashboardTitleShouldBeDisplayed() (0.1s)
