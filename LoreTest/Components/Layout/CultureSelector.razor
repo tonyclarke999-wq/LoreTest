@@ -11,7 +11,7 @@
     <div class="culture-selector">
         <form action="/Culture/SetCulture" method="post" class="d-inline-flex">
             <AntiforgeryToken />
-            <select name="culture" class="form-select form-select-sm" onchange="this.form.submit()">
+            <select name="culture" aria-label="Select Language" class="form-select form-select-sm" onchange="this.form.submit()">
                 @foreach (var culture in SupportedCultures)
                 {
                     <option value="@culture.Name" selected="@(culture.Name == CurrentCulture.Name)">

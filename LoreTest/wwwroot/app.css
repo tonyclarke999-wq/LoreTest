@@ -65,6 +65,16 @@ html, body {
 }
 .data-mono { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
 
+/* Accessible Link Styles */
+a {
+    color: var(--secondary);
+    text-decoration: none;
+}
+a:hover {
+    color: var(--secondary-container);
+    text-decoration: underline;
+}
+
 /* Layout Shell Styles */
 .app-container {
     display: flex;
@@ -165,7 +175,7 @@ html, body {
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--outline);
+    color: #475569;
     border-bottom: 1px solid var(--outline-variant);
     background: var(--surface-container-low);
     padding: 12px 16px;

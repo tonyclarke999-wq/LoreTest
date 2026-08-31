@@ -34,6 +34,53 @@
             document.body.removeChild(link);
         }
         window.getUserAgent = () => navigator.userAgent;
+
+        // Centralized Quill integration with accessibility improvements
+        window.initQuill = function(element, initialContent) {
+            if (!element) return;
+            var quill = new Quill(element, { 
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['image', 'link', 'blockquote', 'code-block'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                    ]
+                }
+            });
+            quill.root.innerHTML = initialContent || '';
+            element.quill = quill;
+
+            // Accessibility fix: dynamically label picker buttons
+            var pickerLabels = element.parentElement.querySelectorAll('.ql-picker-label');
+            pickerLabels.forEach(function(label) {
+                var parent = label.parentElement;
+                if (parent.classList.contains('ql-header')) {
+                    label.setAttribute('aria-label', 'Select Header Level');
+                } else if (parent.classList.contains('ql-font')) {
+                    label.setAttribute('aria-label', 'Select Font');
+                } else if (parent.classList.contains('ql-size')) {
+                    label.setAttribute('aria-label', 'Select Font Size');
+                } else {
+                    label.setAttribute('aria-label', 'Formatting Dropdown');
+                }
+            });
+        };
+        window.getQuillContent = function(element) {
+            return (element && element.quill) ? element.quill.root.innerHTML : '';
+        };
+        window.updateQuillContent = function(element, newContent) {
+            if (element && element.quill) {
+                element.quill.root.innerHTML = newContent || '';
+            }
+        };
+        window.clearQuillEditor = function(element) {
+            if (element && element.quill) {
+                element.quill.setText('');
+            }
+        };
+        window.quillInitialized = true;
     </script>
 </body>
 
