@@ -1,0 +1,77 @@
+Given the user is authenticated as an administrator
+-> done: ProjectSteps.GivenTheUserIsAuthenticatedAsAnAdministrator() (2.4s)
+And they navigate to the Reporting page
+-> done: ReportingSteps.GivenTheyNavigateToTheReportingPage() (2.9s)
+Then they should see the Reporting dashboard with active metrics summary cards
+-> done: ReportingSteps.ThenTheyShouldSeeTheReportingDashboardWithActiveMetricsSummaryCards() (0.0s)
+When they switch to the "Projects" reporting tab
+-> done: ReportingSteps.WhenTheySwitchToTheReportingTab("Projects") (0.9s)
+Then they should see a list of all projects
+-> done: ReportingSteps.ThenTheyShouldSeeAListOfAllProjects() (0.0s)
+And they can filter projects by a search query "Specs"
+-> done: ReportingSteps.ThenTheyCanFilterProjectsByASearchQuery("Specs") (0.9s)
+When they switch to the "TestSuites" reporting tab
+-> done: ReportingSteps.WhenTheySwitchToTheReportingTab("TestSuites") (0.9s)
+Then they should see test suites grouped by project
+-> done: ReportingSteps.ThenTheyShouldSeeTestSuitesGroupedByProject() (0.0s)
+And they can filter test suites by selecting a project
+-> done: ReportingSteps.ThenTheyCanFilterTestSuitesBySelectingAProject() (0.9s)
+When they switch to the "TestCases" reporting tab
+-> done: ReportingSteps.WhenTheySwitchToTheReportingTab("TestCases") (0.9s)
+Then they should see test cases grouped by test suite
+-> done: ReportingSteps.ThenTheyShouldSeeTestCasesGroupedByTestSuite() (0.0s)
+And they can filter test cases by priority "High"
+-> done: ReportingSteps.ThenTheyCanFilterTestCasesByPriority("High") (0.8s)
+When they switch to the "TestRuns" reporting tab
+-> done: ReportingSteps.WhenTheySwitchToTheReportingTab("TestRuns") (0.9s)
+Then they should see test runs grouped by test case
+-> done: ReportingSteps.ThenTheyShouldSeeTestRunsGroupedByTestCase() (0.0s)
+And they can filter test runs by status "Passed"
+-> done: ReportingSteps.ThenTheyCanFilterTestRunsByStatus("Passed") (0.9s)
+When they switch to the "Bugs" reporting tab
+-> done: ReportingSteps.WhenTheySwitchToTheReportingTab("Bugs") (0.9s)
+Then they should see a list of all bugs with filters
+-> done: ReportingSteps.ThenTheyShouldSeeAListOfAllBugsWithFilters() (0.0s)
+And they can filter bugs by severity "Critical"
+-> done: ReportingSteps.ThenTheyCanFilterBugsBySeverity("Critical") (0.9s)
+Playwright trace saved: C:\actions-runner\_work\LoreTest\LoreTest\LoreTest.Specs\bin\Debug\net10.0\allure-results\CONNIE\trace_Navigating_the_reporting_dashboard_and_validating_all_reports_and_filters.zip
+
+
+
+TestContext Messages:
+Given the user is authenticated as an administrator
+-> done: ProjectSteps.GivenTheUserIsAuthenticatedAsAnAdministrator() (2.4s)
+And they navigate to the Reporting page
+-> done: ReportingSteps.GivenTheyNavigateToTheReportingPage() (2.9s)
+Then they should see the Reporting dashboard with active metrics summary cards
+-> done: ReportingSteps.ThenTheyShouldSeeTheReportingDashboardWithActiveMetricsSummaryCards() (0.0s)
+When they switch to the "Projects" reporting tab
+-> done: ReportingSteps.WhenTheySwitchToTheReportingTab("Projects") (0.9s)
+Then they should see a list of all projects
+-> done: ReportingSteps.ThenTheyShouldSeeAListOfAllProjects() (0.0s)
+And they can filter projects by a search query "Specs"
+-> done: ReportingSteps.ThenTheyCanFilterProjectsByASearchQuery("Specs") (0.9s)
+When they switch to the "TestSuites" reporting tab
+-> done: ReportingSteps.WhenTheySwitchToTheReportingTab("TestSuites") (0.9s)
+Then they should see test suites grouped by project
+-> done: ReportingSteps.ThenTheyShouldSeeTestSuitesGroupedByProject() (0.0s)
+And they can filter test suites by selecting a project
+-> done: ReportingSteps.ThenTheyCanFilterTestSuitesBySelectingAProject() (0.9s)
+When they switch to the "TestCases" reporting tab
+-> done: ReportingSteps.WhenTheySwitchToTheReportingTab("TestCases") (0.9s)
+Then they should see test cases grouped by test suite
+-> done: ReportingSteps.ThenTheyShouldSeeTestCasesGroupedByTestSuite() (0.0s)
+And they can filter test cases by priority "High"
+-> done: ReportingSteps.ThenTheyCanFilterTestCasesByPriority("High") (0.8s)
+When they switch to the "TestRuns" reporting tab
+-> done: ReportingSteps.WhenTheySwitchToTheReportingTab("TestRuns") (0.9s)
+Then they should see test runs grouped by test case
+-> done: ReportingSteps.ThenTheyShouldSeeTestRunsGroupedByTestCase() (0.0s)
+And they can filter test runs by status "Passed"
+-> done: ReportingSteps.ThenTheyCanFilterTestRunsByStatus("Passed") (0.9s)
+When they switch to the "Bugs" reporting tab
+-> done: ReportingSteps.WhenTheySwitchToTheReportingTab("Bugs") (0.9s)
+Then they should see a list of all bugs with filters
+-> done: ReportingSteps.ThenTheyShouldSeeAListOfAllBugsWithFilters() (0.0s)
+And they can filter bugs by severity "Critical"
+-> done: ReportingSteps.ThenTheyCanFilterBugsBySeverity("Critical") (0.9s)
