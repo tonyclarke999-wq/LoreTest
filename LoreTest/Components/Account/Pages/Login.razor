@@ -74,9 +74,9 @@
 
         <div class="mt-3 text-center">
             <div class="d-flex justify-content-center gap-3">
-                <a href="privacy" target="_blank" class="body-xs text-decoration-none text-muted">@L["PrivacyPolicy"]</a>
+                <a href="privacy" target="_blank" class="body-xs text-decoration-none text-muted">@(L["PrivacyPolicy"] == "PrivacyPolicy" ? "Privacy Policy" : L["PrivacyPolicy"])</a>
                 <span class="text-muted opacity-25">•</span>
-                <a href="terms" target="_blank" class="body-xs text-decoration-none text-muted">@L["TermsAndConditions"]</a>
+                <a href="terms" target="_blank" class="body-xs text-decoration-none text-muted">@(L["TermsAndConditions"] == "TermsAndConditions" ? "Terms & Conditions" : L["TermsAndConditions"])</a>
             </div>
         </div>
 

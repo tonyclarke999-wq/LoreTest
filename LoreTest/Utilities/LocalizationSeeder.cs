@@ -335,7 +335,12 @@ namespace LoreTest.Utilities
                 { "NewValue", "New Value" },
                 { "ShowingLastLogs", "Showing last {0} entries" },
                 { "ErrorCreatingUser", "Error creating user" },
-                { "ErrorUpdatingUser", "Error updating user" }
+                { "ErrorUpdatingUser", "Error updating user" },
+                { "PrivacyPolicy", "Privacy Policy" },
+                { "TermsAndConditions", "Terms & Conditions" },
+                { "LegalDocuments", "Legal & Compliance Documents" },
+                { "LegalSettings", "Legal Settings" },
+                { "ManageLegalDocuments", "Manage Legal Documents" }
             };
 
             int nextFieldId = (await context.LocalizationFields.MaxAsync(f => (int?)f.Id) ?? 0) + 1;
