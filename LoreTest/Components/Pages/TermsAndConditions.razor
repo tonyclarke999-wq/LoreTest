@@ -1,0 +1,136 @@
+@page "/terms"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@using LoreTest.Utilities
+@inject ApplicationDbContext DbContext
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
+@attribute [AllowAnonymous]
+@rendermode InteractiveServer
+
+<PageTitle>@L["TermsAndConditions"] - LoreTest</PageTitle>
+
+<div class="container py-4" style="max-width: 960px;">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <a href="/" class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                <span class="material-symbols-outlined small me-1">arrow_back</span>
+                <span>@L["Home"]</span>
+            </a>
+            <h1 class="h3 mb-0">@L["TermsAndConditions"]</h1>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <AuthorizeView Roles="Administrator">
+                <a href="/admin/legal?tab=terms" class="btn btn-outline-primary btn-sm d-flex align-items-center">
+                    <span class="material-symbols-outlined small me-1">edit_document</span>
+                    <span>Edit Document</span>
+                </a>
+            </AuthorizeView>
+            <button class="btn btn-outline-secondary btn-sm d-flex align-items-center" onclick="window.print()">
+                <span class="material-symbols-outlined small me-1">print</span>
+                <span>Print</span>
+            </button>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">@L["Loading"]</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        @if (isUsingDefault)
+        {
+            <div class="alert alert-warning d-flex align-items-center mb-4 shadow-sm" role="alert">
+                <span class="material-symbols-outlined me-2 fs-4">info</span>
+                <div>
+                    <strong>Default Open-Source Template:</strong> Showing default template for self-hosted instances. 
+                    Highlighted placeholders (e.g. <mark class="placeholder-highlight">[Organization / Company Name]</mark>) should be configured by your system administrator.
+                </div>
+            </div>
+        }
+
+        <div class="card shadow-sm border-0 mb-5">
+            <div class="card-body p-4 p-md-5 legal-document-content">
+                @((MarkupString)renderedHtml)
+            </div>
+            <div class="card-footer bg-light border-0 py-3 text-center text-muted body-sm">
+                LoreTest QA Management Platform • Self-Hosted Open-Source Software (MIT License)
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .legal-document-content {
+        line-height: 1.7;
+        color: var(--on-surface, #1e293b);
+    }
+    .legal-document-content h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--surface-container-high, #e2e8f0);
+    }
+    .legal-document-content h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+    .legal-document-content h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .legal-document-content p, .legal-document-content ul, .legal-document-content ol {
+        margin-bottom: 1rem;
+    }
+    .legal-document-content hr {
+        margin: 2rem 0;
+        border-color: var(--surface-container-high, #e2e8f0);
+    }
+    mark.placeholder-highlight, .legal-document-content mark {
+        background-color: #fef08a !important;
+        color: #854d0e !important;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        font-weight: 600;
+        border: 1px dashed #ca8a04;
+        display: inline-block;
+    }
+</style>
+
+@code {
+    private bool isLoading = true;
+    private bool isUsingDefault = false;
+    private string renderedHtml = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+
+        string rawMarkdown;
+        if (!string.IsNullOrWhiteSpace(settings?.TermsAndConditions))
+        {
+            rawMarkdown = settings.TermsAndConditions;
+            isUsingDefault = false;
+        }
+        else
+        {
+            rawMarkdown = LegalDefaults.GetDefaultTermsAndConditions();
+            isUsingDefault = true;
+        }
+
+        renderedHtml = LegalDefaults.RenderMarkdownToHtml(rawMarkdown);
+        isLoading = false;
+    }
+}

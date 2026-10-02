@@ -1092,4 +1092,19 @@
   <data name="SystemAnalytics" xml:space="preserve">
     <value>System Analytics</value>
   </data>
+  <data name="PrivacyPolicy" xml:space="preserve">
+    <value>Privacy Policy</value>
+  </data>
+  <data name="TermsAndConditions" xml:space="preserve">
+    <value>Terms and Conditions</value>
+  </data>
+  <data name="LegalDocuments" xml:space="preserve">
+    <value>Legal &amp; Compliance Documents</value>
+  </data>
+  <data name="LegalSettings" xml:space="preserve">
+    <value>Legal Settings</value>
+  </data>
+  <data name="ManageLegalDocuments" xml:space="preserve">
+    <value>Manage Legal Documents</value>
+  </data>
 </root>

@@ -107,6 +107,31 @@ else
                     </div>
                 </div>
 
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        @L["LegalDocuments"]
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted body-sm">
+                            Configure the instance Privacy Policy and Terms &amp; Conditions displayed to users on the login page and dashboard.
+                        </p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="/admin/legal" class="btn btn-outline-primary d-flex align-items-center">
+                                <span class="material-symbols-outlined small me-1">gavel</span>
+                                <span>@L["ManageLegalDocuments"]</span>
+                            </a>
+                            <a href="/privacy" target="_blank" class="btn btn-outline-secondary d-flex align-items-center">
+                                <span class="material-symbols-outlined small me-1">open_in_new</span>
+                                <span>@L["PrivacyPolicy"]</span>
+                            </a>
+                            <a href="/terms" target="_blank" class="btn btn-outline-secondary d-flex align-items-center">
+                                <span class="material-symbols-outlined small me-1">open_in_new</span>
+                                <span>@L["TermsAndConditions"]</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary">@L["SaveSettings"]</button>
                 </div>

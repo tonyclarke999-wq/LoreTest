@@ -164,6 +164,19 @@ else
             </div>
         </div>
     </div>
+
+    <div class="mt-4 pt-3 border-top text-center text-muted body-sm d-flex justify-content-center align-items-center gap-3 flex-wrap">
+        <a href="/privacy" class="text-decoration-none text-muted">@L["PrivacyPolicy"]</a>
+        <span>•</span>
+        <a href="/terms" class="text-decoration-none text-muted">@L["TermsAndConditions"]</a>
+        <AuthorizeView Roles="Administrator">
+            <span>•</span>
+            <a href="/admin/legal" class="text-decoration-none text-primary d-inline-flex align-items-center">
+                <span class="material-symbols-outlined small me-1" style="font-size: 16px;">gavel</span>
+                <span>@L["ManageLegalDocuments"]</span>
+            </a>
+        </AuthorizeView>
+    </div>
 }
 
 @code {

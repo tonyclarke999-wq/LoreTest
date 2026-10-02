@@ -28,6 +28,10 @@ namespace LoreTest.Data
         [StringLength(200)]
         public string? JiraEmail { get; set; }
 
+        public string? PrivacyPolicy { get; set; }
+
+        public string? TermsAndConditions { get; set; }
+
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
         public string? UpdatedBy { get; set; }
     }

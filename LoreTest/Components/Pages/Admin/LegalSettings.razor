@@ -1,0 +1,301 @@
+@page "/admin/legal"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@using LoreTest.Utilities
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+<PageTitle>@L["LegalDocuments"] - LoreTest Admin</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="/admin/settings">@L["AdminSettings"]</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@L["LegalDocuments"]</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-0">@L["LegalDocuments"]</h1>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/admin/settings" class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+            <span class="material-symbols-outlined small me-1">settings</span>
+            <span>@L["AdminSettings"]</span>
+        </a>
+    </div>
+</div>
+
+<p class="text-muted">
+    Manage the Privacy Policy and Terms & Conditions displayed to users of this LoreTest instance.
+    If no custom text is saved, the application automatically displays default templates suitable for self-hosted instances with highlighted placeholders.
+</p>
+
+@if (isLoading)
+{
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">@L["Loading"]</span>
+        </div>
+    </div>
+}
+else
+{
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <span class="material-symbols-outlined me-2 align-middle">check_circle</span>
+            <span>@successMessage</span>
+            <button type="button" class="btn-close" @onclick="() => successMessage = null" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "privacy" ? "active fw-bold" : "")" @onclick='() => SetTab("privacy")'>
+                <span class="material-symbols-outlined small align-middle me-1">shield</span>
+                @L["PrivacyPolicy"]
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "terms" ? "active fw-bold" : "")" @onclick='() => SetTab("terms")'>
+                <span class="material-symbols-outlined small align-middle me-1">gavel</span>
+                @L["TermsAndConditions"]
+            </button>
+        </li>
+    </ul>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="fw-bold">
+                    @(activeTab == "privacy" ? L["PrivacyPolicy"] : L["TermsAndConditions"])
+                </span>
+                <span class="badge @(IsUsingCustomText() ? "bg-success" : "bg-warning text-dark") ms-2">
+                    @(IsUsingCustomText() ? "Custom Document (In Database)" : "Using Default Template")
+                </span>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@(activeTab == "privacy" ? "/privacy" : "/terms")" target="_blank" class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                    <span class="material-symbols-outlined small me-1">open_in_new</span>
+                    <span>View Public Page</span>
+                </a>
+                <button type="button" class="btn btn-outline-warning btn-sm d-flex align-items-center" @onclick="ResetToDefault">
+                    <span class="material-symbols-outlined small me-1">restart_alt</span>
+                    <span>Reset to Default</span>
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <!-- Editor Column -->
+                <div class="col-lg-6">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-bold mb-0">Markdown / Content Editor</label>
+                        <span class="form-text text-muted small">Supports Markdown formatting &amp; HTML</span>
+                    </div>
+
+                    <textarea class="form-control font-monospace" rows="22" 
+                              style="font-size: 0.875rem; line-height: 1.5;"
+                              value="@currentContent" 
+                              @oninput="OnContentChanged"></textarea>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+                        <button type="button" class="btn btn-primary d-flex align-items-center" @onclick="SaveDocument" disabled="@isSaving">
+                            <span class="material-symbols-outlined small me-1">save</span>
+                            <span>@(isSaving ? "Saving..." : "Save Changes")</span>
+                        </button>
+
+                        <div class="form-text text-muted small">
+                            Tip: Any bracketed items like <mark class="placeholder-highlight">[Company Name]</mark> will automatically be highlighted until replaced.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Column -->
+                <div class="col-lg-6">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-bold mb-0">Live Preview</label>
+                        <span class="badge bg-light text-muted border">Real-time render</span>
+                    </div>
+
+                    <div class="border rounded p-3 bg-light overflow-auto preview-pane" style="height: 520px;">
+                        <div class="legal-document-content">
+                            @((MarkupString)renderedPreview)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .legal-document-content {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: var(--on-surface, #1e293b);
+    }
+    .legal-document-content h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        padding-bottom: 0.35rem;
+        border-bottom: 1px solid #cbd5e1;
+    }
+    .legal-document-content h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .legal-document-content h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-top: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+    .legal-document-content p, .legal-document-content ul, .legal-document-content ol {
+        margin-bottom: 0.75rem;
+    }
+    .legal-document-content hr {
+        margin: 1.5rem 0;
+        border-color: #cbd5e1;
+    }
+    mark.placeholder-highlight, .legal-document-content mark {
+        background-color: #fef08a !important;
+        color: #854d0e !important;
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+        font-weight: 600;
+        border: 1px dashed #ca8a04;
+        display: inline-block;
+    }
+</style>
+
+@code {
+    [SupplyParameterFromQuery]
+    private string? Tab { get; set; }
+
+    private AppSettings? settings;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private string activeTab = "privacy";
+    private string currentContent = string.Empty;
+    private string renderedPreview = string.Empty;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+
+        if (!string.IsNullOrEmpty(Tab) && (Tab.ToLower() == "terms" || Tab.ToLower() == "privacy"))
+        {
+            activeTab = Tab.ToLower();
+        }
+
+        settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+        if (settings == null)
+        {
+            settings = new AppSettings();
+            DbContext.AppSettings.Add(settings);
+            await DbContext.SaveChangesAsync();
+        }
+
+        LoadTabContent();
+        isLoading = false;
+    }
+
+    private void SetTab(string tab)
+    {
+        activeTab = tab;
+        successMessage = null;
+        LoadTabContent();
+    }
+
+    private void LoadTabContent()
+    {
+        if (activeTab == "privacy")
+        {
+            currentContent = !string.IsNullOrWhiteSpace(settings?.PrivacyPolicy)
+                ? settings.PrivacyPolicy
+                : LegalDefaults.GetDefaultPrivacyPolicy();
+        }
+        else
+        {
+            currentContent = !string.IsNullOrWhiteSpace(settings?.TermsAndConditions)
+                ? settings.TermsAndConditions
+                : LegalDefaults.GetDefaultTermsAndConditions();
+        }
+
+        renderedPreview = LegalDefaults.RenderMarkdownToHtml(currentContent);
+    }
+
+    private bool IsUsingCustomText()
+    {
+        if (activeTab == "privacy")
+        {
+            return !string.IsNullOrWhiteSpace(settings?.PrivacyPolicy);
+        }
+        return !string.IsNullOrWhiteSpace(settings?.TermsAndConditions);
+    }
+
+    private void OnContentChanged(ChangeEventArgs e)
+    {
+        currentContent = e.Value?.ToString() ?? string.Empty;
+        renderedPreview = LegalDefaults.RenderMarkdownToHtml(currentContent);
+    }
+
+    private void ResetToDefault()
+    {
+        if (activeTab == "privacy")
+        {
+            currentContent = LegalDefaults.GetDefaultPrivacyPolicy();
+        }
+        else
+        {
+            currentContent = LegalDefaults.GetDefaultTermsAndConditions();
+        }
+        renderedPreview = LegalDefaults.RenderMarkdownToHtml(currentContent);
+        successMessage = "Loaded default template into editor. Click 'Save Changes' to update the database.";
+    }
+
+    private async Task SaveDocument()
+    {
+        if (settings == null) return;
+
+        isSaving = true;
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userName = authState.User.Identity?.Name ?? "Administrator";
+
+            if (activeTab == "privacy")
+            {
+                settings.PrivacyPolicy = currentContent;
+            }
+            else
+            {
+                settings.TermsAndConditions = currentContent;
+            }
+
+            settings.LastUpdated = DateTime.UtcNow;
+            settings.UpdatedBy = userName;
+
+            DbContext.AppSettings.Update(settings);
+            await DbContext.SaveChangesAsync();
+
+            var docName = activeTab == "privacy" ? "Privacy Policy" : "Terms and Conditions";
+            successMessage = $"{docName} successfully saved to database!";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}
