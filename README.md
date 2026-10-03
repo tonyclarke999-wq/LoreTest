@@ -1,9 +1,10 @@
-# LoreTest - Collaborative QA Testing Platform (v0.7)
+# LoreTest - Collaborative QA Testing Platform (v0.7.2)
 
 LoreTest is a modern, web-based platform designed for managing test projects, suites, and cases with integrated bug tracking and Jira support.
 
-📖 **Looking for API Reference?** Read the complete [REST API Reference & Usage Guide](LoreTest/Docs/api_documentation.md) to explore endpoints, roles, JWT authentication, and code usage examples.
-
+📊 **Automated Test Reports**: View live Allure test execution results at [GitHub Pages](https://tonyclarke999-wq.github.io/LoreTest/).  
+🔍 **Playwright Trace Viewer**: Inspect test step traces and recordings using [Playwright Trace Viewer](https://trace.playwright.dev/).  
+📖 **Looking for API Reference?** Read the complete [REST API Reference & Usage Guide](LoreTest/Docs/api_documentation.md) to explore endpoints, roles, JWT authentication, and code usage examples.  
 🛠️ **Installation Guide**: Need step-by-step setup instructions? Read the complete [LoreTest Setup & Installation Guide](LoreTest/Docs/setup_guide.md) to build from source or spin up using Docker Compose.
 
 ## 🚀 Quick Start (Docker)
@@ -120,10 +121,14 @@ dotnet user-secrets set "Jwt:Secret" "YourProductionSecureJWTKeyAtLeast32Chars!"
 ---
 
 ## 🛠 Features
-- **Dashboard**: Track active test runs and weekly progress at a glance.
-- **Jira Integration**: Automatically create bugs and link them to Jira tickets.
-- **Audit Logging**: Full traceability for all data changes.
+- **Dashboard & Analytics**: Track active test runs, weekly progress, and real-time execution statistics.
+- **Jira Integration**: Automatically create bugs and link them directly to Jira tickets.
+- **Configurable Legal Documents**: Built-in Privacy Policy and Terms & Conditions with admin management, database persistence, and highlighted placeholders for self-hosted instances.
+- **Audit Logging**: Full EF Core change traceability and audit trails for all sensitive operations.
 - **Multi-language Support**: Dynamic localization for global teams.
+- **Accessibility**: WCAG 2.2 AA compliant contrast, semantics, and keyboard navigation.
+- **Observability Stack**: Prometheus metrics and Grafana dashboards via container stats export.
+- **Modern CI/CD Pipeline**: GitHub Actions running on Node.js 24 runtime, automated testing, container deployment, Playwright end-to-end suites, and GitHub Pages Allure reporting.
 
 ## 📄 License
 Licensed under the [MIT License](LICENSE.txt).

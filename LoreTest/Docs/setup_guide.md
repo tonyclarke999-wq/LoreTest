@@ -78,7 +78,7 @@ Clone the repository from GitHub:
 git clone https://github.com/tonyclarke999-wq/LoreTest.git
 cd LoreTest
 ```
-*(Alternatively, you can extract the release ZIP archive `loretest-v0.6.zip` to a folder of your choice.)*
+*(Alternatively, you can extract the release ZIP archive `loretest-v0.7.2.zip` to a folder of your choice.)*
 
 ### Step 2: Spin up a Local Database
 LoreTest requires a PostgreSQL instance. You can easily start one using Docker:
@@ -118,6 +118,15 @@ If you wish to test different permission levels:
 
 ---
 
+## 📜 Legal Policies & Compliance (Privacy & Terms)
+
+LoreTest includes built-in Privacy Policy and Terms and Conditions pages:
+- **Public Access**: Visitors can access `/privacy` and `/terms` directly from the Login page or footer.
+- **Admin Configuration**: Administrators can customize the text, apply company details, or reset to standard open-source templates under **Administration > Legal Documents** (`/admin/legal`).
+- All changes are stored in the PostgreSQL database with full audit logging.
+
+---
+
 ## 🛠️ Verification & Troubleshooting
 
 ### "Failed to connect to PostgreSQL..."
@@ -131,4 +140,4 @@ To confirm that your C# compilation is fully correct and ready:
 ```bash
 dotnet test LoreTest.Tests/LoreTest.Tests.csproj
 ```
-This will compile and run the 24 unit and integration tests, skipping the live database seeder test cleanly.
+This will compile and run the 31 unit and integration tests, skipping the live database seeder test cleanly.

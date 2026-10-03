@@ -163,6 +163,7 @@ else
 
         DbContext.AppSettings.Update(settings);
         await DbContext.SaveChangesAsync();
+        successMessage = "Settings saved successfully.";
         
         NavigationManager.NavigateTo("/");
     }

@@ -160,13 +160,20 @@ else
     {
         if (!canEdit || testCase == null) return;
 
-        newStep.Description = await JSRuntime.InvokeAsync<string>("getQuillContent", editorDescription);
-        newStep.ExpectedResult = await JSRuntime.InvokeAsync<string>("getQuillContent", editorExpectedResult);
-        newStep.TestCaseId = TestCaseId;
+        try
+        {
+            newStep.Description = await JSRuntime.InvokeAsync<string>("getQuillContent", editorDescription);
+            newStep.ExpectedResult = await JSRuntime.InvokeAsync<string>("getQuillContent", editorExpectedResult);
+            newStep.TestCaseId = TestCaseId;
 
-        DbContext.TestSteps.Add(newStep);
-        await DbContext.SaveChangesAsync();
+            DbContext.TestSteps.Add(newStep);
+            await DbContext.SaveChangesAsync();
 
-        NavigationManager.NavigateTo($"/testcases/details/{TestCaseId}?tab=steps");
+            NavigationManager.NavigateTo($"/testcases/details/{TestCaseId}?tab=steps");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred while saving the test step: {ex.Message}";
+        }
     }
 }

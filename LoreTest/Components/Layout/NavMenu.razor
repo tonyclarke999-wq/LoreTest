@@ -71,31 +71,11 @@
 
 @code {
     private string? currentUrl;
-    private bool registrationDisabled = false;
 
-    [Inject]
-    private IDbContextFactory<ApplicationDbContext> DbFactory { get; set; } = default!;
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
-
-        using var dbContext = await DbFactory.CreateDbContextAsync();
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        var validAdmins = await dbContext.Users
-            .Where(u => u.Role == "Administrator")
-            .ToListAsync();
-            
-        var currentAdmins = validAdmins.Where(u => 
-            (u.StartDate == null || u.StartDate <= today) && 
-            (u.EndDate == null || u.EndDate >= today))
-            .ToList();
-
-        if (currentAdmins.Any())
-        {
-            registrationDisabled = true;
-        }
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)

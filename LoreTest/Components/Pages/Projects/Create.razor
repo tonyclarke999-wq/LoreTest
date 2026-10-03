@@ -24,14 +24,14 @@
 
             <div class="mb-3">
                 <label for="title" class="form-label">@L["Title"]</label>
-                <InputText id="title" @bind-Value="Input.Title" class="form-control" />
-                <ValidationMessage For="() => Input.Title" class="text-danger" />
+                <InputText id="title" @bind-Value="Input!.Title" class="form-control" />
+                <ValidationMessage For="() => Input!.Title" class="text-danger" />
             </div>
             
             <div class="mb-3">
                 <label for="jiraReference" class="form-label">Jira Reference (e.g. PROJ-123)</label>
                 <div class="input-group">
-                    <InputText id="jiraReference" @bind-Value="Input.JiraReference" class="form-control" placeholder="PROJ-123" />
+                    <InputText id="jiraReference" @bind-Value="Input!.JiraReference" class="form-control" placeholder="PROJ-123" />
                     <button type="button" class="btn btn-outline-secondary" @onclick="FetchJiraDetails" disabled="@isFetchingJira">
                         @if (isFetchingJira) {
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -40,7 +40,7 @@
                         }
                     </button>
                 </div>
-                <ValidationMessage For="() => Input.JiraReference" class="text-danger" />
+                <ValidationMessage For="() => Input!.JiraReference" class="text-danger" />
                 @if (!string.IsNullOrWhiteSpace(jiraUrl))
                 {
                     <div class="mt-2">

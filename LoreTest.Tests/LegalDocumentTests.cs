@@ -47,10 +47,10 @@ namespace LoreTest.Tests
 
             // Assert
             Assert.IsFalse(string.IsNullOrWhiteSpace(privacyText));
-            Assert.IsTrue(privacyText.Contains("Self-Hosted Instance"));
-            Assert.IsTrue(privacyText.Contains("MIT License"));
-            Assert.IsTrue(privacyText.Contains("<mark>[Organization / Company Name]</mark>"));
-            Assert.IsTrue(privacyText.Contains("Data Controller"));
+            Assert.Contains("Self-Hosted Instance", privacyText);
+            Assert.Contains("MIT License", privacyText);
+            Assert.Contains("<mark>[Organization / Company Name]</mark>", privacyText);
+            Assert.Contains("Data Controller", privacyText);
         }
 
         [TestMethod]
@@ -61,10 +61,10 @@ namespace LoreTest.Tests
 
             // Assert
             Assert.IsFalse(string.IsNullOrWhiteSpace(termsText));
-            Assert.IsTrue(termsText.Contains("Self-Hosted Instance"));
-            Assert.IsTrue(termsText.Contains("MIT License"));
-            Assert.IsTrue(termsText.Contains("AS IS"));
-            Assert.IsTrue(termsText.Contains("<mark>[Organization / Company Name]</mark>"));
+            Assert.Contains("Self-Hosted Instance", termsText);
+            Assert.Contains("MIT License", termsText);
+            Assert.Contains("AS IS", termsText);
+            Assert.Contains("<mark>[Organization / Company Name]</mark>", termsText);
         }
 
         [TestMethod]
@@ -77,10 +77,10 @@ namespace LoreTest.Tests
             var html = LegalDefaults.RenderMarkdownToHtml(inputMarkdown);
 
             // Assert
-            Assert.IsTrue(html.Contains("<h2"));
-            Assert.IsTrue(html.Contains("Policy for"));
-            Assert.IsTrue(html.Contains("<mark class=\"placeholder-highlight\">[Acme Corp]</mark>"));
-            Assert.IsTrue(html.Contains("<mark class=\"placeholder-highlight\">[admin@acme.com]</mark>"));
+            Assert.Contains("<h2", html);
+            Assert.Contains("Policy for", html);
+            Assert.Contains("<mark class=\"placeholder-highlight\">[Acme Corp]</mark>", html);
+            Assert.Contains("<mark class=\"placeholder-highlight\">[admin@acme.com]</mark>", html);
         }
 
         [TestMethod]
