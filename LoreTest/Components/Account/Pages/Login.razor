@@ -1,73 +1,86 @@
-﻿@page "/Account/Login"
+@namespace LoreTest.Components.Account.Pages
+@page "/Account/Login"
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
 @using LoreTest.Data
+@using Microsoft.AspNetCore.Localization
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject IStringLocalizer<SharedResource> L
+@inject LoreTest.Utilities.UserActivityService ActivityService
 
-<PageTitle>Log in</PageTitle>
+<PageTitle>@L["LoginTitle"]</PageTitle>
 
-<h1>Log in</h1>
-<div class="row">
-    <div class="col-lg-6">
-        <section>
-            <StatusMessage Message="@errorMessage" />
-            <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator />
-                <h2>Use a local account to log in.</h2>
-                <hr />
-                <ValidationSummary class="text-danger" role="alert" />
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username webauthn" aria-required="true" placeholder="name@example.com" />
-                    <label for="Input.Email" class="form-label">Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+<div class="row justify-content-center pt-2 pt-md-3 pb-3">
+    <div class="col-12 col-md-7 col-lg-5 col-xl-4">
+        <div class="text-center mb-3">
+            <div class="headline-md mb-1">@L["LoginTitle"]</div>
+            <div class="body-sm text-muted">@L["UseLocalAccount"]</div>
+        </div>
+
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="card-body p-3 p-md-4">
+                <StatusMessage Message="@errorMessage" />
+                <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger mb-3" role="alert" />
+                    
+                    <div class="form-floating mb-2">
+                        <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username webauthn" aria-required="true" placeholder="name@example.com" />
+                        <label for="Input.Email" class="form-label">@L["Email"]</label>
+                        <ValidationMessage For="() => Input.Email" class="text-danger" />
+                    </div>
+                    
+                    <div class="form-floating mb-2">
+                        <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                        <label for="Input.Password" class="form-label">@L["Password"]</label>
+                        <ValidationMessage For="() => Input.Password" class="text-danger" />
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="form-check mb-0">
+                            <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" id="rememberMe" />
+                            <label class="form-check-label body-sm" for="rememberMe">
+                                @L["RememberMe"]
+                            </label>
+                        </div>
+                        <a href="Account/ForgotPassword" class="body-xs text-decoration-none">@L["ForgotPasswordLink"]</a>
+                    </div>
+                    
+                    <button type="submit" class="w-100 btn btn-primary py-2 fw-bold">@L["LoginButton"]</button>
+                    
+                    <div class="d-flex justify-content-center align-items-center gap-1 mt-3 pt-2 border-top">
+                        <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email" class="btn btn-link body-xs text-decoration-none p-0 d-inline-flex align-items-center">
+                            <span class="material-symbols-outlined small me-1" style="font-size: 16px;">fingerprint</span>
+                            <span>@L["LoginWithPasskey"]</span>
+                        </PasskeySubmit>
+                    </div>
+                </EditForm>
+            </div>
+            <div class="card-footer bg-light border-0 py-2 px-3 text-center">
+                <div class="d-flex justify-content-center gap-3 body-sm">
+                    <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))" class="text-decoration-none">@L["RegisterAsNewUser"]</a>
+                    <span class="text-muted opacity-25">|</span>
+                    <a href="Account/ResendEmailConfirmation" class="text-decoration-none text-muted">@L["ResendEmailConfirmation"]</a>
                 </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label for="Input.Password" class="form-label">Password</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger" />
-                </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
-                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
-                        Remember me
-                    </label>
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <hr />
-                <div class="d-flex flex-column">
-                    <span class="text-secondary mx-auto mt-2">OR</span>
-                    <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email" class="btn btn-link mx-auto">Log in with a passkey</PasskeySubmit>
-                </div>
-                <hr />
-                <div>
-                    <p>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </EditForm>
-        </section>
-    </div>
-    <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
+            </div>
+        </div>
+
+        <div class="mt-3 text-center">
+            <div class="d-flex justify-content-center gap-3">
+                <a href="privacy" target="_blank" class="body-xs text-decoration-none text-muted">@(L["PrivacyPolicy"] == "PrivacyPolicy" ? "Privacy Policy" : L["PrivacyPolicy"])</a>
+                <span class="text-muted opacity-25">•</span>
+                <a href="terms" target="_blank" class="body-xs text-decoration-none text-muted">@(L["TermsAndConditions"] == "TermsAndConditions" ? "Terms & Conditions" : L["TermsAndConditions"])</a>
+            </div>
+        </div>
+
+        <ExternalLoginPicker />
     </div>
 </div>
 
@@ -121,12 +134,29 @@
 
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-            result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+            result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
         }
 
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in.");
+            
+            // Set the culture cookie based on user preference and log user activity
+            var user = await UserManager.FindByEmailAsync(Input.Email);
+            if (user != null)
+            {
+                await ActivityService.LogActivityAsync(user.UserName, user.Id, "Login", "User logged in via local credentials or passkey");
+
+                if (!string.IsNullOrEmpty(user.PreferredLanguage))
+                {
+                    HttpContext.Response.Cookies.Append(
+                        CookieRequestCultureProvider.DefaultCookieName,
+                        CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(user.PreferredLanguage)),
+                        new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+                    );
+                }
+            }
+            
             RedirectManager.RedirectTo(ReturnUrl);
         }
         else if (result.RequiresTwoFactor)

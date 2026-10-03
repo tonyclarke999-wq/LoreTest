@@ -1,3 +1,4 @@
+#nullable enable
 namespace LoreTest.Components.Account
 {
     public class PasskeyInputModel

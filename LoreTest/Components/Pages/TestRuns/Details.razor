@@ -8,24 +8,25 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Test Run Details</PageTitle>
+<PageTitle>@L["TestRunDetails"]</PageTitle>
 
 @if (testRun == null)
 {
-    <p><em>Loading details...</em></p>
+    <p><em>@L["LoadingDetails"]</em></p>
 }
 else
 {
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Run #@testRun.RunNumber Details</h1>
+        <h1>@string.Format(L["RunDetailsPrefix"], testRun.RunNumber)</h1>
         <div>
             @if (testRun.Status != "Completed" && canEdit)
             {
-                <a href="/testruns/execute/@testRun.Id" class="btn btn-success">Resume Execution</a>
+                <a href="/testruns/execute/@testRun.Id" class="btn btn-success">@L["ResumeExecution"]</a>
             }
-            <a href="/testruns" class="btn btn-secondary ms-2">Back to List</a>
+            <a href="/testruns" class="btn btn-secondary ms-2">@L["BackToList"]</a>
         </div>
     </div>
 
@@ -33,33 +34,33 @@ else
         <div class="col-md-4">
             <div class="card h-100 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Summary</h5>
+                    <h5 class="mb-0">@L["Summary"]</h5>
                 </div>
                 <div class="card-body">
                     <dl class="row mb-0">
-                        <dt class="col-sm-5">Project:</dt>
+                        <dt class="col-sm-5">@L["Project"]:</dt>
                         <dd class="col-sm-7">@testRun.Project?.Title</dd>
                         
-                        <dt class="col-sm-5">Suite:</dt>
+                        <dt class="col-sm-5">@L["Suite"]:</dt>
                         <dd class="col-sm-7">@testRun.TestSuite?.Title</dd>
                         
-                        <dt class="col-sm-5">Status:</dt>
+                        <dt class="col-sm-5">@L["Status"]:</dt>
                         <dd class="col-sm-7">
-                             <span class="badge @(testRun.Status == "Completed" ? "bg-success" : "bg-warning text-dark")">@testRun.Status</span>
+                             <span class="badge @(testRun.Status == "Completed" ? "bg-success" : "bg-warning text-dark")">@L[testRun.Status ?? "Pending"]</span>
                         </dd>
                         
-                        <dt class="col-sm-5">Started By:</dt>
+                        <dt class="col-sm-5">@L["StartedBy"]:</dt>
                         <dd class="col-sm-7">@testRun.User?.Name</dd>
                         
-                        <dt class="col-sm-5">Started:</dt>
+                        <dt class="col-sm-5">@L["Started"]:</dt>
                         <dd class="col-sm-7 small">@testRun.StartTime.ToLocalTime().ToString("g")</dd>
                         
                         @if (testRun.EndTime.HasValue)
                         {
-                            <dt class="col-sm-5">Finished:</dt>
+                            <dt class="col-sm-5">@L["Finished"]:</dt>
                             <dd class="col-sm-7 small">@testRun.EndTime.Value.ToLocalTime().ToString("g")</dd>
                             
-                            <dt class="col-sm-5">Duration:</dt>
+                            <dt class="col-sm-5">@L["Duration"]:</dt>
                             <dd class="col-sm-7 small">@((testRun.EndTime.Value - testRun.StartTime).ToString(@"hh\:mm\:ss"))</dd>
                         }
                     </dl>
@@ -76,24 +77,24 @@ else
                         var pendingCases = totalCases - passedCases - failedCases;
                         var passRate = totalCases > 0 ? (int)((double)passedCases / totalCases * 100) : 0;
                     }
-                    <h2 class="display-4 fw-bold @(passRate == 100 ? "text-success" : passRate > 50 ? "text-warning" : "text-danger")">@passRate% Pass Rate</h2>
+                    <h2 class="display-4 fw-bold @(passRate == 100 ? "text-success" : passRate > 50 ? "text-warning" : "text-danger")">@string.Format(L["PassRate"], passRate)</h2>
                     <div class="progress mt-3 mb-4" style="height: 30px;">
-                        <div class="progress-bar bg-success" style="width: @(totalCases > 0 ? passedCases * 100 / totalCases : 0)%">@passedCases Pass</div>
-                        <div class="progress-bar bg-danger" style="width: @(totalCases > 0 ? failedCases * 100 / totalCases : 0)%">@failedCases Fail</div>
-                        <div class="progress-bar bg-secondary" style="width: @(totalCases > 0 ? pendingCases * 100 / totalCases : 0)%">@pendingCases Other</div>
+                        <div class="progress-bar bg-success" style="width: @(totalCases > 0 ? passedCases * 100 / totalCases : 0)%">@string.Format(L["PassSummary"], passedCases)</div>
+                        <div class="progress-bar bg-danger" style="width: @(totalCases > 0 ? failedCases * 100 / totalCases : 0)%">@string.Format(L["FailSummary"], failedCases)</div>
+                        <div class="progress-bar bg-secondary" style="width: @(totalCases > 0 ? pendingCases * 100 / totalCases : 0)%">@pendingCases @L["Other"]</div>
                     </div>
                     <div class="row mt-2">
                         <div class="col">
                             <h4 class="mb-0 text-success">@passedCases</h4>
-                            <small class="text-muted">PASSED</small>
+                            <small class="text-muted">@L["PassedUpper"]</small>
                         </div>
                         <div class="col">
                             <h4 class="mb-0 text-danger">@failedCases</h4>
-                            <small class="text-muted">FAILED</small>
+                            <small class="text-muted">@L["FailedUpper"]</small>
                         </div>
                         <div class="col">
                             <h4 class="mb-0 text-secondary">@totalCases</h4>
-                            <small class="text-muted">TOTAL CASES</small>
+                            <small class="text-muted">@L["TotalCasesUpper"]</small>
                         </div>
                     </div>
                 </div>
@@ -101,7 +102,7 @@ else
         </div>
     </div>
 
-    <h3>Case Details</h3>
+    <h3>@L["CaseDetails"]</h3>
     @foreach (var cr in testRun.CaseResults)
     {
         <div class="card mb-3 border-start border-4 @(cr.Status == "Pass" ? "border-success" : cr.Status == "Fail" ? "border-danger" : "border-warning")">
@@ -110,10 +111,16 @@ else
                     <span class="me-2">@(collapsedCases.Contains(cr.Id) ? "▶" : "▼")</span>
                     @cr.TestCase?.Title
                 </h5>
-                <div>
-                    @if (cr.Status == "Pass") { <span class="badge bg-success">PASS</span> }
-                    else if (cr.Status == "Fail") { <span class="badge bg-danger">FAIL</span> }
-                    else { <span class="badge bg-warning text-dark">@cr.Status</span> }
+                <div class="d-flex align-items-center">
+                    @if (canEdit)
+                    {
+                        <button class="btn btn-sm btn-warning me-3" @onclick:stopPropagation="true" @onclick="() => OpenBugModal(cr)">
+                            <i class="bi bi-bug-fill"></i> @L["ReportBug"]
+                        </button>
+                    }
+                    @if (cr.Status == "Pass") { <span class="badge bg-success">@L["PASS"]</span> }
+                    else if (cr.Status == "Fail") { <span class="badge bg-danger">@L["FAIL"]</span> }
+                    else { <span class="badge bg-warning text-dark">@L[cr.Status ?? "Pending"]</span> }
                 </div>
             </div>
             
@@ -124,10 +131,10 @@ else
                         <thead class="table-light">
                             <tr>
                                 <th style="width: 5%">#</th>
-                                <th style="width: 30%">Step Description</th>
-                                <th style="width: 25%">Expected Result</th>
-                                <th style="width: 25%">Actual Result</th>
-                                <th style="width: 15%">Status</th>
+                                <th style="width: 30%">@L["StepDescription"]</th>
+                                <th style="width: 25%">@L["ExpectedResult"]</th>
+                                <th style="width: 25%">@L["ActualResult"]</th>
+                                <th style="width: 15%">@L["Status"]</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -154,16 +161,16 @@ else
                                         {
                                             <select class="form-select form-select-sm @(sr.Status == "Pass" ? "text-success fw-bold" : sr.Status == "Fail" ? "text-danger fw-bold" : "")" 
                                                     @bind="sr.Status" @bind:after="SaveChangesAsync">
-                                                <option value="Not Run">Not Run</option>
-                                                <option value="Pass">Pass</option>
-                                                <option value="Fail">Fail</option>
+                                                <option value="Not Run">@L["NotRun"]</option>
+                                                <option value="Pass">@L["Pass"]</option>
+                                                <option value="Fail">@L["Fail"]</option>
                                             </select>
                                         }
                                         else
                                         {
-                                            @if (sr.Status == "Pass") { <span class="text-success fw-bold">✔ PASS</span> }
-                                            else if (sr.Status == "Fail") { <span class="text-danger fw-bold">✘ FAIL</span> }
-                                            else { <span class="text-muted">@sr.Status</span> }
+                                            @if (sr.Status == "Pass") { <span class="text-success fw-bold">✔ @L["PASS"]</span> }
+                                            else if (sr.Status == "Fail") { <span class="text-danger fw-bold">✘ @L["FAIL"]</span> }
+                                            else { <span class="text-muted">@L[sr.Status ?? "NotRun"]</span> }
                                         }
                                     </td>
                                 </tr>
@@ -176,12 +183,56 @@ else
     }
 }
 
+@if (showBugModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg shadow-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="bi bi-bug-fill me-2"></i>@L["ReportBugFromTestResult"]</h5>
+                    <button type="button" class="btn-close" @onclick="() => showBugModal = false" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">@L["Title"]</label>
+                        <input type="text" class="form-control" @bind="newBug.Title" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">@L["DescriptionReproSteps"]</label>
+                        <textarea class="form-control" rows="5" @bind="newBug.Description"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">@L["Severity"]</label>
+                            <select class="form-select" @bind="newBug.Severity">
+                                @foreach (var val in Enum.GetValues<BugSeverity>()) { <option value="@val">@L[val.ToString()]</option> }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">@L["Priority"]</label>
+                            <select class="form-select" @bind="newBug.Priority">
+                                @foreach (var val in Enum.GetValues<BugPriority>()) { <option value="@val">@L[val.ToString()]</option> }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showBugModal = false">@L["Cancel"]</button>
+                    <button type="button" class="btn btn-warning" @onclick="SaveBug">@L["SaveBugReport"]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [Parameter] public int Id { get; set; }
 
     private TestRun? testRun;
     private bool canEdit = false;
     private HashSet<int> collapsedCases = new();
+    private bool showBugModal = false;
+    private Bug newBug = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -225,5 +276,38 @@ else
         {
             await DbContext.SaveChangesAsync();
         }
+    }
+
+    private void OpenBugModal(TestRunCaseResult cr)
+    {
+        var failedSteps = cr.StepResults.Where(s => s.Status == "Fail").ToList();
+        var reproSteps = string.Join("\n", failedSteps.Select((s, i) => $"{i + 1}. {s.TestStep?.Description} (Actual: {s.ActualResult})"));
+
+        newBug = new Bug
+        {
+            Title = $"Bug in {cr.TestCase?.Title}",
+            Description = $"Found in Run #{testRun?.RunNumber}.\n\nTest Case: {cr.TestCase?.Title}\n\nFailed Steps:\n{reproSteps}",
+            ExpectedResult = string.Join("\n", failedSteps.Select(s => s.TestStep?.ExpectedResult)),
+            ActualResult = string.Join("\n", failedSteps.Select(s => s.ActualResult)),
+            Status = BugStatus.Open,
+            Severity = BugSeverity.Major,
+            Priority = BugPriority.Medium,
+            ReportedDate = DateTime.UtcNow
+        };
+        showBugModal = true;
+    }
+
+    private async Task SaveBug()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user != null)
+        {
+            newBug.ReporterId = user.Id;
+        }
+
+        DbContext.Bugs.Add(newBug);
+        await DbContext.SaveChangesAsync();
+        showBugModal = false;
     }
 }

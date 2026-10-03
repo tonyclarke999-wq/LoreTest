@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Version History - Requirement #{{ requirement.reqid }} - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Version History</h1>
+            <p class="subtitle">Requirement #{{ requirement.reqid }} — {{ requirement.reqname }}</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <a href="{{ path('app_project_requirement_add_version', {id: project.project_id, reqId: requirement.reqid}) }}" class="btn-primary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.875rem;">+ Add New Version</a>
+            <a href="{{ path('app_project_requirement_detail', {id: project.project_id, reqId: requirement.reqid}) }}" class="badge badge-blue" style="text-decoration: none; display: flex; align-items: center;">Back to Detail</a>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    {% if versions|length > 0 %}
+    <table>
+        <thead>
+            <tr>
+                <th>Version</th>
+                <th>Status</th>
+                <th>Author</th>
+                <th>Created</th>
+                <th>Assigned To</th>
+                <th>Release</th>
+                <th>Reason for Change</th>
+                <th>Current</th>
+                <th width="100">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ver in versions %}
+            <tr {% if ver.latest == 'Y' %}style="background: rgba(99, 102, 241, 0.08);"{% endif %}>
+                <td>
+                    <span class="badge badge-blue" style="font-size: 0.85rem;">v{{ ver.version }}</span>
+                </td>
+                <td>
+                    {% set status_class = 'badge-yellow' %}
+                    {% if ver.status == 'Approved' %}{% set status_class = 'badge-green' %}
+                    {% elseif ver.status == 'Draft' %}{% set status_class = 'badge-blue' %}
+                    {% elseif ver.status == 'Rejected' %}{% set status_class = 'badge-red' %}
+                    {% endif %}
+                    <span class="badge {{ status_class }}">{{ ver.status|default('—') }}</span>
+                </td>
+                <td>{{ ver.author }}</td>
+                <td style="font-size: 0.85rem; color: var(--text-muted);">{{ ver.timestamp }}</td>
+                <td>{{ ver.assignedto|default('—') }}</td>
+                <td>
+                    {% if ver.release_names %}
+                        <span class="badge badge-green" style="font-size: 0.7rem;">{{ ver.release_names }}</span>
+                    {% else %}
+                        <span style="color: var(--text-muted);">—</span>
+                    {% endif %}
+                </td>
+                <td style="font-size: 0.85rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ ver.reasonforchange }}">
+                    {{ ver.reasonforchange|default('—') }}
+                </td>
+                <td>
+                    {% if ver.latest == 'Y' %}
+                        <span class="badge badge-green">✓ Latest</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path('app_project_requirement_version_view', {id: project.project_id, reqId: requirement.reqid, versionId: ver.reqversionid}) }}" class="badge badge-blue" style="text-decoration: none;">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <p>No versions found.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,362 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Defect #{{ bug.bugid }} - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <h1>Defect #{{ bug.bugid }}</h1>
+                {% set status_class = 'badge-blue' %}
+                {% if bug.status == 'Closed' or bug.status == 'Resolved' %}{% set status_class = 'badge-green' %}
+                {% elseif bug.status == 'Confirmed' or bug.status == 'WIP' %}{% set status_class = 'badge-yellow' %}
+                {% endif %}
+                <span class="badge {{ status_class }}" style="font-size: 0.9rem; padding: 0.3rem 0.8rem;">{{ bug.status }}</span>
+
+                {% set priority_class = 'badge-blue' %}
+                {% if bug.priority == 'Immediate' %}{% set priority_class = 'badge-red' %}
+                {% elseif bug.priority == 'High' %}{% set priority_class = 'badge-yellow' %}
+                {% endif %}
+                <span class="badge {{ priority_class }}" style="font-size: 0.9rem; padding: 0.3rem 0.8rem;">Priority: {{ bug.priority }}</span>
+
+                {% set severity_class = 'badge-blue' %}
+                {% if bug.severity == 'Blocker' or bug.severity == 'Critical' %}{% set severity_class = 'badge-red' %}
+                {% elseif bug.severity == 'Major' %}{% set severity_class = 'badge-yellow' %}
+                {% endif %}
+                <span class="badge {{ severity_class }}" style="font-size: 0.9rem; padding: 0.3rem 0.8rem;">Severity: {{ bug.severity }}</span>
+            </div>
+            <h2 style="font-size: 1.5rem; color: #e2e8f0; font-weight: 600; margin-top: 0.25rem;">{{ bug.summary }}</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{{ path('app_project_bug_edit', {id: project.project_id, bugId: bug.bugid}) }}" class="badge badge-yellow" style="text-decoration: none; font-size: 0.9rem; padding: 0.5rem 1rem; display: flex; align-items: center;">✏️ Edit Defect</a>
+            <form action="{{ path('app_project_bug_delete', {id: project.project_id, bugId: bug.bugid}) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this defect? All audit history and attached files will be unlinked.');" style="margin: 0;">
+                <button type="submit" class="badge badge-red" style="border: none; cursor: pointer; font-family: inherit; font-size: 0.9rem; padding: 0.5rem 1rem;">🗑️ Delete Defect</button>
+            </form>
+            <a href="{{ path('app_project_bugs', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; font-size: 0.9rem; padding: 0.5rem 1rem; display: flex; align-items: center;">⬅ Back to List</a>
+        </div>
+    </div>
+</div>
+
+{# Quick Action Toolbar #}
+<div class="project-card" style="max-width: 1200px; margin-bottom: 2rem; padding: 1.25rem 1.75rem;">
+    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary);">⚡ Quick Defect Dispatch Actions</h3>
+    <div style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: center;">
+        <form action="{{ path('app_project_bug_action', {id: project.project_id, bugId: bug.bugid}) }}" method="post" style="display: flex; gap: 0.5rem; align-items: center; margin: 0;">
+            <input type="hidden" name="action_type" value="update_assign_to">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Assign QA:</span>
+            <select name="assignedto" class="form-control" style="width: 180px; padding: 0.35rem 0.75rem; font-size: 0.85rem;">
+                <option value="">— Unassigned —</option>
+                {% for u in lookups.users %}
+                    <option value="{{ u.username }}" {% if bug.assignedto == u.username %}selected{% endif %}>{{ u.username }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="badge badge-blue" style="border: none; cursor: pointer; padding: 0.4rem 0.8rem;">Update</button>
+        </form>
+
+        <form action="{{ path('app_project_bug_action', {id: project.project_id, bugId: bug.bugid}) }}" method="post" style="display: flex; gap: 0.5rem; align-items: center; margin: 0;">
+            <input type="hidden" name="action_type" value="update_assign_to_developer">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Assign Dev:</span>
+            <select name="assignedtodeveloper" class="form-control" style="width: 180px; padding: 0.35rem 0.75rem; font-size: 0.85rem;">
+                <option value="">— Unassigned —</option>
+                {% for u in lookups.users %}
+                    <option value="{{ u.username }}" {% if bug.assignedtodeveloper == u.username %}selected{% endif %}>{{ u.username }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="badge badge-blue" style="border: none; cursor: pointer; padding: 0.4rem 0.8rem;">Update</button>
+        </form>
+
+        <form action="{{ path('app_project_bug_action', {id: project.project_id, bugId: bug.bugid}) }}" method="post" style="display: flex; gap: 0.5rem; align-items: center; margin: 0;">
+            <input type="hidden" name="action_type" value="update_status">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Status:</span>
+            <select name="status" class="form-control" style="width: 150px; padding: 0.35rem 0.75rem; font-size: 0.85rem;">
+                <option value="New" {% if bug.status == 'New' %}selected{% endif %}>New</option>
+                <option value="Assigned" {% if bug.status == 'Assigned' %}selected{% endif %}>Assigned</option>
+                <option value="WIP" {% if bug.status == 'WIP' %}selected{% endif %}>WIP</option>
+                <option value="Confirmed" {% if bug.status == 'Confirmed' %}selected{% endif %}>Confirmed</option>
+                <option value="Resolved" {% if bug.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                <option value="Closed" {% if bug.status == 'Closed' %}selected{% endif %}>Closed</option>
+                <option value="Reopened" {% if bug.status == 'Reopened' %}selected{% endif %}>Reopened</option>
+            </select>
+            <button type="submit" class="badge badge-green" style="border: none; cursor: pointer; padding: 0.4rem 0.8rem;">Apply</button>
+        </form>
+    </div>
+</div>
+
+{# Core Defect Data Grid #}
+<div class="project-card" style="max-width: 1200px; margin-bottom: 2rem;">
+    <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Defect Overview Parameters</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
+        <div>
+            <h4 style="color: var(--primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem;">Categorization & Discovery</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Category:</span>
+                    <span style="font-weight: 500; color: #e2e8f0;">{{ bug.category_name|default('— Not Set —') }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Component:</span>
+                    <span style="font-weight: 500; color: #e2e8f0;">{{ bug.component_name|default('— Not Set —') }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Discovery Phase:</span>
+                    <span style="font-weight: 500; color: #e2e8f0;">{{ bug.discoveryperiod|default('System Testing') }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Closed Reason Code:</span>
+                    <span style="font-weight: 500; color: #e2e8f0;">{{ bug.closedreasoncode|default('— Not Closed / N/A —') }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Test Verification Link:</span>
+                    <span>
+                        {% if bug.testid > 0 %}
+                            <span class="badge badge-blue">Verification Run #{{ bug.testid }}</span>
+                        {% else %}
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">— None —</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Originating Requirement ID:</span>
+                    <span>
+                        {% if bug.reqid > 0 %}
+                            <a href="{{ path('app_project_requirement_detail', {id: project.project_id, reqId: bug.reqid}) }}" class="badge badge-purple" style="text-decoration: none;">Requirement #{{ bug.reqid }}</a>
+                        {% else %}
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">— None —</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h4 style="color: var(--primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem;">Ownership & Release Traceability</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Reported By:</span>
+                    <span style="font-weight: 500; color: #e2e8f0;">{{ bug.reporter }} <span style="color: var(--text-muted); font-size: 0.8rem;">({{ bug.reporteddate }})</span></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Assigned QA / Tester:</span>
+                    <span style="font-weight: 500; color: #e2e8f0;">{{ bug.assignedto|default('— Unassigned —') }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Assigned Developer:</span>
+                    <span style="font-weight: 500; color: #e2e8f0;">{{ bug.assignedtodeveloper|default('— Unassigned —') }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Found In Release:</span>
+                    <span style="font-weight: 500; color: #e2e8f0;">{{ bug.foundinrelease|default('— N/A —') }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Target Release (Fix By):</span>
+                    <span style="font-weight: 500; color: #e2e8f0;">{{ bug.assigntorelease|default('— Unassigned —') }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Implemented In Release:</span>
+                    <span style="font-weight: 500; color: #e2e8f0;">{{ bug.implementedinrelease|default('— Not Implemented —') }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Closed State:</span>
+                    <span>
+                        {% if bug.closed == 'Y' %}
+                            <span class="badge badge-green">Closed ({{ bug.closeddate|default('Date Unknown') }})</span>
+                        {% else %}
+                            <span class="badge badge-yellow">Open / Active</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08);">
+        <h4 style="color: var(--primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Detailed Steps to Reproduce & Description</h4>
+        <div style="background: rgba(15, 23, 42, 0.4); padding: 1.5rem; border-radius: 0.75rem; line-height: 1.6; white-space: pre-wrap; color: #e2e8f0; font-family: monospace; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.05);">{{ bug.description }}</div>
+    </div>
+</div>
+
+{# Supporting Asset Domain Grid #}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1200px; margin-bottom: 2rem;">
+    {# Defect Relationships #}
+    <div class="project-card" style="margin: 0;">
+        <h2 style="font-size: 1.25rem; margin-bottom: 1rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🔗 Defect Relationships</h2>
+        
+        <form action="{{ path('app_project_bug_action', {id: project.project_id, bugId: bug.bugid}) }}" method="post" style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem;">
+            <input type="hidden" name="action_type" value="add_relationship">
+            <input type="number" name="secondaryid" class="form-control" placeholder="Linked Bug ID" style="width: 130px; padding: 0.4rem 0.75rem; font-size: 0.85rem;" required>
+            <select name="relationshiptype" class="form-control" style="width: 150px; padding: 0.4rem 0.75rem; font-size: 0.85rem;" required>
+                <option value="Related To">Related To</option>
+                <option value="Duplicate Of">Duplicate Of</option>
+                <option value="Dependent On">Dependent On</option>
+                <option value="Parent Of">Parent Of</option>
+                <option value="Child Of">Child Of</option>
+            </select>
+            <button type="submit" class="btn-primary" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Link Defect</button>
+        </form>
+
+        {% if relationships|length > 0 %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Defect ID</th>
+                        <th>Type</th>
+                        <th>Summary</th>
+                        <th>Status</th>
+                        <th width="80">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rel in relationships %}
+                    <tr>
+                        <td style="font-weight: 600;"><a href="{{ path('app_project_bug_detail', {id: project.project_id, bugId: rel.secondaryid}) }}" style="color: var(--primary); text-decoration: none;">#{{ rel.secondaryid }}</a></td>
+                        <td><span class="badge badge-purple">{{ rel.relationshiptype }}</span></td>
+                        <td style="font-weight: 500;">{{ rel.summary }}</td>
+                        <td><span class="badge badge-blue">{{ rel.status }}</span></td>
+                        <td>
+                            <form action="{{ path('app_project_bug_action', {id: project.project_id, bugId: bug.bugid}) }}" method="post" onsubmit="return confirm('Remove relationship link?');" style="margin: 0;">
+                                <input type="hidden" name="action_type" value="delete_relationship">
+                                <input type="hidden" name="bugassocid" value="{{ rel.bugassocid }}">
+                                <button type="submit" class="badge badge-red" style="border: none; cursor: pointer;">Unlink</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding: 1.5rem 1rem; margin: 0;">
+            <p style="font-size: 0.9rem;">No related defects currently linked.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    {# Attached Files #}
+    <div class="project-card" style="margin: 0;">
+        <h2 style="font-size: 1.25rem; margin-bottom: 1rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">📁 Attached Screenshots & Files</h2>
+        
+        <form action="{{ path('app_project_bug_action', {id: project.project_id, bugId: bug.bugid}) }}" method="post" enctype="multipart/form-data" style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem;">
+            <input type="hidden" name="action_type" value="upload_file">
+            <input type="file" name="bug_file" class="form-control" style="padding: 0.3rem 0.75rem; font-size: 0.85rem;" required>
+            <button type="submit" class="btn-primary" style="padding: 0.4rem 1rem; font-size: 0.85rem; white-space: nowrap;">Attach File</button>
+        </form>
+
+        {% if files|length > 0 %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Uploaded By</th>
+                        <th>Date</th>
+                        <th width="100">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in files %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ f.displayname }}</td>
+                        <td>{{ f.uploadedby }}</td>
+                        <td style="font-size: 0.8rem; color: var(--text-muted);">{{ f.uploadeddate }}</td>
+                        <td>
+                            <a href="{{ path('app_project_bug_file_download', {id: project.project_id, fileId: f.bugfileid}) }}" class="badge badge-blue" style="text-decoration: none;" target="_blank">⬇ Download</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding: 1.5rem 1rem; margin: 0;">
+            <p style="font-size: 0.9rem;">No files or screenshots currently attached.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{# Bug Notes Threaded Discussions #}
+<div class="project-card" style="max-width: 1200px; margin-bottom: 2rem;">
+    <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">💬 Defect Notes & Discussion Log</h2>
+    
+    <form action="{{ path('app_project_bug_action', {id: project.project_id, bugId: bug.bugid}) }}" method="post" style="margin-bottom: 2.5rem;">
+        <input type="hidden" name="action_type" value="add_bugnote">
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <textarea name="bugnotedetail" class="form-control" style="min-height: 100px; padding: 0.75rem 1rem;" placeholder="Add a new observation, update, or comment to this defect log..." required></textarea>
+        </div>
+        <button type="submit" class="btn-primary" style="padding: 0.6rem 1.5rem; font-size: 0.9rem;">➕ Post Defect Note</button>
+    </form>
+
+    {% if notes|length > 0 %}
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for note in notes %}
+            <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 0.75rem; padding: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 2.25rem; height: 2.25rem; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 0.9rem;">
+                            {{ note.author[:2]|upper }}
+                        </div>
+                        <div>
+                            <span style="font-weight: 600; color: #e2e8f0; font-size: 0.95rem;">{{ note.author }}</span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.5rem;">posted at {{ note.datecreated }}</span>
+                        </div>
+                    </div>
+                    <form action="{{ path('app_project_bug_action', {id: project.project_id, bugId: bug.bugid}) }}" method="post" onsubmit="return confirm('Delete this note?');" style="margin: 0;">
+                        <input type="hidden" name="action_type" value="delete_bugnote">
+                        <input type="hidden" name="bugnoteid" value="{{ note.bugnoteid }}">
+                        <button type="submit" class="badge badge-red" style="border: none; cursor: pointer; padding: 0.3rem 0.6rem;">Delete</button>
+                    </form>
+                </div>
+                <div style="line-height: 1.6; color: #cbd5e1; white-space: pre-wrap; font-size: 0.95rem;">{{ note.bugnotedetail }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state" style="padding: 2rem 1rem; margin: 0;">
+            <p style="font-size: 0.95rem;">No discussion notes recorded yet. Be the first to post a note above!</p>
+        </div>
+    {% endif %}
+</div>
+
+{# Full Audit Trail History #}
+<div class="project-card" style="max-width: 1200px; margin-bottom: 3rem;">
+    <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">📜 Complete Parameter Audit History</h2>
+    
+    {% if history|length > 0 %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th width="180">Timestamp</th>
+                    <th width="150">Operator</th>
+                    <th width="180">Modified Parameter</th>
+                    <th>Previous Value</th>
+                    <th>New Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in history %}
+                <tr>
+                    <td style="font-size: 0.85rem; color: var(--text-muted);">{{ h.datemodified }}</td>
+                    <td style="font-weight: 500; color: #e2e8f0;">{{ h.username }}</td>
+                    <td><span class="badge badge-yellow">{{ h.field }}</span></td>
+                    <td style="color: #94a3b8; font-style: italic;">{{ h.oldvalue|default('—') }}</td>
+                    <td style="color: #10b981; font-weight: 500;">{{ h.newvalue|default('—') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding: 1.5rem 1rem; margin: 0;">
+        <p style="font-size: 0.9rem;">No parameter modifications logged yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

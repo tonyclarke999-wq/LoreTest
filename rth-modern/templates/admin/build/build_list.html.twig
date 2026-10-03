@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Builds for {{ release.releasename }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Builds: {{ release.releasename }}</h1>
+            <p class="subtitle">Managing {{ builds|length }} builds for this release</p>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{{ path('app_admin_releases') }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to Releases</a>
+            <a href="{{ path('app_admin_build_new', {releaseId: release.releaseid}) }}" class="btn-primary" style="text-decoration: none;">Add Build</a>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Build Name</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for build in builds %}
+            <tr>
+                <td style="color: var(--primary); font-weight: 600;">#{{ build.buildid }}</td>
+                <td style="font-weight: 500;">{{ build.buildname }}</td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">{{ build.datecreated }}</td>
+                <td style="display: flex; gap: 0.5rem;">
+                    <a href="{{ path('app_admin_build_edit', {id: build.buildid}) }}" class="badge badge-blue" style="text-decoration: none;">Edit</a>
+                    <form action="{{ path('app_admin_build_delete', {id: build.buildid}) }}" method="post" onsubmit="return confirm('Archive this build?');" style="margin: 0;">
+                        <button type="submit" class="badge badge-red" style="border: none; cursor: pointer; font-family: inherit; font-size: inherit;">Archive</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">No builds found for this release.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

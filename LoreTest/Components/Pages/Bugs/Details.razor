@@ -1,0 +1,201 @@
+@page "/bugs/details/{Id:int}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
+@inject ITranslationService TranslationService
+@attribute [Authorize]
+
+<PageTitle>@string.Format(L["BugDetailsTitle"], translatedTitle)</PageTitle>
+
+@if (bug == null)
+{
+    <p><em>@L["Loading"]</em></p>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>@string.Format(L["BugIdPrefix"], bug.Id) @translatedTitle</h1>
+        <div>
+            <a href="/bugs/edit/@bug.Id" class="btn btn-warning">@L["EditBug"]</a>
+            <a href="/bugs" class="btn btn-secondary">@L["BackToList"]</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    @L["DescriptionReproductionSteps"]
+                </div>
+                <div class="card-body">
+                    <p style="white-space: pre-wrap;">@translatedDescription</p>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">@L["ExpectedResult"]</div>
+                        <div class="card-body">
+                            <p style="white-space: pre-wrap;">@(translatedExpectedResult ?? L["NA"])</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">@L["ActualResult"]</div>
+                        <div class="card-body">
+                            <p style="white-space: pre-wrap;">@(translatedActualResult ?? L["NA"])</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(translatedResolution))
+            {
+                <div class="card mb-4 border-success">
+                    <div class="card-header bg-success text-white">@L["Resolution"]</div>
+                    <div class="card-body">
+                        <p style="white-space: pre-wrap;">@bug.Resolution</p>
+                    </div>
+                </div>
+            }
+
+            <div class="card mb-4">
+                <div class="card-header bg-light">@L["Attachments"]</div>
+                <div class="card-body">
+                    @if (!bug.Attachments.Any())
+                    {
+                        <p class="text-muted">@L["NoAttachmentsFound"]</p>
+                    }
+                    else
+                    {
+                        <div class="list-group">
+                            @foreach (var attachment in bug.Attachments)
+                            {
+                                <a href="@attachment.FilePath" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <i class="bi bi-file-earmark"></i> @attachment.FileName
+                                    </span>
+                                    <span class="badge bg-primary rounded-pill">@(attachment.FileSize / 1024) KB</span>
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-light">@L["Attributes"]</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        @L["Status"] <span class="badge bg-primary">@L[bug.Status.ToString()]</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        @L["Severity"] <span class="badge bg-danger">@L[bug.Severity.ToString()]</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        @L["Priority"] <span class="badge bg-warning text-dark">@L[bug.Priority.ToString()]</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>@L["Environment"]:</strong><br />
+                        <span class="text-muted small">@(bug.Environment ?? L["NotSpecified"])</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>@L["Components"]:</strong><br />
+                        <span class="text-muted small">@(bug.Components ?? L["None"])</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>@L["Labels"]:</strong><br />
+                        <span class="text-muted small">@(bug.Labels ?? L["None"])</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Project:</strong><br />
+                        <span class="text-muted small">@(bug.Project?.Title ?? "None")</span>
+                    </li>
+                    @if (!string.IsNullOrEmpty(bug.JiraBugReference) && !string.IsNullOrEmpty(jiraBaseUrl))
+                    {
+                        <li class="list-group-item">
+                            <strong>Jira Ticket:</strong><br />
+                            <a href="@($"{jiraBaseUrl.TrimEnd('/')}/browse/{bug.JiraBugReference}")" target="_blank" class="small">
+                                @bug.JiraBugReference
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-light">@L["PeopleAndDates"]</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>@L["Reporter"]:</strong><br />
+                        <span class="text-muted">@(bug.Reporter?.UserName ?? L["Unknown"])</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>@L["Assignee"]:</strong><br />
+                        <span class="text-muted">@(bug.Assignee?.UserName ?? L["Unassigned"])</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>@L["Reported"]:</strong><br />
+                        <span class="text-muted small">@bug.ReportedDate.ToLocalTime()</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>@L["DueDate"]:</strong><br />
+                        <span class="text-muted small">@(bug.DueDate?.ToShortDateString() ?? L["None"])</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>@L["AffectedVersion"]:</strong><br />
+                        <span class="text-muted small">@(bug.AffectedVersion ?? L["Unknown"])</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>@L["FixVersion"]:</strong><br />
+                        <span class="text-muted small">@(bug.FixVersion ?? L["TBD"])</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Bug? bug;
+    private string translatedTitle = "";
+    private string translatedDescription = "";
+    private string? translatedExpectedResult;
+    private string? translatedActualResult;
+    private string? translatedResolution;
+    private string? jiraBaseUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bug = await DbContext.Bugs
+            .Include(b => b.Reporter)
+            .Include(b => b.Assignee)
+            .Include(b => b.Attachments)
+            .Include(b => b.Project)
+            .FirstOrDefaultAsync(b => b.Id == Id);
+
+        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+        jiraBaseUrl = settings?.JiraBaseUrl;
+
+        if (bug != null)
+        {
+            var currentCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+            var fromCulture = bug.OriginalCulture ?? "en";
+            
+            translatedTitle = await TranslationService.TranslateAsync(bug.Title, fromCulture, currentCulture);
+            translatedDescription = await TranslationService.TranslateAsync(bug.Description, fromCulture, currentCulture);
+            translatedExpectedResult = bug.ExpectedResult != null ? await TranslationService.TranslateAsync(bug.ExpectedResult, fromCulture, currentCulture) : null;
+            translatedActualResult = bug.ActualResult != null ? await TranslationService.TranslateAsync(bug.ActualResult, fromCulture, currentCulture) : null;
+            translatedResolution = bug.Resolution != null ? await TranslationService.TranslateAsync(bug.Resolution, fromCulture, currentCulture) : null;
+        }
+    }
+}

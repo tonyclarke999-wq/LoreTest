@@ -1,0 +1,328 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Requirement #{{ requirement.reqid }} - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Requirement #{{ requirement.reqid }}</h1>
+            <p class="subtitle">{{ requirement.reqname }}</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+            <a href="{{ path('app_project_requirement_edit', {id: project.project_id, reqId: requirement.reqid}) }}" class="btn-primary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.875rem;">✏️ Edit</a>
+            <a href="{{ path('app_project_requirement_add_version', {id: project.project_id, reqId: requirement.reqid}) }}" class="btn-primary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.875rem; background: rgba(34, 197, 94, 0.2); color: #86efac;">+ New Version</a>
+            <a href="{{ path('app_project_requirement_history', {id: project.project_id, reqId: requirement.reqid}) }}" class="btn-primary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.875rem; background: rgba(59, 130, 246, 0.2); color: #93c5fd;">📋 Version History</a>
+            <a href="{{ path('app_project_requirements', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; display: flex; align-items: center;">Back to List</a>
+        </div>
+    </div>
+</div>
+
+{# --- Main Info Card --- #}
+<div class="project-card" style="max-width: 1000px; cursor: default; margin-bottom: 2rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem 2rem;">
+        {# Row 1 #}
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Status</div>
+            {% set status_class = 'badge-yellow' %}
+            {% if requirement.status == 'Approved' %}{% set status_class = 'badge-green' %}
+            {% elseif requirement.status == 'Draft' %}{% set status_class = 'badge-blue' %}
+            {% elseif requirement.status == 'Rejected' %}{% set status_class = 'badge-red' %}
+            {% endif %}
+            <span class="badge {{ status_class }}">{{ requirement.status|default('—') }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Priority</div>
+            {% set priority_class = 'badge-yellow' %}
+            {% if requirement.priority == 'High' %}{% set priority_class = 'badge-red' %}
+            {% elseif requirement.priority == 'Low' %}{% set priority_class = 'badge-green' %}
+            {% endif %}
+            <span class="badge {{ priority_class }}">{{ requirement.priority|default('—') }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Version</div>
+            <span class="badge badge-blue">v{{ requirement.version|default('1.0') }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Content Type</div>
+            <span>{% if requirement.recordorfile == 'F' %}📄 File{% else %}📝 Record{% endif %}</span>
+        </div>
+
+        {# Row 2 #}
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Author / Originator</div>
+            <span>{{ requirement.author|default('—') }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Assigned To</div>
+            <span>{{ requirement.assignedto|default('—') }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Document Type</div>
+            <span>{{ requirement.doc_type_name|default('—') }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Area Covered</div>
+            <span>{{ requirement.area_name|default('—') }}</span>
+        </div>
+
+        {# Row 3 #}
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Created</div>
+            <span style="font-size: 0.875rem;">{{ requirement.datecreated|default('—') }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Last Updated</div>
+            <span style="font-size: 0.875rem;">{{ requirement.lastupdated|default('—') }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Locked By</div>
+            {% if requirement.lockedby %}
+                <span class="badge badge-red">🔒 {{ requirement.lockedby }}</span>
+            {% else %}
+                <span style="color: var(--text-muted);">—</span>
+            {% endif %}
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Change Request</div>
+            {% if requirement.defect_id and requirement.defect_id > 0 %}
+                <a href="{{ path('app_project_bugs', {id: project.project_id}) }}" class="badge badge-red" style="text-decoration: none;">Bug #{{ requirement.defect_id }}</a>
+            {% else %}
+                <span style="color: var(--text-muted);">—</span>
+            {% endif %}
+        </div>
+
+        {# Row 4: Functionality #}
+        <div style="grid-column: span 2;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Functionality</div>
+            {% if functionalities|length > 0 %}
+                {% for func in functionalities %}
+                    <span class="badge badge-blue" style="margin-right: 0.25rem; margin-bottom: 0.25rem;">{{ func.functionalityname }}</span>
+                {% endfor %}
+            {% else %}
+                <span style="color: var(--text-muted);">—</span>
+            {% endif %}
+        </div>
+        <div style="grid-column: span 2;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Assigned Releases</div>
+            {% if releases|length > 0 %}
+                {% for rel in releases %}
+                    <span class="badge badge-green" style="margin-right: 0.25rem;">{{ rel.releasename }}</span>
+                {% endfor %}
+            {% else %}
+                <span style="color: var(--text-muted);">—</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {# --- Detail / File Section --- #}
+    {% if requirement.recordorfile == 'F' %}
+        {% if requirement.filename %}
+        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Attached File</div>
+            <a href="{{ path('app_project_requirement_download', {id: project.project_id, reqId: requirement.reqid}) }}" class="btn-primary" style="text-decoration: none; display: inline-block; font-size: 0.875rem;">⬇ Download File</a>
+        </div>
+        {% endif %}
+    {% else %}
+        {% if requirement.detail %}
+        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Detailed Description</div>
+            <div style="background: rgba(15, 23, 42, 0.3); padding: 1.25rem; border-radius: 0.75rem; line-height: 1.6; white-space: pre-wrap;">{{ requirement.detail|raw }}</div>
+        </div>
+        {% endif %}
+    {% endif %}
+
+    {# --- Reason for Change --- #}
+    {% if requirement.reasonforchange %}
+    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border);">
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Reason for Change</div>
+        <div style="background: rgba(15, 23, 42, 0.3); padding: 1rem; border-radius: 0.75rem; line-height: 1.6;">{{ requirement.reasonforchange|raw }}</div>
+    </div>
+    {% endif %}
+</div>
+
+{# --- Parent/Child Requirements --- #}
+{% if parentReq or children|length > 0 %}
+<div class="project-card" style="max-width: 1000px; cursor: default; margin-bottom: 2rem;">
+    <h2 style="font-size: 1.25rem; margin-bottom: 1rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Related Requirements</h2>
+    
+    {% if parentReq %}
+    <div style="margin-bottom: 1rem;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Parent:</span>
+        <a href="{{ path('app_project_requirement_detail', {id: project.project_id, reqId: parentReq.reqid}) }}" style="color: var(--primary); text-decoration: none; margin-left: 0.5rem;">#{{ parentReq.reqid }} — {{ parentReq.reqname }}</a>
+    </div>
+    {% endif %}
+
+    {% if children|length > 0 %}
+    <div>
+        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Children:</span>
+        <div class="table-container" style="margin-top: 0.5rem;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for child in children %}
+                    <tr>
+                        <td><a href="{{ path('app_project_requirement_detail', {id: project.project_id, reqId: child.reqid}) }}" style="color: var(--primary); text-decoration: none;">#{{ child.reqid }}</a></td>
+                        <td>{{ child.reqname }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{# --- Associated Tests --- #}
+<div class="project-card" style="max-width: 1000px; cursor: default; margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 style="font-size: 1.25rem; margin: 0; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Associated Tests ({{ tests|length }})</h2>
+        <a href="{{ path('app_project_requirement_test_assoc', {id: project.project_id, reqId: requirement.reqid}) }}" class="badge badge-blue" style="text-decoration: none;">Manage Test Links</a>
+    </div>
+    {% if tests|length > 0 %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Test Name</th>
+                    <th>% Covered</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in tests %}
+                <tr>
+                    <td><a href="{{ path('app_project_test_steps', {id: project.project_id, testId: test.testid}) }}" style="color: var(--primary); text-decoration: none;">#{{ test.testid }}</a></td>
+                    <td>{{ test.testsuitename }}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 60px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                <div style="width: {{ test.percentcovered|default(0) }}%; height: 100%; background: {% if test.percentcovered >= 80 %}#22c55e{% elseif test.percentcovered >= 50 %}#eab308{% else %}#ef4444{% endif %}; border-radius: 3px;"></div>
+                            </div>
+                            <span style="font-size: 0.85rem;">{{ test.percentcovered|default(0) }}%</span>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color: var(--text-muted); font-size: 0.875rem;">No tests associated yet. <a href="{{ path('app_project_requirement_test_assoc', {id: project.project_id, reqId: requirement.reqid}) }}" style="color: var(--primary);">Link tests now →</a></p>
+    {% endif %}
+</div>
+
+{# --- Associated Releases (with inline management) --- #}
+<div class="project-card" style="max-width: 1000px; cursor: default; margin-bottom: 2rem;">
+    <h2 style="font-size: 1.25rem; margin-bottom: 1rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Associated Releases</h2>
+    
+    {% if releases|length > 0 %}
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+        {% for rel in releases %}
+        <div style="display: flex; align-items: center; gap: 0.25rem;">
+            <span class="badge badge-green">{{ rel.releasename }}</span>
+            <form action="{{ path('app_project_requirement_release_assoc', {id: project.project_id, reqId: requirement.reqid}) }}" method="post" style="margin: 0; display: inline;">
+                <input type="hidden" name="release_id" value="{{ rel.releaseid|default(0) }}">
+                <input type="hidden" name="action" value="remove">
+                <button type="submit" style="background: none; border: none; color: #fca5a5; cursor: pointer; font-size: 0.75rem; padding: 0;" title="Remove">✕</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem;">No releases associated.</p>
+    {% endif %}
+
+    {% if availableReleases|length > 0 %}
+    <form action="{{ path('app_project_requirement_release_assoc', {id: project.project_id, reqId: requirement.reqid}) }}" method="post" style="display: flex; gap: 0.5rem; align-items: center;">
+        <input type="hidden" name="action" value="add">
+        <select name="release_id" class="form-control" style="width: auto; padding: 0.375rem 0.75rem; font-size: 0.85rem;">
+            <option value="0">— Add Release —</option>
+            {% for rel in availableReleases %}
+                {% if rel.releaseid not in releaseIds %}
+                    <option value="{{ rel.releaseid }}">{{ rel.releasename }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+        <button type="submit" class="badge badge-green" style="border: none; cursor: pointer; font-family: inherit;">+ Add</button>
+    </form>
+    {% endif %}
+</div>
+
+{# --- Discussions --- #}
+<div class="project-card" style="max-width: 1000px; cursor: default; margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 style="font-size: 1.25rem; margin: 0; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Discussions ({{ discussionCount }})</h2>
+        <a href="{{ path('app_project_requirement_discussions', {id: project.project_id, reqId: requirement.reqid}) }}" class="badge badge-blue" style="text-decoration: none;">All Discussions</a>
+    </div>
+
+    {% if discussions|length > 0 %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Author</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for disc in discussions %}
+                <tr>
+                    <td>
+                        <a href="{{ path('app_project_requirement_discussion_view', {id: project.project_id, reqId: requirement.reqid, discId: disc.discussionid}) }}" style="color: var(--primary); text-decoration: none; font-weight: 500;">
+                            {{ disc.discsubject }}
+                        </a>
+                    </td>
+                    <td>{{ disc.author }}</td>
+                    <td style="font-size: 0.85rem; color: var(--text-muted);">{{ disc.date }}</td>
+                    <td>
+                        {% if disc.status == 'CLOSED' %}
+                            <span class="badge badge-red">Closed</span>
+                        {% else %}
+                            <span class="badge badge-green">Open</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color: var(--text-muted); font-size: 0.875rem;">No discussions yet. <a href="{{ path('app_project_requirement_discussions', {id: project.project_id, reqId: requirement.reqid}) }}" style="color: var(--primary);">Start one →</a></p>
+    {% endif %}
+</div>
+
+{# --- Action Buttons --- #}
+<div style="display: flex; gap: 1rem; max-width: 1000px; margin-top: 1rem; flex-wrap: wrap; align-items: center;">
+    <a href="{{ path('app_project_requirement_edit', {id: project.project_id, reqId: requirement.reqid}) }}" class="btn-primary" style="text-decoration: none;">✏️ Edit Requirement</a>
+    <a href="{{ path('app_project_requirement_add_version', {id: project.project_id, reqId: requirement.reqid}) }}" class="btn-primary" style="text-decoration: none; background: rgba(34, 197, 94, 0.2); color: #86efac;">+ Add New Version</a>
+    <a href="{{ path('app_project_requirement_history', {id: project.project_id, reqId: requirement.reqid}) }}" class="btn-primary" style="text-decoration: none; background: rgba(59, 130, 246, 0.2); color: #93c5fd;">📋 Version History</a>
+
+    {# Lock / Unlock #}
+    {% if requirement.lockedby %}
+        <form action="{{ path('app_project_requirement_unlock', {id: project.project_id, reqId: requirement.reqid}) }}" method="post" style="margin: 0;">
+            <button type="submit" class="btn-primary" style="background: rgba(234, 179, 8, 0.2); color: #fde047;">🔓 Unlock</button>
+        </form>
+    {% else %}
+        <form action="{{ path('app_project_requirement_lock', {id: project.project_id, reqId: requirement.reqid}) }}" method="post" style="margin: 0;">
+            <button type="submit" class="btn-primary" style="background: rgba(234, 179, 8, 0.2); color: #fde047;">🔒 Lock</button>
+        </form>
+    {% endif %}
+
+    <form action="{{ path('app_project_requirement_delete', {id: project.project_id, reqId: requirement.reqid}) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this requirement and all its versions?');" style="margin: 0;">
+        <button type="submit" class="btn-primary" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5;">🗑️ Delete</button>
+    </form>
+</div>
+{% endblock %}

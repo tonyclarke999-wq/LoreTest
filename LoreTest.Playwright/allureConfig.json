@@ -1,0 +1,9 @@
+{
+  "allure": {
+    "directory": "allure-results",
+    "title": "LoreTest E2E Test Suite Results",
+    "links": [
+      "https://jira.example.com/browse/{}"
+    ]
+  }
+}

@@ -8,25 +8,26 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Setup Test Run</PageTitle>
+<PageTitle>@L["SetupTestRun"]</PageTitle>
 
-<h1>Setup Test Run</h1>
+<h1>@L["SetupTestRun"]</h1>
 
 @if (project == null)
 {
-    <p><em>Loading project...</em></p>
+    <p><em>@L["LoadingProject"]</em></p>
 }
 else
 {
     <div class="card mb-4">
         <div class="card-body">
-            <h5 class="card-title">Project: @project.Title</h5>
+            <h5 class="card-title">@L["Project"]: @project.Title</h5>
             <div class="mb-3">
-                <label for="suiteSelect" class="form-label fw-bold">Select Test Suite:</label>
+                <label for="suiteSelect" class="form-label fw-bold">@L["SelectTestSuite"]</label>
                 <select id="suiteSelect" class="form-select" @onchange="OnSuiteChanged">
-                    <option value="0">-- Select a Suite --</option>
+                    <option value="0">@L["SelectASuite"]</option>
                     @foreach (var suite in project.TestSuites)
                     {
                         <option value="@suite.Id" selected="@(selectedSuiteId == suite.Id)">@suite.Title</option>
@@ -40,18 +41,18 @@ else
     {
         <div class="card mb-4">
             <div class="card-header bg-light">
-                <h5 class="mb-0">Select Test Cases</h5>
+                <h5 class="mb-0">@L["SelectTestCases"]</h5>
             </div>
             <div class="card-body">
                 @if (!selectedSuite.TestCases.Any())
                 {
-                    <p class="text-warning">This suite has no test cases.</p>
+                    <p class="text-warning">@L["SuiteHasNoTestCases"]</p>
                 }
                 else
                 {
                     <div class="mb-2">
-                        <button class="btn btn-sm btn-outline-secondary" @onclick="SelectAll">Select All</button>
-                        <button class="btn btn-sm btn-outline-secondary" @onclick="SelectNone">Select None</button>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="SelectAll">@L["SelectAll"]</button>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="SelectNone">@L["SelectNone"]</button>
                     </div>
                     <ul class="list-group">
                         @foreach (var tc in selectedSuite.TestCases)
@@ -77,9 +78,9 @@ else
 
         <div class="d-flex gap-2 mb-5">
             <button class="btn btn-success btn-lg" @onclick="StartRun" disabled="@(!selectedTestCaseIds.Any())">
-                Start Execution
+                @L["StartExecution"]
             </button>
-            <a href="/projects/details/@ProjectId" class="btn btn-secondary btn-lg">Cancel</a>
+            <a href="/projects/details/@ProjectId" class="btn btn-secondary btn-lg">@L["Cancel"]</a>
         </div>
     }
 }

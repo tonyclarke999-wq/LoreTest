@@ -1,0 +1,1225 @@
+<?php
+
+# ------------------------------------
+# Language File
+#
+# $RCSfile: strings_english.txt,v $ 
+# $Revision: 1.33 $
+#
+# The string file is divided into various sections described below
+# Please search for the word you need before adding it to this file
+#
+# Section 1:  Words that are common throughout the application
+# Section 2:  Page Links
+# Section 3:  Page Titles ( should follow the "_page" format
+# Section 4:  Requirements
+# Section 5:  Tests
+# Section 6:  Test Results
+# Section 7:  Bugs
+# Section 8:  Release - words related to Releases, Builds, and Testsets
+# Section 9:  Admin 
+# Section 10: Project
+# Section 11: User
+# Section 12: Reporting
+# Section 13: Help
+# Section 14: Phrases
+# Section 15: Deletion Messages
+# Section 16: Warning and Error Messages
+##############################################################################
+
+#########################################################
+# SECTION 1:
+# Common - words common throughout the application or used on many pages
+#########################################################
+$l_id				= 'ID';
+$l_all				= 'all';
+$l_description			= 'Description';
+$l_comments			= 'Comments';
+$l_comment			= 'Comment';
+$l_detail			= 'Detail';
+$l_details			= 'Details';
+$l_csv_export			= '[Export to CSV]';
+$l_excel_export			= '[Export to Excel]';
+$l_subject			= 'Subject';
+$l_blank			= 'Blank';
+$l_add				= 'Add';
+$l_edit				= 'Edit';
+$l_copy				= 'Copy';
+$l_remove			= 'Remove';
+$l_delete			= 'Delete';
+$l_deleted			= 'Deleted';
+# VERSIONS
+$l_add_new_version		= 'Add New Version';
+$l_new_version			= 'New Version';
+$l_show_history			= 'Show History';
+$l_history			= 'History';
+$l_all_versions			= 'All Versions';
+$l_latest_version		= 'Latest Version';
+# ASSIGNMENTS  
+$l_assigned_to			= 'Assign To';
+$l_assign_to_release		= 'Assign To Release';
+$l_author			= 'Author';
+# STATUS 
+$l_status			= 'Status';
+$l_update_status		= 'Update Status';
+$l_select_all			= 'Select All';
+$l_hold_ctrl			= 'Hold Ctrl to select/deselect multiple values.';
+# UPDATES - DATES  
+$l_last_updated			= 'Last Updated';
+$l_last_updated_by		= 'Last Updated By';
+$l_last_updated_date		= 'Last Updated Date';
+$l_date_created			= 'Date Created';
+$l_created			= 'Created';
+$l_date_received		= 'Date Received';
+$l_date_started			= 'Date Started';
+$l_sign_off			= 'Sign Off';
+$l_signed_off_by		= 'Signed Off By';
+$l_sign_off_date		= 'Sign Off Date';
+# NAVIGATION 
+$l_switch_project		= 'Switch Project';
+$l_back_to_top			= 'Back to Top';
+$l_search			= 'Search';
+$l_first			= 'First';
+$l_last				= 'Last';
+$l_previous			= 'Previous';
+$l_next				= 'Next';
+$l_show 			= 'Show';
+$l_jump				= 'Jump';
+$l_up				= 'Up';
+$l_down				= 'Down';
+$l_supporting_docs_warning	= 'WARNING: Supporting docs are not copied, please copy them manually if necessary!';
+$l_must_complete_field 		= 'field must be completed';
+$l_operation_successful		= 'Operation Successful';
+# PRIORITY 
+$l_priority_high		= 'High';
+$l_priority_medium		= 'Medium';
+$l_priority_low			= 'Low';
+# BUTTONS
+$l_okay_btn			= 'OK';
+$l_submit_btn			= 'Submit';
+$l_add_user_btn			= 'Add User';
+$l_edit_user			= 'Edit User';
+$l_save				= 'Save';
+$l_create			= 'Create';
+$l_yes				= 'Yes';
+$l_no				= 'No';
+$l_update			= 'Update';
+$l_change			= 'Change';
+$l_create_new_account		= 'Create New Account';
+$l_select_children		= 'Edit Children';
+$l_edit_assoc			= 'Edit Associations';
+$l_children			= 'Children';
+$l_parent			= 'Parent';
+$l_create_test			= 'Create Test';
+$l_create_child_req		= 'Create Child Requirement';
+$l_file				= 'File';
+$l_record			= 'Record';
+$l_root_requirement		= 'Top Level Document';
+$l_total			= 'Total';
+# HOME PAGE
+$l_news				= 'News';
+$l_latest_test_results		= 'Test Results - Most Recent';
+$l_latest_tests			= 'Tests - Last Five Modified';
+$l_latest_requirements		= 'Requirements - Last Five Modified';
+$l_new_post			= 'New Post';
+$l_copywrite			= 'Copyright 2005 - MMV';
+$l_contact_admin 		= 'Please contact the system administrator with any problems';
+$l_rth_admin_email		= 'RTH_Admin';
+$l_correct_date_format 		= '(yyyy-mm-dd)';
+$l_latest_build			= 'Build - Latest';
+$l_go					= 'Go';
+
+#########################################################
+# SECTION 2:
+# Page Links - primarily links on the main menu or sub-menus
+#########################################################
+$l_home_link			= 'Home';
+$l_req_link 			= 'Requirements';
+$l_test_link 			= 'Test Library';
+$l_test_add_link		= 'Add Test';
+$l_test_workflow_link		= 'Test Workflow';
+$l_results_link 		= 'Test Results';
+$l_release_link			= 'Release';
+$l_admin_link			= 'Manage';
+$l_user_link			= 'User';
+$l_reports_link			= 'Reporting';
+$l_calendar_link		= 'Calendar';
+$l_help_link			= 'Help';
+$l_logout_link 			= 'Logout';
+$l_docs_link			= 'Docs';
+$l_update_link			= 'Update';
+$l_sign_off_link		= 'Sign Off';
+$l_bug_link			= 'Defects';
+$l_bug_view_link		= 'View Defects';
+$l_bug_add_link			= 'Add Defect';
+$l_edit_link			= 'Edit';
+$l_delete_link			= 'Delete';
+
+
+#########################################################
+# SECTION 3:
+# Page and Window titles
+#########################################################
+$l_add_users_page		= 'ADD USERS';
+$l_last_testsets_page	= 'LAST TESTSETS';
+$l_testsets_status_page	= 'TEST SETS STATUS';
+$l_admin_page			= 'ADMIN';
+$l_testset_add_tests_page	= 'ADD TESTS';
+$l_alter_testset		= 'ALTER TESTSET';
+$l_archive_tests_page		= 'ARCHIVE TESTS';
+$l_archive_results_page		= 'ARCHIVE RESULTS';
+$l_project_add_page		= 'ADD PROJECT';
+$l_add_area_tested_page		= 'ADD AREA TESTED';
+$l_add_machine_page		= 'ADD MACHINE';
+$l_add_testtype_page		= 'ADD TEST TYPE';
+$l_add_test_doc_type_page	= 'ADD TEST DOCUMENT TYPE';
+$l_add_environment_page		= 'ADD ENVIRONMENT';
+$l_add_req_doc_type_page	= 'ADD REQUIREMENT DOCUMENT TYPE';
+$l_add_req_functionality_page	= 'ADD REQUIREMENT FUNCTIONALITY';
+$l_add_req_area_covered_page	= 'ADD REQUIREMENT AREA COVERED';
+$l_report_area_tested_page	= 'AREA TESTED REPORT';
+$l_report_build_status_page	= 'BUILD STATUS REPORT';
+$l_report_verif_page		= 'VERIFICATIONS REPORT';
+$l_report_failed_verif_page	= 'FAILED VERIFICATIONS REPORT';
+$l_report_signoff_page		= 'SIGNOFF REPORT';
+$l_report_requirements_page	= 'REQUIREMENTS REPORT';
+$l_requirements_new_version	= 'REQUIREMENT NEW VERSION';
+$l_build_page			= 'BUILD';
+$l_build_edit_page		= 'BUILD EDIT';
+$l_create_test_page		= 'CREATE TEST';
+$l_copy_test_page		= 'COPY TEST';
+$l_edit_area_tedsted_page	= 'EDIT AREA TESTED';
+$l_edit_machine_page		= 'EDIT MACHINE';
+$l_edit_testtype_page		= 'EDIT TESTTYPE';
+$l_edit_testset_page		= 'EDIT TESTSET';
+$l_edit_test_doc_type_page	= 'EDIT TEST DOCUMENT TYPE';
+$l_edit_req_doc_type_page	= 'EDIT REQUIREMENT DOCUMENT TYPE';
+$l_edit_req_area_covered_page	= 'EDIT REQUIREMENT AREA COVERED';
+$l_edit_project_page		= 'EDIT PROJECT';
+$l_edit_environment_page	= 'EDIT ENVIRONMENT';
+$l_edit_functionality_page	= 'EDIT FUNCTIONALITY';
+$l_forgot_password_page		= 'RESET PASSWORD - ';
+$l_login_page 			= 'LOGIN - ';
+$l_news_edit_page		= 'NEWS EDIT';
+$l_news_add_page		= 'NEWS ADD';
+$l_delete_page			= 'DELETE';
+$l_release_page			= 'RELEASE';
+$l_release_edit_page		= 'RELEASE EDIT';
+$l_testset_page			= 'TESTSET';
+$l_testset_edit_page		= 'TESTSET EDIT';
+$l_testset_copy_page		= 'TESTSET COPY';
+$l_test_results			= 'TEST RESULTS';
+$l_test_detail_page		= 'TEST DETAIL';
+$l_test_doc_history_page	= 'TEST DOC HISTORY';
+$l_test_import_csv_page		= 'TEST IMPORT CSV TEST STEPS';
+$l_reporting_page		= 'REPORTING';
+$l_manage_project_page		= 'MANAGE PROJECT';
+$l_test_step_edit_page		= 'EDIT TEST STEP';
+$l_run_manual_test_page		= 'RUN TEST';	
+$l_user_manage_page		= 'MANAGE USERS';
+$l_user_edit_page		= 'USER EDIT';
+$l_update_test_result_page	= 'UPDATE TEST RESULT';
+$l_update_verification		= 'UPDATE VERIFICATION';
+$l_update_test_page		= 'UPDATE TEST';
+$l_manage_projects_page		= 'MANAGE PROJECTS';
+$l_renumber_test_step_page	= 'RENUMBER TEST STEPS';
+$l_add_test_step_page		= 'ADD TEST STEP';
+$l_edit_test_step_page		= 'EDIT TEST STEP';
+$l_add_test_version_page	= 'ADD TEST VERSION';
+$l_req_update_status_page	= 'UPDATE REQUIREMENT STATUS';
+$l_req_update_assign_release_page = 'UPDATE REQUIREMENT ASSIGNED RELEASE';
+$l_req_detail_page		= 'REQUIREMENT DETAIL';
+$l_req_page			= 'REQUIREMENTS';
+$l_req_discussion_page		= 'REQUIREMENT DISCUSSION';
+$l_req_edit_page		= 'REQUIREMENT UPDATE';
+$l_req_notifications		= 'REQUIREMENT NOTIFICATIONS';
+$l_req_add_page			= 'ADD REQUIREMENT';
+$l_req_assoc_tests_page		= 'REQUIREMENT EDIT ASSOCIATED TESTS';
+$l_req_assoc_releases_page	= 'REQUIREMENT EDIT ASSOCIATED RELEASES';
+$l_req_req_assoc_page		= 'SELECT REQUIREMENT CHILDREN';
+$l_req_assoc_page		= 'REQUIREMENT ASSOCIATIONS';
+$l_discussion_add_page		= 'ADD DISCUSSION';
+$l_discussion_post_add_page	= 'ADD POST TO DISCUSSION';
+$l_discussion_close_page	= 'CLOSE DISCUSSION';
+$l_window_title 		= 'UF_Wiki';
+$l_page_title 			= 'UF Wiki';
+$l_test_req_assoc_page		= 'TEST/REQUIREMENT ASSOC';
+$l_test_req_coverage_page	= 'TEST/REQUIREMENT COVERAGE';
+$l_test_mass_update_page	= 'TEST MASS UPDATE';
+$l_bug_mass_update_page		= 'DEFECT MASS UPDATE';
+$l_test_page			= 'TESTS';
+$l_req_mass_update_page		= 'REQUIREMENT MASS UPDATE';
+$l_results_mass_update_page	= 'RESULTS MASS UPDATE';
+$l_test_results_page		= 'TEST RESULTS';
+$l_req_folder_view_page		= 'REQUIREMENTS - FOLDER VIEW';
+$l_bug_page			= 'DEFECTS';
+$l_add_bug_page			= 'ADD DEFECT';
+$l_add_bug_category_page	= 'ADD CATEGORY';
+$l_edit_bug_category_page	= 'EDIT CATEGORY';
+$l_add_bug_component_page	= 'ADD COMPONENT';
+$l_edit_bug_component_page	= 'EDIT COMPONENT';
+$l_bug_detail_page		= 'DEFECT DETAIL';
+$l_update_bug_page		= 'UPDATE DEFECT';
+$l_edit_bugnote_page		= 'EDIT NOTE';
+$l_bug_close_page		= 'CLOSE DEFECT';
+$l_testset_signoff_page		= 'TESTSET SIGNOFF';
+$l_testset_time_remaining_page	= 'ESTIMATED TEST TIME';
+$l_auto_pass_page		= 'AUTO PASS';
+$l_file_upload_page		= 'FILE UPLOAD';
+$l_release_signoff_page		= 'RELEASE SIGNOFF';
+$l_screen_page			= 'SCREENS';
+$l_field_page			= 'FIELDS';
+$l_function_page		= 'FUNCTIONS';
+$l_remote_execution_page	= 'REMOTE TEST EXECUTION';
+$l_testset_lock_page	= 'LOCK TESTSET';
+$l_testset_unlock_page	= 'UNLOCK TESTSET';
+$l_help_sourceforge		= 'For general help or support please visit our project page: ';
+$l_traceability_matrix_page     = 'REQUIREMENTS/TEST TRACEABILITY MATRIX';
+
+
+#########################################################
+# SECTION 4:
+# Requirement - words that are related to requirements
+#########################################################
+$l_req				= 'Requirement';
+$l_req_id			= 'ReqID';
+$l_req_add_file_link		= 'Add Requirement - File';
+$l_req_add_rec_link		= 'Add Requirement - Record';
+$l_req_add_folder		= 'Add Folder';
+$l_add_req_functionality	= 'Add Requirement Functionality';
+$l_req_search			= 'Search';
+$l_req_name			= 'Requirement Name';
+$l_req_type			= 'Doc Type';
+$l_req_area			= 'Area Covered';
+$l_req_status			= 'Status';
+$l_req_priority			= 'Priority';
+$l_req_untestable		= 'Un-Testable';
+$l_req_version			= 'Version';
+$l_req_locked			= 'Locked';
+$l_req_locked_by		= 'Locked By';
+$l_req_locked_date		= 'Locked Date';
+$l_req_assign_release		= 'Assigned Release';
+$l_req_detail			= 'Detail';
+$l_req_actions			= 'Actions';
+$l_total_coverage		= 'Total Coverage';
+$l_num_req			= 'Number of Requirements';
+$l_tot_percent_req_cov		= 'Total % of Requirements Covered';
+$l_functionality		= 'Functionality';
+$l_req_created			= 'Date Created';
+$l_req_rels			= 'Requirement Relationships';
+$l_req_rel			= 'Relationship';
+$l_req_test_rel			= 'Test Relationships';
+$l_req_release_assoc		= 'Release Assoc';
+$l_req_update			= 'Update Requirement';
+$l_req_delete			= 'Delete Requirement';
+$l_req_lock			= 'Lock Requirement';
+$l_req_unlock			= 'Unlock Requirement';
+$l_req_add_rel			= 'Add Relationship';
+$l_req_add_ver			= 'Add New Version';
+$l_req_notification		= 'Notifications';
+$l_close_discussion		= 'Close Discussion';
+$l_req_detail			= 'Requirement Detail';
+$l_req_reason_change		= 'Reason for Change';
+$l_req_assoc			= 'Requirements Assoc';
+$l_req_test_assoc		= 'Test Assoc';
+$l_req_discussions		= 'Discussions';
+$l_req_assoc_type		= 'Type of Association:';
+$l_req_folder_view		= 'Folder View';
+$l_reqs				= 'Requirements';
+$l_req_defect_id		= 'Change Request';
+
+# DISCUSSIONS FORUM
+$l_discussion			= 'Discussion';
+$l_add_discussion		= 'Add Discussion';
+$l_num_posts			= '# of Posts';
+$l_posts			= 'Posts';
+$l_post				= 'Post';
+$l_posted			= 'Posted';
+$l_add_new_post			= 'Add a New Post';
+
+$l_update_req_status		= 'Update Status';
+$l_update_req_release		= 'Update Release';
+
+#########################################################
+# SECTION 5:
+# Tests - words that are related to tests
+#########################################################
+$l_test				= 'Test';
+$l_tests			= 'Tests';
+$l_testing			= 'Testing';
+$l_test_id			= 'Test ID';
+$l_test_name			= 'Test Name';
+$l_ba_owner			= 'BA Owner';
+$l_qa_owner			= 'QA Owner';
+$l_tester			= 'Tester';
+$l_testtype			= 'Test Type';
+$l_area_tested			= 'Test Area';
+$l_automated			= 'Automated';
+$l_automated_test		= 'Automated Test';
+$l_manual			= 'Manual';
+$l_manual_test			= 'Manual Test';
+$l_man_auto			= 'Man/Auto';
+$l_man_auto_test		= 'Manual &amp; Automated Test';
+$l_test_status			= 'Test Status';
+$l_test_run_status		= 'Test Run Status';
+$l_email_test_run_status	= 'E-mail User';
+$l_autopass			= 'Auto Pass';
+$l_priority			= 'Priority';
+$l_results			= 'Results';
+$l_test_doc			= 'Test Doc';
+$l_file_type			= 'File Type';
+$l_date_assigned		= 'Date Assigned';
+$l_date_expected		= 'Date Expected';
+$l_date_complete		= 'Date Complete';
+$l_ba_signoff_date		= 'Sign Off Date';
+$l_signoff_date			= 'Sign Off Date';
+$l_signoff_by			= 'Sign Off By';
+$l_signoff			= 'Sign Off';
+$l_version			= 'Version';
+$l_active			= 'Active';
+$l_make_active			= 'Make Active';
+$l_view_test			= 'View';
+$l_requirements_assoc		= 'Requirement/Test Assoc';
+$l_req_assoc_link		= 'Req Assoc';
+$l_test_history_link		= 'Test History';
+$l_info				= 'Info';
+$l_upload_heading		= 'Upload New File';
+$l_upload_new_file_version	= 'Upload New Version of File:';
+$l_upload_test_plan		= 'Upload Test Plan';
+$l_test_plan_file_upload	= 'Test Plan File Upload';
+$l_test_plan_history		= 'Test Plan History';
+$l_test_plan_add		= 'Add Test Plan';
+$l_upload_new_test_plan		= 'Upload A New Test Plan Version';
+$l_uploading_new_version	= 'Uploading New Version Of:';
+$l_upload			= 'Upload';
+$l_file_name			= 'File Name';
+$l_view				= 'View';
+$l_num_of_tests_for_area	= 'No. of Tests for Area';
+$l_num_of_tests_used		= 'No. of Tests Run';
+$l_num_of_tests			= 'No. of Tests';
+$l_num_of_test_sets		= 'No. of Test Sets';
+$l_num_of_not_started		= 'No. of Not Started';
+$l_num_of_passed		= 'No. of Passed';
+$l_num_of_failed		= 'No. of Failed';
+$l_num_of_wip			= 'No. WIP';
+$l_num_of_finished		= 'No. Finished Awaiting Review';
+$l_num_of_incomplete            = 'No. Incomplete';
+$l_download			= 'Download';
+$l_show_log			= 'Show Log';
+$l_add_version			= 'Add Version';
+$l_uploaded_by			= 'Uploaded By';
+$l_date_added			= 'Date Added';
+$l_delete_latest		= 'Delete Latest Version';
+$l_req_documents		= 'Req Documents';
+$l_percent_covered		= '% Covered';
+$l_percent_covered_test		= '% Covered by Test';
+$l_percent_covered_req		= '% Covered by Req';
+$l_percent_covered_string	= 'Percent Covered';
+$l_percentage_of_area_tests	= '% of Area Tests';
+$l_no_test_suites		= 'There are either no Test Suites that meet your search criteria or none associated to ';
+$l_no_req_docs			= 'There are no Requirement Documents associated with ';
+$l_no_documentation		= 'No documentation exists.';
+$l_include			= 'Include';
+$l_testsuite_name		= 'Test Name';
+$l_test_version			= 'Test Version';
+$l_created_by			= 'Created By';
+$l_test_created_date		= 'Created Date';
+$l_test_steps			= 'Test Steps';
+$l_test_docs			= 'Supporting Docs';
+$l_test_history			= 'Test History';
+$l_duration			= 'Duration';
+$l_in_minutes			= '(in minutes)';
+$l_time_to_run_test		= 'Time to Complete Test';
+$l_test_view_detail		= 'View Test Detail';
+$l_info_step			= 'Info Step';
+$l_continue_test_run		= 'Continue Test Run';
+$l_cvs_version			= 'CVS Version';
+$l_import_teststeps_csv		= 'Import Steps from CSV';
+$l_export_teststeps_csv		= 'Export Steps to CSV';
+$l_import_teststeps_excel	= 'Import Steps from Excel';
+$l_export_teststeps_excel	= 'Export Steps to Excel';
+$l_email_ba_owner		= 'Email BA Owner';
+$l_email_qa_owner		= 'Email QA Owner';
+$l_view_all				= 'View all';
+
+
+$l_add_test				= 'Add a Test';
+$l_copy_test			= 'Copy Test';
+$l_add_test_version		= 'Add Test Version:';
+$l_test_purpose			= 'Purpose';
+$l_test_comments		= 'Comments';
+$l_test_assigned_to		= 'Assigned To';
+$l_test_tester			= 'Tester';
+$l_test_assigned_by		= 'Assigned By';
+$l_test_email_person	= 'Email this person on Not Running';
+$l_test_performance		= 'LoadRunner';
+$l_update_test_coverage	= 'Update Test Coverage';
+
+$l_update_man_auto		= 'Update Manual/Automated';
+$l_update_ba_owner		= 'Update BA Owner';
+$l_update_qa_owner		= 'Update QA Owner';
+$l_update_tester		= 'Update Tester';
+$l_update_test_status	= 'Update Test Status';
+$l_update_priority		= 'Update Test Priority';
+$l_update_autopass		= 'Update Auto Pass';
+$l_update_testtype		= 'Update Test Type';
+$l_update_area_tested		= 'Update Area Tested';
+
+$l_update_test			= 'Update Test';
+$l_add_version			= 'Add Version';
+$l_delete_test_btn		= 'Delete Test';
+$l_copy_test_btn		= 'Copy Test to';
+$l_delete_test			= 'Are you sure you want to DELETE all versions of ';
+$l_test_steps_section		= 'Test Steps Section';
+$l_upload_section		= 'File Upload Section';
+$l_req_assoc_section		= 'Requirements Associated Section';
+$l_step				= 'Step:';
+$l_add_test_step		= 'Add Test Step';
+$l_add_step			= 'Add Step';
+$l_edit_step			= 'Edit Step';
+$l_move_step			= 'Move Step';
+$l_step_no			= 'Step Number';
+$l_step_action			= 'Action';
+$l_step_inputs			= 'Test Inputs';
+$l_step_expected		= 'Expected Result';
+$l_step_edit			= 'Edit/Delete';
+$l_renumber_steps		= 'Renumber Steps';
+
+$l_screen_link			= 'Screens';
+$l_add_screen			= 'Add Screen';
+$l_edit_screen			= 'Edit Screen';
+$l_screen_name			= 'Screen Name';
+$l_order			= 'Order';
+
+$l_locked_by			= 'Lock changed by';
+$l_lock_comment			= 'Lock comment';
+$l_lock_date			= 'Last Lock Change';
+$l_lock					= 'Lock';
+$l_unlock				= 'Unlock';
+$l_locked_on			= 'Locked on';
+$l_unlocked_on			= 'Unlocked on';
+
+$l_field_link			= 'Fields';
+$l_field_edit_link		= 'Field';
+$l_field_name			= 'Field Name';
+$l_add_field			= 'Add Field';
+$l_edit_field			= 'Edit Field';
+$l_text_box				= 'Text Box';
+
+$l_field_value_link		= 'Values';
+$l_function_link		= 'Functions';
+
+$l_goto_to_id		= 'Goto TestID';
+
+#########################################################
+# SECTION 6:
+# Results - words that are related to test results
+#########################################################
+$l_test_run			= 'Test Run';
+$l_view_run			= 'View Run';
+$l_update_test_run		= 'Update Test Run';
+$l_update_test_result_form	= 'Update Test Result';
+$l_update_verification		= 'Update Verification';
+$l_test_case			= 'Test Case';
+$l_step_no			= 'Step';
+$l_action			= 'Action';
+$l_expected_result		= 'Expected Result';
+$l_test_inputs			= 'Test Inputs';
+$l_actual_result		= 'Actual Result';
+$l_action_			= '______Action______';
+$l_expected_			= '______Expected Result______';
+$l_test_inputs_			= '______Test Inputs______';
+$l_actual_			= '______Actual Result______';
+$l_machine_name			= 'Machine Name';
+$l_time_started			= 'Time Started';
+$l_time_finished		= 'Time Finished';
+$l_environment			= 'Environment';
+$l_finished			= 'Finished';
+$l_os				= 'OS';
+$l_sp				= 'SP';
+$l_doc				= 'Doc';
+$l_test_run_id			= 'Test Run ID';
+$l_pass				= 'Pass';
+$l_pass_test			= 'Pass Test';
+$l_fail				= 'Fail';
+$l_fail_test			= 'Fail Test';
+$l_phone_no			= 'Home Phone';
+$l_policy_id			= 'Tracking No';
+$l_quote_id			= 'Customer ID';
+$l_claim_id			= 'Login ID';
+$l_n_number			= 'Booking Number';
+$l_time_tested			= 'Time Tested';
+$l_time_approved		= 'Time Approved';
+$l_window			= 'Window';
+$l_object			= 'Object';
+$l_line_no			= 'Line No';
+$l_script_version		= 'Version';
+$l_hold				= 'Hold';
+$l_other			= 'Other';
+$l_tot_phy_mem			= 'TotPhyMem';
+$l_free_phy_mem			= 'FreePhyMem';
+$l_tot_vir_mem			= 'TotVirMem';
+$l_free_vir_mem			= 'FreeVirMem';
+$l_cur_mem_util			= 'CurMemUtil';
+$l_tot_page_file		= 'TotPageFile';
+$l_free_page_file		= 'FreePageFile';
+$l_root_cause			= 'Not Run/Failed Reason';
+$l_no_test_runs			= 'There are no test runs for this test.';
+$l_tester			= 'Tester';
+$l_info				= 'Info';
+$l_bug				= 'Bug';
+$l_run_test			= 'Run Test';
+$l_view_results			= 'View Results';
+$l_est_time_for_testset		= 'Estimated Execution Time for:';
+$l_est_time			= 'Estimated Time to Complete';
+$l_est_total_time		= 'Estimated Total Time';
+$l_est_time_remaining		= 'Estimated Time Remaining';
+$l_run_autopass			= 'Run Autopass';
+$l_autopass_complete		= 'Autopass Complete...';
+
+# Manual Test Run
+$l_run_test			= 'Run Test';
+$l_time_started			= 'Time Started';
+$l_os				= 'OS';
+$l_environment			= 'Test Environment';
+$l_upload_file			= 'Upload File';
+$l_upload_doc_test_run		= 'Upload Document for this Test Run';
+$l_save_results			= 'Save Results';
+$l_actual_result		= 'Actual Result';
+$l_pass_fail			= 'Pass/Fail';
+$l_correct_file_format		= 'Please make sure the upload file is in the following format';
+
+$l_remote_execution		= 'Remote Execution';
+$l_run				= 'Run';
+$l_test_path			= 'Test Path';
+$l_parameters			= 'Parameters';
+$l_test_tool			= 'Test Tool';
+$l_upload_tests			= 'Upload Tests';
+
+#########################################################
+# SECTION 7:
+# Bugs - words that are related to defects
+#########################################################
+# Bugs - words related to Defect tracking
+$l_defect			= 'Defect';
+$l_defect_link			= 'Defect';
+$l_defect_id			= 'Defect ID';
+$l_bug_id			= 'Bug ID';
+$l_bug_priority			= 'Priority';
+$l_bug_severity			= 'Severity';
+$l_bug_status			= 'Status';
+$l_bug_project_id		= 'Project ID';
+# Category
+$l_bug_category			= 'Category';
+$l_bug_category_link		= 'Defect Category';
+$l_add_bug_category		= 'Add Category';
+$l_edit_bug_category		= 'Edit Category';
+# Component
+$l_bug_component		= 'Component';
+$l_bug_component_link	= 'Defect Component';
+$l_add_bug_component	= 'Add Component';
+$l_edit_bug_component	= 'Edit Component';
+$l_reported_by			= 'Reported By';
+$l_reported_date		= 'Date Reported';
+$l_date_modified		= 'Date Modified';
+$l_assigned_to			= 'Assigned To';
+$l_tester				= 'Tester';
+$l_assign_to			= 'Assign To';
+$l_assigned_to_developer= 'Assigned To Developer';
+$l_assign_to_developer	= 'Assign To Developer';
+$l_found_in_release		= 'Found in Release';
+$l_assigned_to_release	= 'Assigned to Release';
+$l_implemented_in_release	= 'Implemented in Release';
+$l_bug_summary			= 'Summary';
+$l_bug_description		= 'Description';
+$l_view_closed_bugs		= 'View Closed';
+$l_add_bug				= 'Add Defect';
+$l_discovery_period		= 'Phase of Discovery';
+$l_bug_view_detail		= 'View Detail';
+$l_bug_detail			= 'Defect Detail';
+$l_update_bug			= 'Update Defect';
+$l_no_bug_detail		= 'There is no detail for Defect ID: ';
+$l_assign_to_user		= 'Assign To User';
+$l_change_status		= 'Change Status';
+$l_delete_bug			= 'Delete Defect';
+$l_add_bugnote			= 'Add Note';
+$l_delete_bugnote		= 'Delete Note';
+$l_bug_note				= 'Note';
+$l_bug_notes			= 'Notes';
+$l_edit_bugnote			= 'Edit Note';
+$l_jump_to_bugnotes		= 'Jump to Notes';
+$l_bugnote_id			= 'Note ID';
+$l_severity_low			= 'Low';
+$l_severity_medium		= 'Medium';
+$l_severity_high		= 'High';
+$l_severity_critical		= 'Critical';
+$l_test_step_id			= 'Test Step ID';
+$l_test_step_no			= 'Test Step Number';
+$l_bug_history			= 'History';
+$l_jump_to_history		= 'Jump to History';
+$l_field			= 'Field Name';
+$l_change			= 'Change';
+$l_new_bug			= 'New Defect';
+$l_summary_updated		= 'Update Summary';
+$l_description_updated		= 'Description Updated';
+$l_add_relationship		= 'Add Relationship';
+$l_new_relationship		= 'New Relationship';
+$l_current_bug_is		= 'Current Defect is:';
+$l_related_to			= 'Related To';
+$l_child_of				= 'Child of';
+$l_parent_of			= 'Parent of';
+$l_test_verification_id	= 'Verification ID'; # as it appears on bug pages
+$l_view_closed			= 'View Closed';
+$l_update_bug_status	= 'Update Status';
+$l_update_assign_to		= 'Assign To';
+$l_update_assign_to_developer	= 'Assign To Developer';
+$l_close_bug			= 'Close Defect';
+$l_closed_reason_code	= 'Closed Reason Code';
+$l_bug_closed			= 'Closed' ;
+$l_bug_closed_date		= 'Closed Date';
+$l_req_version_id		= 'Requirement Version ID';
+$l_file_upload			= 'File Upload';
+
+
+#########################################################
+# SECTION 8:
+# Release - words that are related to the Release section
+#########################################################
+# RELEASE
+$l_release			= 'Release';
+$l_release_name			= 'Release Name';
+$l_edit_release			= 'Edit Release';
+$l_release_id			= 'Release ID';
+$l_release_none			= 'No Releases';
+$l_add_release			= 'Add Release to Project';
+$l_rel_date_received		= 'Date Received';
+$l_rel_description		= 'Description';
+$l_rel_qa_signoff		= 'QA Signoff';
+$l_rel_qa_signoff_by		= 'Signoff By'; # we have this elsewhere
+$l_rel_qa_signoff_date		= 'Date';
+$l_rel_qa_signoff_note		= 'Comments';   # we already have this word
+$l_rel_ba_signoff		= 'BA Signoff';
+$l_rel_ba_signoff_by		= 'Signoff By';
+$l_rel_ba_signoff_date		= 'Date';
+$l_rel_ba_signoff_note		= 'Comments';
+$l_test_machine			= 'Test Machine';
+
+# BUILD
+$l_build			= 'Build';
+$l_builds			= 'Builds';
+$l_add_build			= 'Add Build to Release';
+$l_edit_build			= 'Edit Build';
+$l_build_name			= 'Build Name';
+$l_build_id			= 'Build ID';
+$l_builds_none			= 'No Builds';
+$l_build_description		= 'Description';
+$l_build_date_received		= 'Build Date Received';
+
+# TESTSET
+$l_testset				= 'Test Set';
+$l_testsets				= 'Test Sets';
+$l_testset_name			= 'Test Set Name';
+$l_testset_id			= 'TestSetID';
+$l_testset_none			= 'No Test Sets';
+$l_testset_date_received	= 'Date Received';
+$l_edit_testset			= 'Edit Testset';
+$l_add_tests			= 'Add Tests';
+$l_add_testset			= 'Add Testset to Build';
+$l_copy_testset			= 'Copy Testset to Build';
+$l_testset_select_group		= 'Select Tests';
+$l_copy_testset_to		= 'Copy Testset';
+$l_no_tests_testset		= 'There are no Tests associated with this TestSet.';
+$l_edit_add_tests		= 'Edit/Add Tests';
+$l_testsets_last_five   = 'Test Sets - Last Five';
+
+
+#########################################################
+# SECTION 9:
+# Admin - words that are related to the Admin section
+#########################################################
+$l_machine			= 'Machine';
+$l_machine_location		= 'Location';
+$l_machine_ip			= 'Machine IP Address';
+$l_test_doc_type		= 'Test Document Type';
+$l_add_area_tested		= 'Add New Test Area';
+$l_add_machine			= 'Add New Machine';
+$l_add_testtype			= 'Add New Test Type';
+$l_add_test_doc_type		= 'Add New Test Document Type';
+$l_add_environment		= 'Add Environment';
+$l_req_doc_type			= 'Requirement Document Type';
+$l_req_functionality		= 'Requirement Functionality';
+$l_add_req_doc_type		= 'Add Requirement Document Type';
+$l_req_area_covered		= 'Requirement Area Covered';
+$l_add_req_area_covered		= 'Add Requirement Area Covered';
+$l_delete_rights		= 'Delete Rights';
+$l_user_rights			= 'User Rights';
+$l_qa_tester			= 'QA Owner';
+$l_ba_owner			= 'BA Owner';
+$l_email_testset		= 'Email Testset';
+$l_email_discussions		= 'Email Discussions';
+$l_email_new_bug		= 'Email New Bug';
+$l_email_update_bug		= 'Email Update Bug';
+$l_email_assigned_bug		= 'Email Assigned Bug';
+$l_email_bugnote_bug		= 'Email Bugnote';
+$l_email_status_bug		= 'Email Status Change';
+$l_no_discussions		= 'There are no discussions.';
+$l_add_user_to_project		= 'Add User(s) To Project';
+$l_top				= 'Top';
+$l_archive_tests		= 'Archive Tests';
+$l_archive_results		= 'Archive Results';
+$l_archive			= 'Archive';
+
+
+#########################################################
+# SECTION 10:
+# Projects - words that are related to the Projects 
+#########################################################
+$l_project_name			= 'Project Name';
+$l_projects			= 'Projects';
+$l_default_project		= 'Default Project';
+$l_manage_projects		= 'Manage Projects';
+$l_manage_project		= 'Manage Project';
+$l_edit_project			= 'Edit Project';
+$l_my_account			= 'My Account';
+$l_add_project			= 'Add Project';
+$l_add_to_projects		= 'Add To Projects';
+$l_project_view_hide		= 'View/Hide Columns';
+$l_project_use_files		= 'Use Files';
+$l_project_enable		= 'Enable';
+$l_project_disable		= 'Disable';
+$l_project_req_upload_path 	= 'Requirements Upload Path';
+$l_project_bug_upload_path	= 'Bug Upload Path';
+$l_project_testplan_upload_path	= 'Test Plan Upload Path';
+$l_project_test_run_upload_path	= 'Test Run Upload Path';
+$l_project_test_upload_path	= 'Test Upload Path';
+$l_project_managers		= 'Managers';
+$l_view_memory_stats		= 'View Memory Stats';
+$l_show_testcase		= 'Testcase';
+$l_show_custom_1		= 'Custom 1';
+$l_show_custom_2		= 'Custom 2';
+$l_show_custom_3		= 'Custom 3';
+$l_show_custom_4		= 'Custom 4';
+$l_show_custom_5		= 'Custom 5';
+$l_show_custom_6		= 'Custom 6';
+$l_show_window			= 'Window';
+$l_show_object			= 'Object';
+$l_show_mem_stats		= 'Memory Stats';
+$l_show_priority		= 'Priority';
+$l_show_test_input		= 'Test Input';
+
+#########################################################
+# SECTION 11:
+# Users - words that are related to the users 
+#########################################################
+$l_user				= 'User';
+$l_users			= 'Users';
+$l_all_users			= 'All Users';
+$l_first_name			= 'First Name';
+$l_last_name			= 'Last Name';
+$l_add_user			= 'Add User';
+$l_add_new_user			= 'Add New User';
+$l_login			= 'Login';
+$l_username			= 'Username';
+$l_password			= 'Password';
+$l_password_confirm		= 'Confirm Password';
+$l_change_password		= 'Change Password';
+$l_save_login			= 'Save Login';
+$l_phone			= 'Phone';
+$l_full_name			= 'Full Name';
+$l_admin			= 'Admin';
+$l_user				= 'User';
+$l_manager			= 'Manager';
+$l_developer		= 'Developer';
+$l_add_user			= 'Add User';
+$l_email			= 'E-Mail';
+$l_user_email			= 'Email';
+$l_email_address		= 'E-Mail Address';
+$l_password_verify		= 'Verify Password';
+$l_access_level			= 'Access Level';
+$l_administrator		= 'Administrator';
+$l_manager			= 'Manager';
+$l_updater			= 'Updater';
+$l_viewer			= 'Viewer';
+$l_enabled			= 'Enabled';
+$l_prefs			= 'Preferences';
+$l_user_rights			= 'User Rights';
+$l_tempest_admin		= 'RTH Administrator';
+$l_tempest_user_rights		= 'RTH User Rights';
+$l_project_user_rights		= 'Project User Rights';
+$l_actions			= 'Actions';
+
+$l_forgot_password		= 'Forgot your password?';
+$l_password_reset_form		= 'This form will reset your password, please enter your email address:	';
+$l_new_reset_password		= "An e-mail has been sent to you with a confirmation link. Please click on this link to reset your password.";
+$l_reset_password		= "Your password has been changed, please check your e-mail for all the details.";
+$l_confirm_password		= 'Confirm Password';
+
+$l_home_welcome			= 'Welcome to RTH';
+
+#########################################################
+# SECTION 12:
+# Reporting - words that are related to reports
+#########################################################
+$l_report_name			= 'Report Name';
+$l_report				= 'Report';
+$l_verifs_passed		= 'Verifications Passed';
+$l_verifs_failed		= 'Verifications Failed';
+$l_back_to_verifs_report	= 'Back to Verifications Report';
+$l_num_bugs			= 'Number of Bugs';
+$l_step_id			= 'StepID';
+$l_action			= 'Action';
+$l_result			= 'Result';
+$l_time_failed			= 'Time Failed';
+$l_status_of			= 'Status of';
+$l_tests_in_ts			= 'Tests in TestSet';
+$l_tests_in_build		= 'Tests in Build';
+$l_all_tests_in			= 'All Tests in';
+$l_num_of_tests_in_ts		= 'Number of Tests in TestSet';
+$l_percent_of_tests		= 'Percentage of Tests';
+$l_percent_of_all_tests		= 'Percentage of all Tests';
+$l_percent_of_tests_in_ts	= 'Percentage of Tests in Testset';
+$l_information			= 'Information';
+$l_tot_num_tests		= 'Total Number of Tests';
+$l_area_tested_desc		= 'View the number of tests executed by Test Area for a selected Release > Build > TestSet.';
+$l_build_status			= 'Build Status';
+$l_build_status_desc		= 'View the status of all tests for a selected Release > Build.';
+$l_failed_verifications		= 'Failed Verifications';
+$l_failed_ver_desc		= 'View detailed information on all failed verifications for a selected Release > Build > TestSet.';
+$l_requirements_coverage	= 'Requirements Coverage';
+$l_requirements_coverage_desc	= 'View the requirements coverage for a selected Release > Build > TestSet';
+$l_signoff_report		= 'Test Signoff';
+$l_signoff_report_desc		= 'Information on tests in a selected Release > Build > TestSet.  Useful for deciding to signoff on testing.';
+$l_report_custom_page		= 'Custom Reporting';
+$l_report_custom_page_desc	= 'Create your own customize reports';
+$l_testsets_status_desc		= 'View the last Test Sets ordered by their creation date';
+$l_testsets_status			= 'Test Sets Status';
+$l_traceability_matrix_report   = 'Traceability Matrix';
+
+#########################################################
+# SECTION 13:
+# Help - words that are related to the Help section
+#########################################################
+$l_help_index			= 'Help Index';
+$l_help_return_to_index		= 'Return To: Help Index';
+$l_help_requirements		= 'Help: Requirements';
+$l_help_tests			= 'Help: Tests';
+$l_help_releases		= 'Help: Adding/Editing a Release, Build, or Test Set';
+$l_help_run_test		= 'Help: Running a Test & Viewing Results';
+$l_help_manage_proj		= 'Help: Managing A Project';
+# Requirements Help Index
+$l_help_req_overview		= 'Requirements: Overview';
+$l_help_req_add			= 'Adding A New Requirement';
+$l_help_req_view		= 'Viewing Requirements';
+$l_help_req_detail		= 'Viewing Requirement Detail';
+$l_help_req_add_version		= 'Adding a New Version';
+$l_help_req_history		= 'View the Requirement History';
+$l_help_req_assoc		= 'Associating a Requirement to other Requirements';
+$l_help_req_test_assoc		= 'Associating a Requirement to Tests';
+# Tests Help Index
+$l_help_test_overview		= 'Tests: Overview';
+$l_help_test_add		= 'Adding a New Test';
+$l_help_test_view		= 'Viewing Tests';
+$l_help_test_detail		= 'Viewing Test Detail';
+$l_help_test_add_steps		= 'Adding Test Steps';
+$l_help_test_associate_req	= 'Associating a Test to Requirements';
+# Releases/Builds/Test Sets
+$l_help_release_overview	= 'Release/Build/Test Set: Overview';
+$l_help_add_release		= 'Add/Edit a Release';
+$l_help_add_build		= 'Add/Edit a Build';
+$l_help_add_testset		= 'Add Test Set';
+$l_help_edit_testset		= 'Edit Test Set';
+$l_help_view_testset		= 'Viewing a Test Set';
+# Results
+$l_help_results_overview	= 'Results: Overview';
+$l_help_results_run_test	= 'Run a Test';
+$l_help_results_view_tests	= 'View Test Results';
+$l_help_results_view_testrun	= 'View Test Run';
+$l_help_results_view_verifications	= 'View Verifications';
+# Run Test
+$l_help_run_test_overview	= 'Run Test: Overview';
+$l_help_run_test_manual		= 'Running a Manual Test';
+$l_help_run_test_automated	= 'Running an Automated Test';
+$l_help_run_test_continue	= 'Re-Run or Continue Running a Test';
+$l_help_run_test_link_bug	= 'Linking Defects to a Failed Verification';
+$l_help_run_test_link_reporting	= 'Reporting on Test Execution';
+
+# Manage Project
+$l_help_project_overview	= 'Project Overview';
+$l_help_project_add		= 'Adding a Project';
+$l_help_project_prefs		= 'Editing Project Preferences';
+$l_help_project_users		= 'Adding Users';
+$l_help_project_reqs		= 'Project Preferences for Requirements';
+$l_help_project_tests		= 'Project Preferences for Tests';
+$l_help_project_defects		= 'Project Preferences for Defects';
+
+$l_help_warning_on_meta_data	= 'Please Read';
+$l_help_meta_data_warning_title = 'Please read before adding meta-data';
+$l_help_meta_data_warning_text	= 'It is recomended that users have a thorough understanding
+				  of the RTH reporting section before entering any meta data
+				  as many of the reports hinge on the values entered in the meta 
+				  data fields. A good understanding of your own application is 
+				  also required to populate meta-data fields so that the data 
+				  helps users sort and find the records they want to view.';
+
+#########################################################
+# SECTION 14:
+# Phrases 
+#########################################################
+$l_no_project			= 'No project matches criteria.';
+$l_no_testsets 			= 'There are no TestSets in this Build.';
+$l_no_releases			= 'There are no Releases.';
+$l_no_builds			= 'There are no Builds in this Release.';
+$l_no_tests			= 'There are no Tests matching criteria specified.';
+$l_no_posts			= 'There are no posts.';
+$l_ask_close_discussion		= 'Are you sure you want to close this discussion?';
+$l_no_requirements		= 'There are no Requirements matching criteria specified.';
+$l_no_related_reqs		= 'There are no Requirements related to this Requirement.';
+$l_no_related_tests		= 'There are no Tests related to this Requirement.';
+$l_no_related_releases		= 'There are no Releases related to this Requirement.';
+$l_no_testsets_in_project 	= 'There are no TestSets in this Project.';
+$l_no_testsets_in_build 	= 'There are no TestSets the latest Build.';
+$l_no_builds_in_release		= 'There are no Builds in the latest Release.';
+$l_no_releases_in_project	= 'There are no Releases created in this project.';
+$l_no_tests_in_project	 	= 'There are no Tests created in this project.';
+$l_no_requirements_in_project	= 'There are no Requirements created in this project.';
+$l_no_archive_results		= 'There are no Results.';
+$l_no_archive_tests		= 'There are no Tests.';
+$l_no_areas_covered		= 'There are no Requirement Areas Covered in this project.';
+$l_no_reqdoctype		= 'There are no Requirement Document Types in this project.';
+$l_no_reqfunctionality		= 'There is no Requirement Functionality in this project.';
+$l_no_testareatested		= 'There are no Test Areas in this project.';
+$l_no_testenvironment		= 'There are no Test Environments in this project.';
+$l_no_testmachines		= 'There are no Test Machines in this project.';
+$l_no_testdoctype		= 'There are no Test Document Types in this project.';
+$l_no_testtype			= 'There are no Test Types in this project.';
+$l_no_project_users		= 'There are no users assigned to this project.';
+$l_no_req_assoc			= 'There are no Requirements associated with this Test.';
+$l_no_bug_categories		= 'There are no Categories associated with this project.';
+$l_no_bug_components		= 'There are no Components associated with this project.';
+$l_no_screens			= 'There are no Screens';
+$l_no_fields			= 'There are no Fields entered for this Screen';
+$l_no_field_values		= 'There are no Field Values entered for this Field';
+$l_delete_confirm_suppdoc		= 'Are you sure you want to delete this Supporting Doc?';
+$l_error_empty_id_field		= 'You must enter a test ID!';
+$l_home_notes			= 'This tool has been designed to do the following:
+
+				<UL>
+				  <LI>Store requirements under version control
+				  <LI>Allow attributes to be assigned to every requirement (e.g. priority, risk, estimates, release)
+				  <LI>All requirements to be baselined
+				  <LI>Allow users to relate requirements to other requirements
+				  <LI>Link Tests and Requirements 
+				  <LI>Store Test artifacts under version control
+				  <LI>Capture both Manual and Automated Test Results
+				  <LI>Easily link to any web-based Change Control or Bug Tracking system
+				  <LI>Provide reporting on Requirments, Tests, and Test Results
+				 </UL>';
+
+#########################################################
+# SECTION 15:
+# Deletion Messages: Phrases related to deleting data 
+#########################################################
+$l_del_msg[DEL_TEST_RUN]	  		= "Are you sure you want to DELETE this Test Run?";
+$l_del_msg[DEL_RELEASE]		  		= "Are you sure you want to DELETE this Release?\nThis will delete all Builds, Test Sets, and Test Results associated to this Release.";
+$l_del_msg[DEL_BUILD]		  		= "Are you sure you want to DELETE this Build?\nThis will delete all Test Sets and Test Results associated to this Build.";
+$l_del_msg[DEL_TESTSET]		  		= "Are you sure you want to DELETE this Test Set?\nThis will delete all Test Results associated to this Test Set.";
+$l_del_msg[DEL_USER_FROM_PROJECT]		= "Are you sure you want to REMOVE this user?\n";
+$l_del_msg[DEL_AREA_FROM_PROJECT]		= "Are you sure you want to REMOVE this Area Tested?\n";
+$l_del_msg[DEL_ENVIRONMENT_FROM_PROJECT]	= "Are you sure you want to REMOVE this Environment?\n";
+$l_del_msg[DEL_REQ_DOC_TYPE_FROM_PROJECT]	= "Are you sure you want to REMOVE this Requirement Document Type?\n";
+$l_del_msg[DEL_MACHINE_FROM_PROJECT]		= "Are you sure you want to REMOVE this Machine?\n";
+$l_del_msg[DEL_TESTTYPE_FROM_PROJECT]		= "Are you sure you want to REMOVE this Test Type?\n";
+$l_del_msg[DEL_TEST_DOC_TYPE_FROM_PROJECT]	= "Are you sure you want to REMOVE this Test Document Type?\n";
+$l_del_msg[DEL_TEST_STEP]			= "Are you sure you want to DELETE this Test Step?\n";
+$l_del_msg[DEL_PROJECT]				= "Are you sure you want to DELETE this Project?\n";
+$l_del_msg[DEL_USER]				= "Are you sure you want to DELETE this User?\n";
+$l_del_msg[DEL_REQ_AREA_FROM_PROJECT]		= "Are you sure you want to DELETE this Requirement Area?\n";
+$l_del_msg[DEL_REQUIREMENT]			= "Are you sure you want to DELETE this Requirement and all previous versions?\n";
+$l_del_msg[DEL_REQ_FUNCT_FROM_PROJECT]		= "Are you sure you want to DELETE this Functionality?\n";
+$l_del_msg[DEL_TEST]				= "Are you sure you want to DELETE this Test?\n";
+$l_del_msg[DEL_NEWS]				= "Are you sure you want to DELETE this News post?\n";
+$l_del_msg[DEL_BUG_CATEGORY_FROM_PROJECT]	= "Are you sure you want to DELETE this Category?\n";
+$l_del_msg[DEL_BUG_COMPONENT_FROM_PROJECT]	= "Are you sure you want to DELETE this Component?\n";
+$l_del_msg[DEL_BUG]				= "Are you sure you want to DELETE this Defect?\n";
+$l_del_msg[DEL_BUGNOTE]				= "Are you sure you want to DELETE this Note?\n";
+$l_del_msg[DEL_BUG_ASSOC]			= "Are you sure you want to DELETE this relationship?\n";
+$l_del_msg[DEL_TEST_PLAN]			= "Are you sure you want to DELETE this Test Plan?\n";
+$l_del_msg[DEL_TEST_RUN_DOC]			= "Are you sure you want to DELETE this TestRun Document?\n";
+$l_del_msg[DEL_SCREEN]				= "Are you sure you want to DELETE this Screen?\nThis will delete all Fields and Field Values related to this Screen";
+$l_del_msg[DEL_FIELD]				= "Are you sure you want to DELETE this Field?\nThis will delete all Field Values related to this Field.";
+
+#########################################################
+# SECTION 16:
+# Warning and Error Messages: Phrases related to errors 
+#########################################################
+$l_err_msg[INVALID_LOGIN]	  		= "WARNING: Invalid login. Please re-enter your user name and password.";
+$l_err_msg[NO_DEFAULT_PROJ]	  		= "WARNING: You have no default project.  Please contact the system administrator.";
+$l_err_msg[NO_USER_RIGHTS]	  		= "WARNING: You have insufficient user rights.  Please contact the system administrator.";
+$l_err_msg[NOT_LOGGED_IN]	  		= "WARNING: You are not logged in.  Please enter a user name and password.";
+$l_err_msg[COOKIES_NOT_ENABLED]	  		= "WARNING: Cookies must be enabled on your browser to use the Save Login feature. Please enable them and retry.";
+$l_err_msg[PROJECT_SWITCH_FAILED] 		= "WARNING: The switch to a new project failed. Please contact the system administrator.";
+$l_err_msg[REQUIRED_FIELD_MISSING]		= "WARNING: A Required field is missing. Please fill in the missing details.";
+$l_err_msg[INVALID_DATE]   				= "WARNING: An Invalid date was entered. Please re-enter in yyyy-mm-dd format.";
+$l_err_msg[DUPLICATE_TEST_DOC_TYPE]		= "WARNING: Test Document Type already exists. Please choose another name.";
+$l_err_msg[DUPLICATE_REQUIREMENT_DOCTYPE]		= "WARNING: Requirement Document Type already exists. Please choose another name.";
+$l_err_msg[DUPLICATE_REQUIREMENT_FUNCTIONALITY]	= "WARNING: Requirement Functionality already exists. Please choose another name.";
+$l_err_msg[DUPLICATE_ENVIRONMENT_NAME]	= "WARNING: Test Environment already exists. Please choose another name.";
+$l_err_msg[DUPLICATE_TESTTYPE_NAME]		= "WARNING: Test Type already exists. Please choose another name.";
+$l_err_msg[DUPLICATE_BUG_CATEGORY]		= "WARNING: Bug Category already exists. Please choose another category.";
+$l_err_msg[DUPLICATE_BUG_COMPONENT]		= "WARNING: Bug Component already exists. Please choose another component.";
+$l_err_msg[DUPLICATE_MACHINE_NAME]		= "WARNING: Machine Name already exists. Please choose another machine.";
+$l_err_msg[DUPLICATE_IP_ADDRESS]		= "WARNING: IP Address already exists. Please choose another address.";
+$l_err_msg[DUPLICATE_TESTAREA]			= "WARNING: Test Area already exists. Please choose another name.";
+$l_err_msg[DUPLICATE_TESTNAME]			= "WARNING: Test Name already exists. Please choose another name.";
+$l_err_msg[DUPLICATE_AREANAME]			= "WARNING: Requirement Area Covered already exists. Please choose another name.";
+$l_err_msg[DUPLICATE_BUILD_NAME]		= "WARNING: Build Name already exists. Please choose another name.";
+$l_err_msg[DUPLICATE_TESTSET_NAME]		= "WARNING: Test Set Name already exists. Please choose another name.";
+$l_err_msg[PROJECT_DB_NOT_SET]			= "ERROR: No project database has been defined. Please contact the system administrator.";
+$l_err_msg[PROJECT_NOT_EXISTS]			= "ERROR: The project you wanted to view, does not exist.";
+$l_err_msg[NO_RIGHTS_TO_VIEW_PROJECT]	= "ERROR: Permission denied to view that project.";
+$l_err_msg[TEST_NOT_EXISTS]				= "ERROR: The test you wanted to view, does not exist.";
+$l_err_msg[DUPLICATE_RELEASE_NAME]		= "WARNING: Release Name already exists. Please choose another name.";
+$l_err_msg[DUPLICATE_FILE_NAME]			= "ERROR: Duplicate File Name.";
+$l_err_msg[FAILED_FILE_UPLOAD]			= "ERROR: File Upload Failed.";
+$l_err_msg[FAILED_DELETE_DOC]			= "ERROR: Deleting this document failed.";
+$l_err_msg[PASSWORDS_NOT_MATCH]			= "WARNING: Passwords do not match.";
+$l_err_msg[USERNAME_NOT_UNIQUE]			= "ERROR: Username already exits.";
+$l_err_msg[PROJECT_NOT_UNIQUE]			= "ERROR: Project already exits.";
+$l_err_msg[USERNAME_CONTAINS_BLANK]		= "ERROR: Username contains at least one space.";
+$l_err_msg[USERNAME_CONTAINS_INVALID_CHARS]		= "ERROR: Username contains invalid characters, please only input letters and numbers.";
+$l_err_msg[UNABLE_TO_CREATE_PROJECT_FOLDERS]	= "ERROR: Unable to create project folders.";
+$l_err_msg[NO_RIGHTS_TO_VIEW_PAGE]		= "WARNING: You do not have access rights to this page.";
+$l_err_msg[NO_REQ_SELECTED]			= "WARNING: There were no Requirements selected. Please try again.";
+$l_err_msg[PASSWORD_INVALID]			= "ERROR: Password contains invalid characters.";
+$l_err_msg[NO_TESTS_SELECTED]			= "WARNING: There were no Tests selected. Please try again.";
+$l_err_msg[DUPLICATE_REQ_NAME]			= "WARNING: Requirement Name already exists. Please choose another name.";
+$l_err_msg[ERROR_ACCOUNT_NOT_FOUND]		= "ERROR: Account not found.";
+$l_err_msg[ERROR_CANNOT_RESET_PASSWORD]		= "ERROR: Unable to reset your password. <br><br>This may because your password has already been reset using this link, or the link has expired. Please check your e-mail for the new password.";
+$l_err_msg[ERROR_WRONG_HOST]			= "ERROR: You tried to access RTH using the wrong HOST address. If you have bookmarked a different address than ".RTH_URL." please bookmark this page now.";
+$l_err_msg[EMAIL_NOT_UNIQUE]			= "ERROR: Another user exists with the same E-Mail address.";
+$l_err_msg[NO_RIGHTS_TO_PROJECT]		= "ERROR: You do not have rights to view this project.";
+$l_err_msg[COULD_NOT_CREATE_RELATIONSHIP]	= "ERROR: Could not create relationship.";
+$l_err_msg[NO_BUGS_SELECTED]			= "WARNING: There were no Defects selected.  Please try again.";
+$l_err_msg[INVALID_BUG_ID]			= "WARNING: You entered an invalid Defect ID.  Please try again.";
+$l_err_msg[NO_MATCHING_FILE_NAME]		= "ERROR: The file name does not match the name of the previous version.  Please try again";
+$l_err_msg[NO_FILE_SPECIFIED]			= "WARNING: No file specified or file containing no data.  Please try again";
+$l_err_msg[DUPLICATE_SCREEN_NAME]		= "WARNING: Screen Name already exists.  Please try again.";
+$l_err_msg[DUPLICATE_FIELD_NAME]		= "WARNING: Field Name already exists for this Screen.  Please try again.";
+$l_err_msg[TEST_ID_NOT_FOUND]		= 'ERROR: Test does not exist.';
+$l_err_msg[TEST_ID_FIELD_EMPTY]		= 'ERROR: You entered no test Id.';
+$l_err_msg[NUMERIC_ERROR]			= 'ERROR: Please only enter a valid number for test ID.';
+$l_err_msg[NO_SUFFICIENT_RIGHTS]	= 'ERROR: unsufficient permissions to access test in project.';
+
+
+$l_ERROR['ERROR_GENERIC']			= 'ERROR: An error occurred during this action.  You are screwed!';
+$l_ERROR['ERROR_SQL']				= 'ERROR: SQL error detected.  A message has been sent to the system administrator';
+$l_ERROR['ERROR_LANG_STRING_NOT_FOUND']		= 'ERROR: String not found.';
+
+
+
+# --------------------------------------------------------
+# $Log: strings_english.txt,v $
+# Revision 1.33  2009/04/02 11:55:00  sca_gs
+# small modification of footer text
+#
+# Revision 1.32  2009/03/26 08:05:31  sca_gs
+# added new string for correct caption for edit test step page
+#
+# Revision 1.31  2009/03/24 07:53:11  sca_gs
+# fixed misspelling
+#
+# Revision 1.30  2009/01/12 12:02:45  cryobean
+# now permissions are checked before switching to test id/project and an error message is shown on the home_page.php and the user doesn't get logged out if there are unsufficient permissions.
+#
+# Revision 1.29  2009/01/12 09:15:25  cryobean
+# incorporate requirements traceability matrix feature developed by Bruce Butler
+#
+# Revision 1.28  2009/01/09 08:10:53  cryobean
+# implemented feature request 2435387
+# included the not finished tests of testsets in calculation
+# fix was sent by Bruce Butler
+#
+# Revision 1.27  2008/08/08 09:30:32  peter_thal
+# added direct navigate to testid function above project switch select box
+#
+# Revision 1.26  2008/08/05 10:42:43  peter_thal
+# small changes: delete confirm SuppDocs, Error message file upload, disabled sorting teststeps
+#
+# Revision 1.25  2008/07/25 09:50:13  peter_thal
+# added lock testset feature
+# disabled detail column in test result, because functionality is not implemented yet
+#
+# Revision 1.24  2008/07/23 14:53:51  peter_thal
+# delete supporting docs feature added (linux/unix)
+#
+# Revision 1.23  2008/07/17 13:54:12  peter_thal
+# added new feature: test sets status (overview)
+# +fixed some bugs with project_id parameter in testdetail_page references
+#
+# Revision 1.22  2008/07/10 07:28:30  peter_thal
+# security update:
+# disabled writing spaces or apostrophe and others into login textfields
+#
+# Revision 1.21  2008/07/09 07:13:27  peter_thal
+# added direct linking of test detail by adding project_id link parameter
+# added automated project switching if necessary
+#
+# Revision 1.20  2008/07/01 13:46:24  peter_thal
+# now usernames can't contain whitespaces
+#
+# Revision 1.19  2008/03/25 12:59:06  cryobean
+# fixed bug with mass update of testers in test library
+#
+# Revision 1.18  2008/01/22 08:26:15  cryobean
+# added strings for copy test feature
+#
+# Revision 1.17  2007/11/22 09:37:26  cryobean
+# bugfixes
+#
+# Revision 1.16  2007/02/12 07:16:36  gth2
+# adding email functionality on test update - gth
+#
+# Revision 1.15  2006/12/05 05:27:35  gth2
+# adding code to display deleted users - gth
+#
+# Revision 1.14  2006/10/05 02:42:19  gth2
+# adding file upload to the bug page - gth
+#
+# Revision 1.13  2006/09/27 23:58:55  gth2
+# Adding functionality to link a change request (defect_id) to a requirement - gth
+#
+# Revision 1.12  2006/05/03 21:55:54  gth2
+# adding screen and field to language file - gth
+#
+# Revision 1.11  2006/04/11 12:11:02  gth2
+# create a test version when uploading test steps - gth
+#
+# Revision 1.10  2006/04/08 13:38:18  gth2
+# Adding to reporting module
+#
+# Revision 1.9  2006/02/27 17:49:54  gth2
+# added autopass - gth
+#
+# Revision 1.7  2006/02/06 13:05:08  gth2
+# adding to help section - gth
+#
+# Revision 1.6  2006/01/16 13:27:48  gth2
+# adding excel integration - gth
+#
+# Revision 1.5  2006/01/09 02:02:24  gth2
+# fixing some defects found while writing help file
+#
+# Revision 1.4  2006/01/06 00:46:46  gth2
+# correcting some minor problems with strings - gth
+#
+# Revision 1.3  2005/12/08 19:39:31  gth2
+# updating reports containing calls to jp-graph - gth
+#
+# Revision 1.2  2005/12/06 13:56:50  gth2
+# Adding requirement priority and last updated - gth
+#
+# Revision 1.1.1.1  2005/11/30 23:01:58  gth2
+# importing initial version - gth
+#
+# --------------------------------------------------------
+?>

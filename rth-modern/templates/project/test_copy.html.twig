@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Copy Test Case #{{ test.testid }} - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Copy Test Case</h1>
+            <p class="subtitle">Duplicate test case & steps to another project workspace</p>
+        </div>
+        <a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Cancel & Back</a>
+    </div>
+</div>
+
+<div class="project-card" style="max-width: 600px; margin-top: 1rem;">
+    <h3 style="color: var(--primary); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+        <span class="material-symbols-outlined" style="font-size: 20px;">content_copy</span>
+        <span>Copying: {{ test.testsuitename }}</span>
+    </h3>
+
+    <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: var(--radius-lg); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 1.5rem; font-size: 13px; line-height: 1.6;">
+        <div style="display: grid; grid-template-columns: 100px 1fr; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-muted);">Source Project:</span>
+            <span style="font-weight: 600; color: var(--text-main);">{{ project.project_name }}</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 100px 1fr; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-muted);">Test ID:</span>
+            <span style="font-family: 'JetBrains Mono', monospace; color: var(--primary);">TC-{{ test.testid }}</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 100px 1fr; gap: 0.5rem;">
+            <span style="color: var(--text-muted);">Type/Area:</span>
+            <span style="color: var(--text-main);">{{ test.testtype }} / {{ test.areatested|default('—') }}</span>
+        </div>
+    </div>
+
+    <form method="post">
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="target_project_id" style="font-size: 13px; font-weight: 600; color: var(--text-main); display: block; margin-bottom: 0.5rem;">Select Target Project Workspace <span style="color: var(--danger);">*</span></label>
+            <select id="target_project_id" name="target_project_id" class="form-control" style="width: 100%;" required>
+                {% for p in projects %}
+                    <option value="{{ p.project_id }}" {{ p.project_id == project.project_id ? 'selected' : '' }}>
+                        {{ p.project_name }} {% if p.project_id == project.project_id %}(Current){% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.4;">
+                <span style="color: var(--primary); font-weight: 600;">Note:</span> All manual steps associated with this test case will be fully duplicated under the new test case number. If you copy within the same project, " - Copy" will be appended to the test case name.
+            </p>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn-primary" style="padding: 0.6rem 1.5rem; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">content_copy</span>
+                <span>Copy Test Case</span>
+            </button>
+            <a href="{{ path('app_project_test_detail', {id: project.project_id, testId: test.testid}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none; padding: 0.6rem 1.5rem; font-size: 13px; font-weight: 600; display: flex; align-items: center;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+services:
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring-network
+
+  docker-stats-exporter:
+    image: wywywywy/docker_stats_exporter:latest
+    container_name: docker-stats-exporter
+    ports:
+      - "9487:9487"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - DOCKERSTATS_PORT=9487
+      - DOCKERSTATS_INTERVAL=15
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.1
+    container_name: node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($|/)'
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+
+networks:
+  monitoring-network:
+    name: monitoring-network
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  grafana-data:

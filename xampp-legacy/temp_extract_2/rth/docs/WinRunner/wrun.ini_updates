@@ -1,0 +1,8 @@
+Add these values to the wrun.ini file just under the [WrEnv] section
+
+
+TESTSETID=1
+WRITETORTH=1
+ENVIRONMENT=QA
+SYSTEM_MOD=1
+USER_MOD=1

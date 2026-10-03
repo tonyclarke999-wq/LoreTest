@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reporting Dashboard - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div>
+        <h1>Reporting</h1>
+        <p class="subtitle">Standard and custom reports for {{ project.project_name }}</p>
+    </div>
+</div>
+
+<div class="table-container" style="margin-top: 1.5rem;">
+    <table style="width: 100%; text-align: left; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Report Name</th>
+                <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="border-bottom: 1px solid var(--glass-border);">
+                <td style="padding: 1rem 1.25rem;"><a href="{{ path('app_report_custom_build', {id: project.project_id}) }}" style="color: var(--primary-light); font-weight: 500;">Custom Reporting</a></td>
+                <td style="padding: 1rem 1.25rem; color: var(--text-main);">Create your own customize reports</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--glass-border);">
+                <td style="padding: 1rem 1.25rem;"><a href="{{ path('app_report_test_area', {id: project.project_id}) }}" style="color: var(--primary-light); font-weight: 500;">Test Area</a></td>
+                <td style="padding: 1rem 1.25rem; color: var(--text-main);">View the number of tests executed by Test Area for a selected Release > Build > TestSet.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--glass-border);">
+                <td style="padding: 1rem 1.25rem;"><a href="{{ path('app_report_build_status', {id: project.project_id}) }}" style="color: var(--primary-light); font-weight: 500;">Build Status</a></td>
+                <td style="padding: 1rem 1.25rem; color: var(--text-main);">View the status of all tests for a selected Release > Build.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--glass-border);">
+                <td style="padding: 1rem 1.25rem;"><a href="{{ path('app_report_failed_verifications', {id: project.project_id}) }}" style="color: var(--primary-light); font-weight: 500;">Failed Verifications</a></td>
+                <td style="padding: 1rem 1.25rem; color: var(--text-main);">View detailed information on all failed verifications for a selected Release > Build > TestSet.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--glass-border);">
+                <td style="padding: 1rem 1.25rem;"><a href="{{ path('app_report_req_coverage', {id: project.project_id}) }}" style="color: var(--primary-light); font-weight: 500;">Requirements Coverage</a></td>
+                <td style="padding: 1rem 1.25rem; color: var(--text-main);">View the requirements coverage for a selected Release > Build > TestSet.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--glass-border);">
+                <td style="padding: 1rem 1.25rem;"><a href="{{ path('app_report_test_signoff', {id: project.project_id}) }}" style="color: var(--primary-light); font-weight: 500;">Test Signoff</a></td>
+                <td style="padding: 1rem 1.25rem; color: var(--text-main);">Information on tests in a selected Release > Build > TestSet. Useful for deciding to signoff on testing.</td>
+            </tr>
+            <tr>
+                <td style="padding: 1rem 1.25rem;"><a href="{{ path('app_report_test_sets', {id: project.project_id}) }}" style="color: var(--primary-light); font-weight: 500;">Test Sets Status</a></td>
+                <td style="padding: 1rem 1.25rem; color: var(--text-main);">View the last Test Sets ordered by their creation date.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

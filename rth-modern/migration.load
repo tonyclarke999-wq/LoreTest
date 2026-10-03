@@ -1,0 +1,16 @@
+LOAD DATABASE
+     FROM mysql://root@host.docker.internal:33066/rth
+     INTO postgresql://app:!ChangeMe!@host.docker.internal:54321/rth_modern
+
+ WITH include drop, create tables, create indexes, reset sequences,
+      workers = 8, concurrency = 1,
+      multiple readers per thread, rows per range = 50000
+
+  SET maintenance_work_mem to '128MB', work_mem to '12MB'
+
+ CAST type datetime to timestamptz,
+      type tinyint to smallint
+
+ BEFORE LOAD DO
+   $$ drop schema if exists public cascade; $$,
+   $$ create schema public; $$;

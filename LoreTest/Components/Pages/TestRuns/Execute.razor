@@ -8,147 +8,164 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
+@inject IStringLocalizer<SharedResource> L
+@inject LoreTest.Utilities.JiraIntegrationService JiraService
 @attribute [Authorize]
 
-<PageTitle>Execute Test Run</PageTitle>
+<PageTitle>@L["ExecuteTestRun"]</PageTitle>
 
 @if (testRun == null)
 {
     <div class="p-5 text-center">
         <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden">@L["Loading"]</span>
         </div>
-        <p class="mt-2">Loading Test Run #@RunId...</p>
+        <p class="mt-2">@string.Format(L["LoadingRunPrefix"], RunId)</p>
     </div>
 }
 else if (testRun.Status == "Completed")
 {
     <div class="alert alert-success">
-        <h4 class="alert-heading">Execution Completed!</h4>
-        <p>This test run was completed on @testRun.EndTime?.ToLocalTime().</p>
+        <h4 class="alert-heading">@L["ExecutionCompleted"]</h4>
+        <p>@string.Format(L["RunCompletedOn"], testRun.EndTime?.ToLocalTime())</p>
         <hr>
-        <a href="/testruns/details/@testRun.Id" class="btn btn-success">View Final Results</a>
+        <a href="/testruns/details/@testRun.Id" class="btn btn-success">@L["ViewFinalResults"]</a>
     </div>
 }
 else
 {
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>Run #@testRun.RunNumber <small class="text-muted fs-5">Execution</small></h1>
-        <div class="text-end">
-            <div class="fw-bold">@testRun.Project?.Title</div>
-            <div class="text-muted">@testRun.TestSuite?.Title</div>
-        </div>
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <div class="headline-md">@string.Format(L["RunNumberPrefix"] + " {0}", testRun.RunNumber) <small class="text-muted fs-6">@L["Execution"]</small></div>
+        <div class="body-sm text-muted mt-1">@testRun.Project?.Title &nbsp;•&nbsp; @testRun.TestSuite?.Title</div>
     </div>
-
-    <div class="progress mb-4" style="height: 25px;">
+    <div class="text-end">
         @{
             var totalSteps = flattenedSteps.Count;
             var completedSteps = flattenedSteps.Count(s => s.StepResult.Status != "Not Run");
             var percent = totalSteps > 0 ? (int)((double)completedSteps / totalSteps * 100) : 0;
         }
-        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" 
-             style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">
-            @percent% Complete (@completedSteps / @totalSteps Steps)
+        <div class="body-sm fw-bold mb-1">@percent% @L["Complete"]</div>
+        <div class="progress" style="height: 6px; width: 200px; background-color: var(--surface-container-high);">
+            <div class="progress-bar bg-success" style="width: @percent%;"></div>
         </div>
     </div>
+</div>
 
-    @if (currentStepIndex >= 0 && currentStepIndex < flattenedSteps.Count)
-    {
-        var current = flattenedSteps[currentStepIndex];
-        
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                <span>
-                    <strong>Test Case:</strong> @current.CaseResult.TestCase?.Title 
-                    <small class="ms-2 text-info">(Case @(currentCaseIndex + 1) of @testRun.CaseResults.Count)</small>
+@if (currentStepIndex >= 0 && currentStepIndex < flattenedSteps.Count)
+{
+    var current = flattenedSteps[currentStepIndex];
+    
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <span class="material-symbols-outlined me-2 text-info">assignment</span>
+                <span class="body-md fw-bold">@L["TestCase"]: @current.CaseResult.TestCase?.Title</span>
+                <span class="badge-custom ms-3" style="background: rgba(255,255,255,0.1); color: white;">
+                    @string.Format(L["CaseOfTotal"], currentCaseIndex + 1, testRun.CaseResults.Count)
                 </span>
-                <span class="badge bg-light text-dark">Step @current.StepResult.TestStep?.StepNumber</span>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 border-end">
-                        <h6 class="text-uppercase text-muted fw-bold small mb-3">Requirements</h6>
-                        <div class="mb-3">
-                            <label class="fw-bold d-block mb-1">Step Description:</label>
-                            <div class="p-2 bg-light border rounded">
-                                @((MarkupString)(current.StepResult.TestStep?.Description ?? "<em>No description provided.</em>"))
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="fw-bold d-block mb-1">Expected Result:</label>
-                            <div class="p-2 bg-light border rounded">
-                                @((MarkupString)(current.StepResult.TestStep?.ExpectedResult ?? "<em>No expected result defined.</em>"))
-                            </div>
+            <span class="badge bg-light text-dark fw-bold">@L["Step"] @current.StepResult.TestStep?.StepNumber</span>
+        </div>
+        <div class="card-body p-4 p-md-5">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="label-caps text-muted mb-3">@L["Requirements"]</div>
+                    
+                    <div class="mb-4">
+                        <div class="title-xs mb-2">@L["StepDescription"]</div>
+                        <div class="p-3 bg-light rounded border-start border-4 border-primary">
+                            @((MarkupString)(current.StepResult.TestStep?.Description ?? $"<em>{L["NoDescriptionProvided"]}</em>"))
                         </div>
                     </div>
-                    <div class="col-md-6 ps-md-4">
-                        <h6 class="text-uppercase text-muted fw-bold small mb-3">Actual Execution</h6>
-                        
-                        <div class="mb-4">
-                            <label class="fw-bold d-block mb-2">Set Status:</label>
-                            <div class="btn-group w-100" role="group">
-                                <button type="button" class="btn @(current.StepResult.Status == "Pass" ? "btn-success" : "btn-outline-success")"
-                                        @onclick='() => SetStepStatus("Pass")'>
-                                    <i class="bi bi-check-circle me-1"></i> PASS
-                                </button>
-                                <button type="button" class="btn @(current.StepResult.Status == "Fail" ? "btn-danger" : "btn-outline-danger")"
-                                        @onclick='() => SetStepStatus("Fail")'>
-                                    <i class="bi bi-x-circle me-1"></i> FAIL
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="actualResult" class="fw-bold d-block mb-2">Actual Result / Notes:</label>
-                            <textarea id="actualResult" class="form-control" rows="5" 
-                                      placeholder="Describe what actually happened..."
-                                      @bind="current.StepResult.ActualResult"></textarea>
+                    
+                    <div class="mb-0">
+                        <div class="title-xs mb-2">@L["ExpectedResult"]</div>
+                        <div class="p-3 bg-light rounded border-start border-4 border-success">
+                            @((MarkupString)(current.StepResult.TestStep?.ExpectedResult ?? $"<em>{L["NoExpectedResultDefined"]}</em>"))
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="card-footer bg-white d-flex justify-content-between">
-                <button class="btn btn-outline-secondary" @onclick="PrevStep" disabled="@(currentStepIndex == 0)">
-                    <i class="bi bi-arrow-left"></i> Previous Step
-                </button>
-                
-                @if (currentStepIndex < flattenedSteps.Count - 1)
-                {
-                    <button class="btn btn-primary" @onclick="NextStep" disabled="@(current.StepResult.Status == "Not Run")">
-                        Next Step <i class="bi bi-arrow-right"></i>
-                    </button>
-                }
-                else
-                {
-                    <button class="btn btn-success px-5" @onclick="FinishRun" disabled="@(current.StepResult.Status == "Not Run")">
-                        Complete Test Run
-                    </button>
-                }
+
+                <div class="col-lg-6 ps-lg-5 border-start">
+                    <div class="label-caps text-muted mb-3">@L["ActualExecution"]</div>
+                    
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <button type="button" class="btn w-100 py-3 fw-bold d-flex flex-column align-items-center gap-1 @(current.StepResult.Status == "Pass" ? "btn-success" : "btn-outline-success")"
+                                    @onclick='() => SetStepStatus("Pass")'>
+                                <span class="material-symbols-outlined">check_circle</span>
+                                @L["PASS"]
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn w-100 py-3 fw-bold d-flex flex-column align-items-center gap-1 @(current.StepResult.Status == "Fail" ? "btn-danger" : "btn-outline-danger")"
+                                    @onclick='() => SetStepStatus("Fail")'>
+                                <span class="material-symbols-outlined">cancel</span>
+                                @L["FAIL"]
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button type="button" class="btn btn-warning w-100 py-2 fw-bold d-flex align-items-center justify-content-center" @onclick="OpenBugModal">
+                            <span class="material-symbols-outlined me-2">bug_report</span> @L["ReportBug"]
+                        </button>
+                    </div>
+
+                    <div class="mb-0">
+                        <label for="actualResult" class="title-xs d-block mb-2">@L["ActualResultNotes"]</label>
+                        <textarea id="actualResult" class="form-control" rows="4" 
+                                  placeholder="@L["DescribeWhatHappened"]"
+                                  @bind="current.StepResult.ActualResult"></textarea>
+                    </div>
+                </div>
             </div>
         </div>
+        <div class="card-footer bg-light p-3 d-flex justify-content-between border-0">
+            <button class="btn btn-outline-primary d-flex align-items-center" @onclick="PrevStep" disabled="@(currentStepIndex == 0)">
+                <span class="material-symbols-outlined me-2">arrow_back</span> @L["PreviousStep"]
+            </button>
+            
+            @if (currentStepIndex < flattenedSteps.Count - 1)
+            {
+                <button class="btn btn-primary px-4 d-flex align-items-center" @onclick="NextStep" disabled="@(current.StepResult.Status == "Not Run")">
+                    @L["NextStep"] <span class="material-symbols-outlined ms-2">arrow_forward</span>
+                </button>
+            }
+            else
+            {
+                <button class="btn btn-success px-5 fw-bold d-flex align-items-center" @onclick="FinishRun" disabled="@(current.StepResult.Status == "Not Run")">
+                    @L["CompleteTestRun"] <span class="material-symbols-outlined ms-2">task_alt</span>
+                </button>
+            }
+        </div>
+    </div>
 
-        <div class="mt-4">
-            <h6>Run Progress Log</h6>
-            <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
-                <table class="table table-sm table-hover border">
-                    <thead class="sticky-top bg-white border-bottom">
+    <div class="mt-5">
+        <div class="label-caps text-muted mb-3">@L["RunProgressLog"]</div>
+        <div class="card p-0 overflow-hidden">
+            <div class="table-responsive" style="max-height: 250px;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light sticky-top">
                         <tr>
-                            <th>Step</th>
-                            <th>Case</th>
-                            <th>Status</th>
+                            <th style="width: 80px">@L["Step"]</th>
+                            <th>@L["Case"]</th>
+                            <th class="text-end" style="width: 120px">@L["Status"]</th>
                         </tr>
                     </thead>
                     <tbody>
                         @for (int i = 0; i < flattenedSteps.Count; i++)
                         {
                             var s = flattenedSteps[i];
-                            <tr class="@(i == currentStepIndex ? "table-primary" : "")" style="cursor:pointer" @onclick="() => currentStepIndex = i">
-                                <td>@s.StepResult.TestStep?.StepNumber</td>
-                                <td class="text-truncate" style="max-width: 200px;">@s.CaseResult.TestCase?.Title</td>
-                                <td>
-                                    @if (s.StepResult.Status == "Pass") { <span class="badge bg-success">P</span> }
-                                    else if (s.StepResult.Status == "Fail") { <span class="badge bg-danger">F</span> }
-                                    else { <span class="badge bg-secondary">-</span> }
+                            var isActive = i == currentStepIndex;
+                            <tr class="@(isActive ? "table-primary" : "")" style="cursor:pointer" @onclick="() => currentStepIndex = i">
+                                <td class="data-mono">@s.StepResult.TestStep?.StepNumber</td>
+                                <td class="body-sm @(isActive ? "fw-bold" : "")">@s.CaseResult.TestCase?.Title</td>
+                                <td class="text-end pe-3">
+                                    @if (s.StepResult.Status == "Pass") { <span class="badge-custom" data-status="Pass">@L["P"]</span> }
+                                    else if (s.StepResult.Status == "Fail") { <span class="badge-custom" data-status="Fail">@L["F"]</span> }
+                                    else { <span class="badge-custom" data-status="Pending">—</span> }
                                 </td>
                             </tr>
                         }
@@ -156,7 +173,99 @@ else
                 </table>
             </div>
         </div>
-    }
+    </div>
+}
+}
+
+@if (showBugModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg shadow-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="bi bi-bug-fill me-2"></i>@L["ReportBugFromExecution"]</h5>
+                    <button type="button" class="btn-close" @onclick="() => showBugModal = false" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!isBugCreated)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">@L["Title"]</label>
+                            <input type="text" class="form-control" @bind="newBug.Title" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">@L["DescriptionReproSteps"]</label>
+                            <textarea class="form-control" rows="5" @bind="newBug.Description"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">@L["Severity"]</label>
+                                <select class="form-select" @bind="newBug.Severity">
+                                    @foreach (var val in Enum.GetValues<BugSeverity>()) { <option value="@val">@L[val.ToString()]</option> }
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">@L["Priority"]</label>
+                                <select class="form-select" @bind="newBug.Priority">
+                                    @foreach (var val in Enum.GetValues<BugPriority>()) { <option value="@val">@L[val.ToString()]</option> }
+                                </select>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success">Bug created successfully!</div>
+                        @if (canCreateJiraBug)
+                        {
+                            <div class="card border border-warning shadow-sm mb-3">
+                                <div class="card-header bg-warning text-dark fw-bold d-flex align-items-center">
+                                    <span class="material-symbols-outlined me-2">sync</span> Sync with Jira
+                                </div>
+                                <div class="card-body bg-light">
+                                    <div class="mb-3">
+                                        <label for="jiraKey" class="form-label fw-bold">Jira Project Key or Parent Issue Reference</label>
+                                        <input id="jiraKey" type="text" class="form-control" @bind="jiraProjectOrIssueKey" placeholder="e.g. PROJ or PROJ-123" />
+                                        <div class="form-text">Specify the Jira project key (like 'PROJ') or link it to a parent issue (like 'PROJ-123').</div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary w-100 fw-bold py-2 d-flex align-items-center justify-content-center" @onclick="CreateJiraBug" disabled="@(isCreatingJiraBug || string.IsNullOrWhiteSpace(jiraProjectOrIssueKey))">
+                                        @if (isCreatingJiraBug)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        }
+                                        Create JIRA Bug
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(jiraBugError))
+                        {
+                            <div class="alert alert-danger mb-3">@jiraBugError</div>
+                        }
+                        @if (!string.IsNullOrEmpty(newBug.JiraBugReference))
+                        {
+                            <div class="alert alert-info">
+                                Jira Ticket Created: 
+                                <a href="@($"{jiraBaseUrl?.TrimEnd('/')}/browse/{newBug.JiraBugReference}")" target="_blank">
+                                    @newBug.JiraBugReference
+                                </a>
+                            </div>
+                        }
+                    }
+                </div>
+                <div class="modal-footer">
+                    @if (!isBugCreated)
+                    {
+                        <button type="button" class="btn btn-secondary" @onclick="CloseBugModal">@L["Cancel"]</button>
+                        <button type="button" class="btn btn-warning" @onclick="SaveBugFromExecution">@L["SaveBugContinue"]</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-secondary" @onclick="CloseBugModal">Close</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 @code {
@@ -166,6 +275,15 @@ else
     private List<FlatStep> flattenedSteps = new();
     private int currentStepIndex = 0;
     private int currentCaseIndex => flattenedSteps.Count > currentStepIndex ? testRun!.CaseResults.ToList().IndexOf(flattenedSteps[currentStepIndex].CaseResult) : 0;
+
+    private bool showBugModal = false;
+    private bool isBugCreated = false;
+    private bool canCreateJiraBug = false;
+    private bool isCreatingJiraBug = false;
+    private string? jiraBugError;
+    private string? jiraBaseUrl;
+    private string jiraProjectOrIssueKey = "";
+    private Bug newBug = new();
 
     private class FlatStep
     {
@@ -199,6 +317,9 @@ else
             NavigationManager.NavigateTo("/projects");
             return;
         }
+
+        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+        jiraBaseUrl = settings?.JiraBaseUrl;
 
         // Flatten steps for easier iteration
         foreach (var cr in testRun.CaseResults.OrderBy(cr => cr.Id))
@@ -271,5 +392,85 @@ else
         await DbContext.SaveChangesAsync();
 
         NavigationManager.NavigateTo($"/testruns/details/{testRun.Id}");
+    }
+
+    private void OpenBugModal()
+    {
+        if (currentStepIndex < 0 || currentStepIndex >= flattenedSteps.Count) return;
+        
+        var current = flattenedSteps[currentStepIndex];
+        newBug = new Bug
+        {
+            Title = $"Bug in {current.CaseResult.TestCase?.Title}",
+            Description = $"Found during execution of Run #{testRun?.RunNumber}.\n\nTest Case: {current.CaseResult.TestCase?.Title}\nStep: {current.StepResult.TestStep?.Description}\n\nReproduction Steps:\n1. ",
+            ExpectedResult = current.StepResult.TestStep?.ExpectedResult,
+            ActualResult = current.StepResult.ActualResult,
+            Status = BugStatus.Open,
+            Severity = BugSeverity.Major,
+            Priority = BugPriority.Medium,
+            ReportedDate = DateTime.UtcNow,
+            ProjectId = testRun?.TestProjectId,
+            Project = testRun?.Project
+        };
+        isBugCreated = false;
+        canCreateJiraBug = false;
+        jiraBugError = null;
+        jiraProjectOrIssueKey = testRun?.Project?.JiraReference ?? "";
+        showBugModal = true;
+    }
+
+    private void CloseBugModal()
+    {
+        showBugModal = false;
+    }
+
+    private async Task SaveBugFromExecution()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user != null)
+        {
+            newBug.ReporterId = user.Id;
+        }
+
+        DbContext.Bugs.Add(newBug);
+        await DbContext.SaveChangesAsync();
+        
+        isBugCreated = true;
+        SetStepStatus("Fail");
+
+        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+        if (settings != null && !string.IsNullOrWhiteSpace(settings.JiraApiToken) && !string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
+        {
+            canCreateJiraBug = true;
+        }
+    }
+
+    private async Task CreateJiraBug()
+    {
+        isCreatingJiraBug = true;
+        jiraBugError = null;
+        try
+        {
+            var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+            if (settings == null) return;
+
+            string newJiraKey = await JiraService.CreateBugAsync(newBug, jiraProjectOrIssueKey, settings);
+            newBug.JiraBugReference = newJiraKey;
+            
+            // Save to database
+            DbContext.Bugs.Update(newBug);
+            await DbContext.SaveChangesAsync();
+            
+            canCreateJiraBug = false;
+        }
+        catch (Exception ex)
+        {
+            jiraBugError = ex.Message;
+        }
+        finally
+        {
+            isCreatingJiraBug = false;
+        }
     }
 }

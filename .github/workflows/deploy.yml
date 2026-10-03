@@ -1,0 +1,171 @@
+# Force trigger CI/CD pipeline
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup .NET SDK (Manual Install)
+        run: |
+          curl -sSL https://dot.net/v1/dotnet-install.sh -O
+          chmod +x dotnet-install.sh
+          ./dotnet-install.sh --channel 10.0
+          echo "DOTNET_ROOT=$HOME/.dotnet" >> $GITHUB_ENV
+          echo "$HOME/.dotnet" >> $GITHUB_PATH
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test LoreTest.Tests/LoreTest.Tests.csproj --no-build --verbosity normal
+
+  build-and-push:
+    needs: test
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy-test:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/develop'
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v7
+      - name: Log in to the Container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy to Test Environment
+        run: |
+          echo "Deploying to test environment (Localhost)..."
+          docker compose -f docker-compose.test.yml pull
+          docker compose -f docker-compose.test.yml up -d
+
+  deploy-preprod:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v7
+      - name: Log in to the Container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy to PreProd Environment
+        run: |
+          echo "Deploying to preprod environment (Localhost)..."
+          docker compose -f docker-compose.preprod.yml pull
+          docker compose -f docker-compose.preprod.yml up -d
+
+  playwright-tests:
+    needs: [deploy-preprod, deploy-test]
+    if: always() && (needs.deploy-preprod.result == 'success' || needs.deploy-test.result == 'success')
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build Playwright Tests
+        run: dotnet build LoreTest.Playwright/LoreTest.Playwright.csproj
+      - name: Build Reqnroll BDD Specs
+        run: dotnet build LoreTest.Specs/LoreTest.Specs.csproj
+      - name: Run Playwright Tests
+        env:
+          BASE_URL: ${{ github.ref == 'refs/heads/main' && (secrets.PREPROD_URL || 'http://localhost:5002') || (secrets.TEST_URL || 'http://localhost:5001') }}
+          PLAYWRIGHT_BROWSERS_PATH: C:\actions-runner\_work\ms-playwright
+        run: dotnet test LoreTest.Playwright/LoreTest.Playwright.csproj --no-build --verbosity normal --logger trx --results-directory allure-results-combined
+      - name: Run Reqnroll BDD Specs
+        if: always()
+        env:
+          BASE_URL: ${{ github.ref == 'refs/heads/main' && (secrets.PREPROD_URL || 'http://localhost:5002') || (secrets.TEST_URL || 'http://localhost:5001') }}
+          PLAYWRIGHT_BROWSERS_PATH: C:\actions-runner\_work\ms-playwright
+        run: dotnet test LoreTest.Specs/LoreTest.Specs.csproj --no-build --verbosity normal --logger trx --results-directory allure-results-combined
+      - name: Upload Allure Results Artifact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: allure-results
+          path: allure-results-combined/
+          retention-days: 1
+
+  publish-report:
+    needs: playwright-tests
+    if: always() && (needs.playwright-tests.result == 'success' || needs.playwright-tests.result == 'failure')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Download Allure Results
+        uses: actions/download-artifact@v8
+        with:
+          name: allure-results
+          path: allure-results
+      - name: Convert TRX to Native Allure JSON Results
+        run: |
+          python convert-trx.py
+      - name: Load Allure Report History
+        uses: actions/checkout@v7
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+      - name: Build Allure Report
+        uses: simple-elf/allure-report-action@master
+        id: allure-report
+        with:
+          allure_results: allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+      - name: Deploy Allure Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-history
+

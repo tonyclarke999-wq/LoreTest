@@ -1,0 +1,294 @@
+###################################################################################################################################################
+#
+#	WINRUNNER CONFIGURATION SCRIPT
+#
+# 	TITLE:
+#		wr_initialization
+#
+# 	DESCRIPTION:
+#		This is the initial script that is called when WinRunner is first invoked.
+#		This script in turn loads every other config script that is required to get 
+#		the system up in workable order.
+#
+# 	USAGE:
+#		This script is called directly by TSLINIT, which resides in the \DAT  subdirectory
+#		of wherever WinRunner is installed on a given system.  each TSLINIT script
+#		should make a single call to this script
+#
+# 	ARGUMENTS:
+#
+# 	DEPENDENCIES:
+#		TSLINIT (WinRunner Startup Script)
+#
+# 	REVISION HISTORY:
+#
+#	Rev				Author					Date				Description
+#	------------	---------------------	-------------		------------------------------------
+####################################################################################################################################################
+
+####################################################################################################################################################
+#
+#	CONFIGURATION-SPECIFIC DECLARATION SECTION
+#
+# 	PLEASE NOTE: On all constants and variables that define paths, the backslashes are DOUBLED.
+#	This is because the backslash is an ESCAPE character (\n = newline, \t = tab, etc.), and it
+#	needs to be doubled so WinRunner won't mistakenly interpret the backslash as an escape 
+#	sequence.
+#
+#####################################################################################################################################################
+
+
+##############################################################################################################################
+#
+# Read Paths from wrun.ini file located in the windows directory to avoid passing parameters
+#
+##############################################################################################################################
+
+#	Set Path Variables		
+public const M_ROOT 			= getenv ("M_ROOT");
+public const FunctionPath		= "C:\\Sandbox\\Your_Project\\Functions";
+public const GuiPath			= "C:\\Sandbox\\Your_Project\\Gui\\";
+public const DataPath			= "C:\\Sandbox\\Your_Project\\Data\\";
+public const BinPath			= "C:\\Sandbox\\Your_Project\\Bin";
+public const TestPath			= "C:\\Sandbox\\Your_Project\\Tests";
+public add_ons 					= getenv("ADDONS");
+public TE_LOADED 				= (index(add_ons, "TE") > 0);
+
+##############################################################################################################################
+#
+#	GLOBAL CONSTANT DECLARATIONS
+#
+##############################################################################################################################
+
+#	Change both variables to 0, to switch debugging on (to step into every function)
+public const SYSTEM_MOD  = getenv("SYSTEM_MOD");
+public const USER_MOD    = getenv("USER_MOD");
+
+
+##############################################################################################################################
+#
+#	CFP CONTROL DATA ARRAY AND RELATED CONSTANTS 
+#   This array is a crucial part of writing to the RTH database
+#   The values in this array are updating during test execution and written out to the RTH
+#   database in the verify.fun function library
+##############################################################################################################################
+
+public arControlArray[];
+
+# Test Run Info
+public const TestSetID				= 1;
+public const TestID					= 2;
+public const TestName 				= 3;
+public const TestPath				= 4;
+public const TCUniqueID				= 5;
+public const TSUniqueID	 			= 6;
+public const VerificationID			= 7;
+
+# User Login and Environment Info
+public const Environment 			= 8;	
+public const MachineName 			= 9;		
+public const MachineLogin			=10; 
+public const AppLogin		 		=11;  
+public const Window 				=12;
+public const Object 				=13;
+
+# Custom Fields
+public const Custom_1				=14;
+public const Custom_2				=15;
+public const Custon_3				=16;
+public const Custom_4				=17;
+public const Custom_5				=18;
+public const Custom_6				=19;
+
+# Anchor
+public const ArrayLastValue			=20;
+arControlArray[ArrayLastValue] 		= "Anchor";
+
+##############################################################################################################################
+#
+#	LOAD YOUR FUNCTION LIBRARY HERE
+#
+##############################################################################################################################
+
+#reload (FunctionPath & "\\My_Functions");
+
+m_root = getenv ("M_ROOT");
+
+if (m_root != "") {
+	load (m_root & "\\lib\\wr_gen", 1, 1);
+	reset_internals();
+	init_ext_util ();
+}
+
+set_class_map("RICHEDIT", "edit");
+
+if (m_root != "")
+{
+	#load date operations support if selected
+	if(getenv ("DATE_OPERATIONS")=="1" && !TE_LOADED)
+		call "y2k_init"();
+		
+	for (addin_ind=0; addin_ind<numFuncs; addin_ind++)
+	{
+		eval ("call " funcArray[addin_ind]";");
+	}
+}
+
+_set_trapping_info();
+
+#############################################################################################################################
+#
+#  Set up Constants for wait times
+#
+#############################################################################################################################
+
+public const SHORT_WAIT	=	5;
+public const MID_WAIT	=	15;
+public const LONG_WAIT	=	60;
+
+##############################################################################################################################
+#
+#	Load EXTERNAL FUNCTIONS
+#
+##############################################################################################################################
+extern int Startup(string,string);
+extern int Shutdown();
+extern int SendSingleMessage(string,string,string,string,string);
+extern int SendMessagecAttach(string,string,string,string,string,string);
+extern int MGetMSWindowsInfo( out string, out int, out int, out int, out string );
+extern int keybd_type(in string);
+
+# Load DLLS
+unload_dll("");
+
+load (M_ROOT  & "\\lib\\win32api",SYSTEM_MOD,USER_MOD);  # Used to get memory stats
+load_dll(BinPath & "\\csolib2.dll");
+load_dll(BinPath & "\\cso32lib.dll");
+load_dll(BinPath & "\\mcommon.dll"); 	# To get Windows version information
+load_dll(BinPath & "\\batapi.dll");		# To send Email.  Free utility loaded from the web.
+
+
+##############################################################################################################################
+#
+#	Load COMMON FUNCTIONS
+#
+##############################################################################################################################
+
+reload (FunctionPath & "\\cso32lib", SYSTEM_MOD, USER_MOD);
+init_cso_api_function(); 
+
+
+######################################################################################################################
+#
+# Loading extra utilities provided by Mercury - you may or may not want these examples loaded on startup
+#
+######################################################################################################################
+
+#call_close M_ROOT & "\\samples\\utils\\func_gen"();
+#call_close M_ROOT & "\\samples\\utils\\ext_func\\tests\\ext_func"();
+#call_close M_ROOT & "\\lib\\cso3_init"();
+#call_close M_ROOT & "\\lib\\cso2_init"();
+#call_close M_ROOT & "\\lib\\cso_init"();
+
+
+######################################################################################################################
+#
+# 	Load GUI Map - Load your gui map on startup if desired
+#
+######################################################################################################################
+
+GUI_unload_all();
+GUI_close_all ();
+GUI_load ( GuiPath & "your.gui"); 
+
+
+##############################################################################################################################
+#
+#	Load RTH SPECIFIC FUNCTIONS
+# 	Connection string for RTH database
+# 	You must install the myodbc driver for this to work
+# 	See www.mysql.com to download the driver
+#
+##############################################################################################################################
+
+# Path to your database driver.  In this case we're using a MySQL database driver version 2.50
+public const FileName = "C:\\WINNT\\System32\\MYODBC.DLL";
+
+if( file_exists( FileName ) == E_OK)
+	public const CONNECTIONSTRING = "DATABASE=rth;DRIVER=MySQL;SERVER=localhost;UID=root;PWD="";PORT=3306;";
+else
+	pause("You must install myodbc.dll into c:\winnt\system32\. You can get the dll at www.mysql.com");
+	
+# Load the function library which writes to RTH 
+reload (FunctionPath & "\\verify.fun" ,SYSTEM_MOD,USER_MOD);
+
+#Initialize Control Array
+InitializeControlArray();							
+RestoreControlArray(arControlArray);	
+
+##############################################################################################################################
+#
+#	MACHINE-SPECIFIC FILE LOADING SECTION
+#
+##############################################################################################################################
+
+arControlArray[TestSetID] = getenv("TESTSETID");
+arControlArray[Environment] = getenv("ENVIRONMENT");
+SaveControlArray(arControlArray);
+
+
+###################################################################################################################
+#
+#	Modify the Gui Map Configuration if you like (a couple of examples below)
+#
+###################################################################################################################
+ 
+# HTML TABLE
+set_class_map("html_table", "object");
+set_record_attr("html_table", "class html_name", "MSW_class", "index");
+set_record_method("html_table", RM_RECORD);
+
+# RADIO BUTTON
+set_class_map("html_radio_button", "radio_button");
+set_record_attr("html_radio_button", "class MSW_class html_name", "", "location");
+set_record_method("html_radio_button", RM_RECORD);
+
+
+##############################################################################################################################
+#
+#	Add RTH Functions to Function Generator
+#
+##############################################################################################################################
+
+generator_add_category("RTH Functions");	
+
+generator_add_function( "WriteVerification" , 
+	"Writes a record directly to the VerifyResults table" , 
+	9, 
+	"Step ID:", "type_edit", "\"\"",
+	"Action:", "type_edit", "\"\"",
+	"Test Inputs:", "type_edit", "\"\"",
+	"Expected:", "type_edit", "\"\"",
+	"Status:" , "select_list(\"PASS\" \"FAIL\" \"INFO\")" , "\"PASS\"",
+	"Step Desc:", "type_edit", "\"\"",
+	"Window:", "point_object","",
+	"Object:" , "point_object" , "",
+	"Object Type:" , "type_edit", "\"\"", 
+	"Line No:" , "type_edit", "getvar(\"line_no\")",
+	"Control Array", "type_edit", "arControlArray");
+generator_add_function_to_category( "RTH Functions", "WriteVerification");
+
+generator_add_function( "TestStarted" , 
+	"Writes to the RTH database when a starting a test" , 
+	4, 
+	"Narrative:", "select_list(\"Test Suite Started\" \"Test Case Started\")" , "\"Test Suite Started\"",
+	"Path Name:" , "type_edit", "getvar(\"testname\")",
+	"Control Array:", "type_edit", "arControlArray",
+	"Started:" , "type_edit", "\"WIP\"");
+generator_add_function_to_category( "RTH Functions", "TestStarted");
+
+generator_add_function( "TestCompleted" , 
+	"Writes to the RTH database when a test has finished" , 
+	1, 
+	"UniqueID:", "select_list(arControlArray[TCUniqueID] arControlArray[TSUniqueID])" , "arControlArray[TCUniqueID]");
+generator_add_function_to_category( "RTH Functions", "TestCompleted");

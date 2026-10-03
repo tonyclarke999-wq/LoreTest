@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Signoff Report - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header" style="margin-bottom: 2rem;">
+    <div>
+        <h1>Test Signoff</h1>
+        <p class="subtitle">Information on tests in a selected Test Set. Useful for deciding to signoff on testing.</p>
+    </div>
+</div>
+
+{{ include('report/_filters.html.twig', { filter_type: 'testset' }) }}
+
+{% if selected_testset %}
+    {% if result %}
+        <div class="project-card" style="max-width: 600px;">
+            <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">Signoff Details: {{ result.testsetname }}</h3>
+            
+            <div style="display: grid; grid-template-columns: 150px 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div style="color: var(--text-muted); font-weight: 600;">Status:</div>
+                <div>
+                    {% if result.testsetstatus == 'Finished' %}
+                        <span class="badge badge-green">{{ result.testsetstatus }}</span>
+                    {% else %}
+                        <span class="badge badge-yellow">{{ result.testsetstatus ?: 'In Progress' }}</span>
+                    {% endif %}
+                </div>
+
+                <div style="color: var(--text-muted); font-weight: 600;">Signoff By:</div>
+                <div style="color: var(--text-main);">{{ result.signoffby ?: 'N/A' }}</div>
+
+                <div style="color: var(--text-muted); font-weight: 600;">Signoff Date:</div>
+                <div style="color: var(--text-main);">{{ result.signoffdate ?: 'N/A' }}</div>
+
+                <div style="color: var(--text-muted); font-weight: 600;">Comments:</div>
+                <div style="color: var(--text-main); font-style: italic;">{{ result.signoffcomments ?: 'No comments provided.' }}</div>
+            </div>
+        </div>
+    {% else %}
+        <div class="project-card" style="text-align: center; color: var(--text-muted);">
+            Test Set not found.
+        </div>
+    {% endif %}
+{% endif %}
+
+{% endblock %}

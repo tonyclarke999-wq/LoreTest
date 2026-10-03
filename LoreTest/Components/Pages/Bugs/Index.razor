@@ -1,0 +1,112 @@
+@page "/bugs"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IStringLocalizer<SharedResource> L
+@inject ITranslationService TranslationService
+@attribute [Authorize]
+
+<PageTitle>@L["BugReports"]</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="headline-md">@L["BugReports"]</div>
+    <a href="/bugs/create" class="btn btn-primary d-flex align-items-center">
+        <span class="material-symbols-outlined small me-1">add</span> @L["ReportNewBug"]
+    </a>
+</div>
+
+@if (bugs == null)
+{
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">@L["Loading"]</span>
+        </div>
+    </div>
+}
+else if (!bugs.Any())
+{
+    <div class="card p-5 text-center text-muted">
+        <span class="material-symbols-outlined display-lg d-block mb-2 opacity-25">bug_report</span>
+        <div class="body-md">@L["NoBugsFound"]</div>
+    </div>
+}
+else
+{
+    <div class="card p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 80px">ID</th>
+                        <th>@L["Title"]</th>
+                        <th>@L["Severity"]</th>
+                        <th>@L["Priority"]</th>
+                        <th>@L["Status"]</th>
+                        <th>@L["Reporter"]</th>
+                        <th>Project</th>
+                        <th>@L["Assignee"]</th>
+                        <th class="text-end">@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var bug in bugs)
+                    {
+                        <tr>
+                            <td class="data-mono">@bug.Id</td>
+                            <td class="body-md fw-bold">@translatedTitles.GetValueOrDefault(bug.Id, bug.Title)</td>
+                            <td>
+                                <span class="badge-custom" data-severity="@bug.Severity">@L[bug.Severity.ToString()]</span>
+                            </td>
+                            <td>
+                                <span class="badge-custom" data-priority="@bug.Priority">@L[bug.Priority.ToString()]</span>
+                            </td>
+                            <td>
+                                <span class="badge-custom" data-status="@bug.Status">@L[bug.Status.ToString()]</span>
+                            </td>
+                            <td class="body-sm text-muted">@(bug.Reporter?.UserName ?? L["Unknown"])</td>
+                            <td class="body-sm">@(bug.Project?.Title ?? "None")</td>
+                            <td class="body-sm text-muted">@(bug.Assignee?.UserName ?? L["Unassigned"])</td>
+                            <td class="text-end pe-3">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="/bugs/details/@bug.Id" class="btn btn-sm btn-outline-primary" title="@L["Details"]">
+                                        <span class="material-symbols-outlined small">visibility</span>
+                                    </a>
+                                    <a href="/bugs/edit/@bug.Id" class="btn btn-sm btn-outline-primary" title="@L["Edit"]">
+                                        <span class="material-symbols-outlined small">edit</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Bug>? bugs;
+    private Dictionary<int, string> translatedTitles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        bugs = await DbContext.Bugs
+            .Include(b => b.Reporter)
+            .Include(b => b.Assignee)
+            .Include(b => b.Project)
+            .OrderByDescending(b => b.ReportedDate)
+            .ToListAsync();
+
+        var currentCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+        foreach (var bug in bugs)
+        {
+            translatedTitles[bug.Id] = await TranslationService.TranslateAsync(bug.Title, bug.OriginalCulture ?? "en", currentCulture);
+        }
+    }
+
+    }
+}

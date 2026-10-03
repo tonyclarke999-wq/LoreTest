@@ -1,23 +1,35 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+@inject IStringLocalizer<SharedResource> L
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="app-container">
+    <UserActivityTracker @rendermode="InteractiveServer" />
+    <NavMenu />
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+    <div class="main-wrapper">
+        <header class="top-header">
+            <div class="d-flex justify-content-end align-items-center w-100">
+                <div class="d-flex align-items-center">
+                    <CultureSelector />
+                    <AuthorizeView>
+                        <Authorized>
+                            <a href="Account/Manage" class="ms-3 d-flex align-items-center text-decoration-none">
+                                <span class="material-symbols-outlined me-1 text-muted" style="font-size: 20px;">account_circle</span>
+                                <span class="body-md text-muted">@context.User.Identity?.Name</span>
+                            </a>
+                        </Authorized>
+                    </AuthorizeView>
+                </div>
+            </div>
+        </header>
 
-        <article class="content px-4">
+        <main class="page-content">
             @Body
-        </article>
-    </main>
+        </main>
+    </div>
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
+    @L["UnhandledError"]
+    <a href="." class="reload">@L["Reload"]</a>
     <span class="dismiss">🗙</span>
 </div>

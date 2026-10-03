@@ -1,6 +1,7 @@
+@using System.Globalization
 @namespace LoreTest.Components
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@CultureInfo.CurrentUICulture.Name">
 
 <head>
     <meta charset="utf-8" />
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="@Assets["LoreTest.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
     <HeadOutlet />
 </head>
@@ -22,6 +24,64 @@
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="@Assets["Components/Account/Shared/PasskeySubmit.razor.js"]" type="module"></script>
+    <script>
+        window.downloadFile = (fileName, base64Data) => {
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = 'data:application/octet-stream;base64,' + base64Data;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        window.getUserAgent = () => navigator.userAgent;
+
+        // Centralized Quill integration with accessibility improvements
+        window.initQuill = function(element, initialContent) {
+            if (!element) return;
+            var quill = new Quill(element, { 
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['image', 'link', 'blockquote', 'code-block'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                    ]
+                }
+            });
+            quill.root.innerHTML = initialContent || '';
+            element.quill = quill;
+
+            // Accessibility fix: dynamically label picker buttons
+            var pickerLabels = element.parentElement.querySelectorAll('.ql-picker-label');
+            pickerLabels.forEach(function(label) {
+                var parent = label.parentElement;
+                if (parent.classList.contains('ql-header')) {
+                    label.setAttribute('aria-label', 'Select Header Level');
+                } else if (parent.classList.contains('ql-font')) {
+                    label.setAttribute('aria-label', 'Select Font');
+                } else if (parent.classList.contains('ql-size')) {
+                    label.setAttribute('aria-label', 'Select Font Size');
+                } else {
+                    label.setAttribute('aria-label', 'Formatting Dropdown');
+                }
+            });
+        };
+        window.getQuillContent = function(element) {
+            return (element && element.quill) ? element.quill.root.innerHTML : '';
+        };
+        window.updateQuillContent = function(element, newContent) {
+            if (element && element.quill) {
+                element.quill.root.innerHTML = newContent || '';
+            }
+        };
+        window.clearQuillEditor = function(element) {
+            if (element && element.quill) {
+                element.quill.setText('');
+            }
+        };
+        window.quillInitialized = true;
+    </script>
 </body>
 
 </html>

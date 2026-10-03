@@ -6,15 +6,19 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-LoreTest-2bd98a07-78a5-457e-bb27-a85563f38a17</UserSecretsId>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <Version>0.7.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Markdig" Version="1.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.6" PrivateAssets="all" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.6" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+    <PackageReference Include="Sentry.AspNetCore" Version="6.6.0" />
   </ItemGroup>
 
 </Project>

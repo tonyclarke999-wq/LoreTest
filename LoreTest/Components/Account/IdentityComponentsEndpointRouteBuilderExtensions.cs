@@ -1,3 +1,4 @@
+#nullable enable
 using LoreTest.Data;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
@@ -11,6 +12,9 @@ using System.Text.Json;
 
 namespace LoreTest.Components.Account
 {
+    // Using global:: to resolve IDE namespace resolution issues
+    using ExternalLogin = global::LoreTest.Components.Account.Pages.ExternalLogin;
+    using ExternalLogins = global::LoreTest.Components.Account.Pages.Manage.ExternalLogins;
     using Microsoft.AspNetCore.Routing;
 
     internal static class IdentityComponentsEndpointRouteBuilderExtensions
@@ -30,7 +34,7 @@ namespace LoreTest.Components.Account
             {
                 IEnumerable<KeyValuePair<string, StringValues>> query = [
                     new("ReturnUrl", returnUrl),
-                    new("Action", global::LoreTest.Components.Account.Pages.ExternalLogin.LoginCallbackAction)];
+                    new("Action", ExternalLogin.LoginCallbackAction)];
 
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
@@ -42,10 +46,21 @@ namespace LoreTest.Components.Account
             });
 
             accountGroup.MapPost("/Logout", async (
+                HttpContext context,
                 [FromServices] SignInManager<ApplicationUser> signInManager,
+                [FromServices] LoreTest.Utilities.UserActivityService activityService,
                 [FromForm] string returnUrl) =>
             {
+                var username = context.User?.Identity?.Name;
+                var userId = context.User is null ? null : signInManager.UserManager.GetUserId(context.User);
+
                 await signInManager.SignOutAsync();
+
+                if (username != null)
+                {
+                    await activityService.LogActivityAsync(username, userId, "Logout", "User logged out");
+                }
+
                 return TypedResults.LocalRedirect($"~/{returnUrl}");
             });
 
@@ -101,7 +116,7 @@ namespace LoreTest.Components.Account
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
                     "/Account/Manage/ExternalLogins",
-                    QueryString.Create("Action", global::LoreTest.Components.Account.Pages.Manage.ExternalLogins.LinkLoginCallbackAction));
+                    QueryString.Create("Action", ExternalLogins.LinkLoginCallbackAction));
 
                 var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, signInManager.UserManager.GetUserId(context.User));
                 return TypedResults.Challenge(properties, [provider]);

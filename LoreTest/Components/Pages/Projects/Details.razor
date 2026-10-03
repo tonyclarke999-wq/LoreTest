@@ -8,75 +8,130 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
+@inject IJSRuntime JS
+@using System.Text
 @attribute [Authorize]
 
-<PageTitle>Project Details</PageTitle>
+<PageTitle>@L["ProjectDetails"]</PageTitle>
 
 @if (project == null)
 {
-    <p><em>Loading...</em></p>
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">@L["Loading"]</span>
+        </div>
+    </div>
 }
 else
 {
-    <h1>Project: @project.Title</h1>
-    <p>@((MarkupString)(project.Description ?? ""))</p>
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <div class="headline-md">@L["ProjectTitlePrefix"] @project.Title</div>
+            <div class="body-md text-muted mt-1">@((MarkupString)(project.Description ?? ""))</div>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(project.JiraReference))
+        {
+            <div class="card bg-light border-0">
+                <div class="card-body py-2 px-3 d-flex align-items-center">
+                    <span class="material-symbols-outlined small me-2 text-primary">link</span>
+                    <span class="label-caps me-2">Jira:</span>
+                    @if (!string.IsNullOrWhiteSpace(jiraUrl))
+                    {
+                        <a href="@jiraUrl" target="_blank" class="body-sm fw-bold text-decoration-none">@project.JiraReference</a>
+                    }
+                    else
+                    {
+                        <span class="body-sm fw-bold">@project.JiraReference</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
 
-    <hr />
-
-    <h2>Test Suites</h2>
-    @if (canEdit || canCreateRun)
-    {
-        <p>
-            @if (canEdit)
-            {
-                <a href="/testsuites/create?projectId=@project.Id" class="btn btn-primary">Create New Test Suite</a>
-            }
-            @if (canCreateRun)
-            {
-                <a href="/testruns/setup?projectId=@project.Id" class="btn btn-success ms-2">Start Test Run</a>
-            }
-        </p>
-    }
-
-    @if (!project.TestSuites.Any())
-    {
-        <p>No test suites found for this project.</p>
-    }
-    else
-    {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var suite in project.TestSuites)
+    <div class="card mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <span class="material-symbols-outlined me-2">folder_zip</span>
+                <span class="title-sm mb-0">@L["TestSuites"]</span>
+            </div>
+            <div class="d-flex gap-2">
+                @if (canEdit)
                 {
-                    <tr>
-                        <td>@suite.Id</td>
-                        <td>@suite.Title</td>
-                        <td>@((MarkupString)(suite.Description ?? ""))</td>
-                        <td>
-                            <a href="/testsuites/details/@suite.Id">View Test Cases</a>
-                            @if (canEdit)
-                            {
-                                <span> | </span>
-                                <a href="/testsuites/edit/@suite.Id">Edit</a> <span> | </span>
-                                <a href="/testsuites/delete/@suite.Id">Delete</a>
-                            }
-                        </td>
-                    </tr>
+                    <a href="/testsuites/create?projectId=@project.Id" class="btn btn-sm btn-primary d-flex align-items-center">
+                        <span class="material-symbols-outlined small me-1">add</span> @L["CreateNewTestSuite"]
+                    </a>
+                    <a href="/testsuites/import/@project.Id" class="btn btn-sm btn-outline-primary d-flex align-items-center">
+                        <span class="material-symbols-outlined small me-1">upload</span> @L["ImportCSV"]
+                    </a>
+                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center" @onclick="ExportToCsv">
+                        <span class="material-symbols-outlined small me-1">download</span> @L["ExportCSV"]
+                    </button>
                 }
-            </tbody>
-        </table>
-    }
+                @if (canCreateRun)
+                {
+                    <a href="/testruns/setup?projectId=@project.Id" class="btn btn-sm btn-outline-primary d-flex align-items-center">
+                        <span class="material-symbols-outlined small me-1">play_arrow</span> @L["StartTestRun"]
+                    </a>
+                }
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @if (!project.TestSuites.Any())
+            {
+                <div class="p-5 text-center text-muted">
+                    <span class="material-symbols-outlined display-lg d-block mb-2 opacity-25">folder_off</span>
+                    <div class="body-md">@L["NoTestSuitesFound"]</div>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>@L["Title"]</th>
+                                <th>@L["Description"]</th>
+                                <th class="text-end">@L["Actions"]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var suite in project.TestSuites)
+                            {
+                                <tr>
+                                    <td class="data-mono">@suite.Id</td>
+                                    <td class="body-md fw-bold">@suite.Title</td>
+                                    <td class="body-md text-muted">@((MarkupString)(suite.Description ?? ""))</td>
+                                    <td class="text-end pe-3">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="/testsuites/details/@suite.Id" class="btn btn-sm btn-outline-primary" title="@L["ViewTestCases"]">
+                                                <span class="material-symbols-outlined small">visibility</span>
+                                            </a>
+                                            @if (canEdit)
+                                            {
+                                                <a href="/testsuites/edit/@suite.Id" class="btn btn-sm btn-outline-primary" title="@L["Edit"]">
+                                                    <span class="material-symbols-outlined small">edit</span>
+                                                </a>
+                                                <a href="/testsuites/delete/@suite.Id" class="btn btn-sm btn-outline-danger" title="@L["Delete"]">
+                                                    <span class="material-symbols-outlined small">delete</span>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
 
-    <div>
-        <a href="/projects">Back to List</a>
+    <div class="mt-4">
+        <a href="/projects" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
+            <span class="material-symbols-outlined small me-1">arrow_back</span> @L["BackToList"]
+        </a>
     </div>
 }
 
@@ -87,6 +142,7 @@ else
     private TestProject? project;
     private bool canEdit = false;
     private bool canCreateRun = false;
+    private string? jiraUrl;
 
     [Inject]
     private IDbContextFactory<ApplicationDbContext> DbFactory { get; set; } = default!;
@@ -116,6 +172,114 @@ else
         if (project == null)
         {
             NavigationManager.NavigateTo("/projects");
+            return;
         }
+
+        if (!string.IsNullOrWhiteSpace(project.JiraReference))
+        {
+            var settings = await dbContext.AppSettings.FirstOrDefaultAsync();
+            if (settings != null && !string.IsNullOrWhiteSpace(settings.JiraBaseUrl))
+            {
+                var baseUrl = settings.JiraBaseUrl.TrimEnd('/');
+                
+                // If the user already pasted a full URL, use it as is.
+                if (Uri.TryCreate(project.JiraReference, UriKind.Absolute, out _))
+                {
+                    jiraUrl = project.JiraReference;
+                }
+                else
+                {
+                    jiraUrl = $"{baseUrl}/browse/{project.JiraReference}";
+                }
+            }
+        }
+    }
+
+    private async Task ExportToCsv()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("Test Suite Title,Test Suite Description,Test Case Title,Test Case Description,Test Step,Test Step Expected Result");
+
+        if (project == null) return;
+
+        // Reload with full hierarchy for export
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        var fullProject = await dbContext.TestProjects
+            .Include(p => p.TestSuites)
+                .ThenInclude(s => s.TestCases)
+                    .ThenInclude(c => c.TestSteps)
+            .FirstOrDefaultAsync(p => p.Id == project.Id);
+
+        if (fullProject == null) return;
+
+        if (!fullProject.TestSuites.Any())
+        {
+            // Export demo CSV as per user request
+            sb.AppendLine("Suite 1 title,Suite 1 Description,Case 1 Title,Case 1 Description,Test step 1,Test Step 1 expected result");
+            sb.AppendLine(",,,,Test Step 2,Test step 2 expected result");
+            sb.AppendLine(",,Case 2 title,Case 2 description,Step1a action,Step 1a expected result");
+            sb.AppendLine(",,,,Step 2a,Step 2a expected result");
+            sb.AppendLine("Suite 2 title,Suite 2 description,Case 3 title,Case 3 desc,Step 1b,Step 1b expected result");
+            sb.AppendLine(",,,,Step2b,Step 2b expected result");
+        }
+        else
+        {
+            foreach (var suite in fullProject.TestSuites)
+            {
+                bool suiteHeaderAdded = false;
+                foreach (var testCase in suite.TestCases)
+                {
+                    bool caseHeaderAdded = false;
+                    foreach (var step in testCase.TestSteps.OrderBy(s => s.StepNumber))
+                    {
+                        string suiteTitle = !suiteHeaderAdded ? EscapeCsv(suite.Title) : "";
+                        string suiteDesc = !suiteHeaderAdded ? EscapeCsv(suite.Description ?? "") : "";
+                        string caseTitle = !caseHeaderAdded ? EscapeCsv(testCase.Title) : "";
+                        string caseDesc = !caseHeaderAdded ? EscapeCsv(testCase.Description ?? "") : "";
+                        string stepAction = EscapeCsv(step.Description ?? "");
+                        string stepExpected = EscapeCsv(step.ExpectedResult ?? "");
+
+                        sb.AppendLine($"{suiteTitle},{suiteDesc},{caseTitle},{caseDesc},{stepAction},{stepExpected}");
+                        
+                        suiteHeaderAdded = true;
+                        caseHeaderAdded = true;
+                    }
+                    
+                    // If case has no steps, still add it
+                    if (!testCase.TestSteps.Any())
+                    {
+                        string suiteTitle = !suiteHeaderAdded ? EscapeCsv(suite.Title) : "";
+                        string suiteDesc = !suiteHeaderAdded ? EscapeCsv(suite.Description ?? "") : "";
+                        string caseTitle = !caseHeaderAdded ? EscapeCsv(testCase.Title) : "";
+                        string caseDesc = !caseHeaderAdded ? EscapeCsv(testCase.Description ?? "") : "";
+                        
+                        sb.AppendLine($"{suiteTitle},{suiteDesc},{caseTitle},{caseDesc},,");
+                        suiteHeaderAdded = true;
+                    }
+                }
+                
+                // If suite has no cases, still add it
+                if (!suite.TestCases.Any())
+                {
+                     string suiteTitle = !suiteHeaderAdded ? EscapeCsv(suite.Title) : "";
+                     string suiteDesc = !suiteHeaderAdded ? EscapeCsv(suite.Description ?? "") : "";
+                     sb.AppendLine($"{suiteTitle},{suiteDesc},,,,");
+                }
+            }
+        }
+
+        var fileName = $"project_{fullProject.Title.Replace(" ", "_")}_export_{DateTime.Now:yyyyMMdd}.csv";
+        var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+        await JS.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(bytes));
+    }
+
+    private string EscapeCsv(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        if (text.Contains(",") || text.Contains("\"") || text.Contains("\n") || text.Contains("\r"))
+        {
+            return $"\"{text.Replace("\"", "\"\"")}\"";
+        }
+        return text;
     }
 }

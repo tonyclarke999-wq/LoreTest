@@ -1,0 +1,123 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Import Test Cases - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Import Test Cases & Steps</h1>
+            <p class="subtitle">Bulk upload test cases and step metadata from a structured CSV file for {{ project.project_name }}</p>
+        </div>
+        <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Cancel & Back</a>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; align-items: start; margin-top: 1rem;">
+    <!-- Upload Card -->
+    <div class="project-card">
+        <form method="post" enctype="multipart/form-data" id="import-form">
+            <h2 style="font-size: 16px; font-weight: 600; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined">upload_file</span>
+                <span>Select Import Source File</span>
+            </h2>
+
+            <div style="border: 2px dashed rgba(192, 193, 255, 0.25); border-radius: var(--radius-sm); padding: 3rem 2rem; text-align: center; background: rgba(255, 255, 255, 0.01); transition: border-color 0.2s, background 0.2s; cursor: pointer; position: relative;" id="dropzone">
+                <input type="file" name="csv_file" id="csv_file" accept=".csv" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" required>
+                <div id="dropzone-prompt">
+                    <span class="material-symbols-outlined" style="font-size: 48px; color: var(--text-muted); margin-bottom: 1rem; display: block;">cloud_upload</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-main); display: block; margin-bottom: 0.25rem;">Drag and drop your CSV file here</span>
+                    <span style="font-size: 12px; color: var(--text-muted); display: block;">or click to browse local files</span>
+                </div>
+                <div id="dropzone-selected" style="display: none;">
+                    <span class="material-symbols-outlined" style="font-size: 48px; color: var(--primary); margin-bottom: 1rem; display: block;">task</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-main); display: block; margin-bottom: 0.25rem;" id="selected-file-name">filename.csv</span>
+                    <span style="font-size: 12px; color: var(--text-muted); display: block;" id="selected-file-size">0 KB</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.5rem;">
+                <button type="submit" class="btn-primary" style="padding: 0.65rem 1.75rem; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">publish</span>
+                    <span>Upload & Ingest CSV</span>
+                </button>
+                <a href="{{ path('app_project_tests', {id: project.project_id}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none; padding: 0.65rem 1.75rem; font-size: 13px; font-weight: 600; display: flex; align-items: center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Specifications Card -->
+    <div class="project-card" style="background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
+        <h2 style="font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span class="material-symbols-outlined" style="color: var(--primary);">info</span>
+            <span>CSV Import Specifications</span>
+        </h2>
+        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6; display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+                <strong style="color: var(--text-main); display: block; margin-bottom: 0.25rem;">Format Matching:</strong>
+                The uploaded file must strictly follow the format of the export CSV file. To be safe, we recommend downloading an export of your current test cases first and using it as a template.
+            </div>
+            <div>
+                <strong style="color: var(--text-main); display: block; margin-bottom: 0.25rem;">Update vs. Create Rules:</strong>
+                <ul style="padding-left: 1.25rem; margin: 0.25rem 0; display: flex; flex-direction: column; gap: 0.25rem;">
+                    <li>If the <strong style="color: var(--primary);">Test ID</strong> (e.g. `TC-12`) is specified in the first column and matches an existing test case in this project, that test case's metadata and manual steps will be completely **overwritten** with the values in the CSV.</li>
+                    <li>If the <strong style="color: var(--primary);">Test ID</strong> is empty, or doesn't match an existing test case, a **new** test case is generated.</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color: var(--text-main); display: block; margin-bottom: 0.25rem;">Multi-row Step Mapping:</strong>
+                Subsequent rows representing steps should leave left test case fields completely blank, specifying only step columns (`Step Number`, `Action`, `Inputs`, `Expected Result`, `Step Type`) on the right.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('turbo:load', function() {
+        const fileInput = document.getElementById('csv_file');
+        const dropzone = document.getElementById('dropzone');
+        const prompt = document.getElementById('dropzone-prompt');
+        const selected = document.getElementById('dropzone-selected');
+        const nameLabel = document.getElementById('selected-file-name');
+        const sizeLabel = document.getElementById('selected-file-size');
+
+        if (!fileInput || !dropzone) return;
+
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                nameLabel.textContent = file.name;
+                
+                const sizeKb = (file.size / 1024).toFixed(1);
+                sizeLabel.textContent = `${sizeKb} KB`;
+
+                prompt.style.display = 'none';
+                selected.style.display = 'block';
+                dropzone.style.borderColor = 'var(--primary)';
+                dropzone.style.background = 'rgba(192, 193, 255, 0.03)';
+            }
+        });
+
+        // Visual drag indicators
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, e => {
+                dropzone.style.borderColor = 'var(--primary)';
+                dropzone.style.background = 'rgba(192, 193, 255, 0.05)';
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, e => {
+                if (!fileInput.files || !fileInput.files[0]) {
+                    dropzone.style.borderColor = 'rgba(192, 193, 255, 0.25)';
+                    dropzone.style.background = 'rgba(255, 255, 255, 0.01)';
+                }
+            }, false);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Discussion: {{ discussion.discsubject }} - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>{{ discussion.discsubject }}</h1>
+            <p class="subtitle">Requirement #{{ requirement.reqid }} — {{ requirement.reqname }}</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+            {% if discussion.status != 'CLOSED' %}
+                <form action="{{ path('app_project_requirement_discussion_close', {id: project.project_id, reqId: requirement.reqid, discId: discussion.discussionid}) }}" method="post" style="margin: 0;">
+                    <button type="submit" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem; background: rgba(239, 68, 68, 0.2); color: #fca5a5;">Close Discussion</button>
+                </form>
+            {% endif %}
+            <a href="{{ path('app_project_requirement_discussions', {id: project.project_id, reqId: requirement.reqid}) }}" class="badge badge-blue" style="text-decoration: none; display: flex; align-items: center;">Back to Discussions</a>
+        </div>
+    </div>
+</div>
+
+{# --- Discussion Header --- #}
+<div class="project-card" style="max-width: 900px; cursor: default; margin-bottom: 2rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem;">
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Author</div>
+            <span>{{ discussion.author }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Created</div>
+            <span style="font-size: 0.875rem;">{{ discussion.date }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Assigned To</div>
+            <span>{{ discussion.assignto|default('—') }}</span>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Status</div>
+            {% if discussion.status == 'CLOSED' %}
+                <span class="badge badge-red">Closed</span>
+            {% else %}
+                <span class="badge badge-green">Open</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border);">
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Discussion</div>
+        <div style="background: rgba(15, 23, 42, 0.3); padding: 1.25rem; border-radius: 0.75rem; line-height: 1.6; white-space: pre-wrap;">{{ discussion.discussion|raw }}</div>
+    </div>
+</div>
+
+{# --- Posts --- #}
+<div style="max-width: 900px; margin-bottom: 2rem;">
+    <h2 style="font-size: 1.25rem; margin-bottom: 1rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        Posts ({{ posts|length }})
+    </h2>
+
+    {% if posts|length > 0 %}
+        {% for post in posts %}
+        <div class="project-card" style="cursor: default; margin-bottom: 1rem; padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                <span style="font-weight: 600; color: var(--primary);">{{ post.author }}</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">{{ post.date }}</span>
+            </div>
+            <div style="line-height: 1.6; white-space: pre-wrap;">{{ post.post|raw }}</div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="color: var(--text-muted); font-size: 0.875rem;">No posts yet.</p>
+    {% endif %}
+</div>
+
+{# --- Add Post Form --- #}
+{% if discussion.status != 'CLOSED' %}
+<div class="project-card" style="max-width: 900px; cursor: default;">
+    <h2 style="font-size: 1.1rem; margin-bottom: 1rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Add Reply</h2>
+
+    <form method="post">
+        <div class="form-group">
+            <label for="post">Your Reply <span style="color: #f87171;">*</span></label>
+            <textarea id="post" name="post" class="form-control" style="min-height: 120px;" placeholder="Write your reply..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary">Post Reply</button>
+    </form>
+</div>
+{% else %}
+<div class="project-card" style="max-width: 900px; cursor: default; text-align: center; padding: 1.5rem;">
+    <p style="color: var(--text-muted);">🔒 This discussion is closed. No new posts can be added.</p>
+</div>
+{% endif %}
+{% endblock %}

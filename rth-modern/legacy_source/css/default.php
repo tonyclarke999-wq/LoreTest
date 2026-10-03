@@ -1,0 +1,202 @@
+<?php
+header ('Content-type: text/css');
+# Making this php file beacuse the server keeps sending back a cached version,
+# meaning I have to wait about 1 minute after every changed before I could see
+# the results.
+
+?>
+
+body 		{ background-color: #ffffff; text-align: left; color: #000000; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 8pt; margin-left: 4px; margin-right: 4px; margin-top: 6px; margin-bottom: 6px; }
+
+p			{ font-family: Verdana, Arial, Helvetica, sans-serif; }
+p.error		{ font-weight: bold; text-align: center; color: red; font-size: 8pt;}
+p.warning	{ font-weight: bold; text-align: center; color: #F5B500; font-size: 12pt;}
+
+p.help-page-title   { font-weight: bold; text-align: left; font-size: 12pt; }
+li.help-link			{ font-weight: bold; text-align: left; font-size: 10pt; }
+td.help-title		{ font-weight: bold; text-align: left; font-size: 10pt; }
+td.help-text		{ text-align: left; font-size: 10pt; }
+
+
+/* IMAGE */
+img
+{
+	border: 0;
+	border-witdh:.0px;
+}
+.imagelink:visited, .imagelink:link
+{
+	border: 0;
+	border-witdh:.0px;
+}
+
+/* ANCHOR
+a			{}
+a:active 		{ color: ;    }
+a:link    		{ color: ; }
+a:visited 		{ color: ;   }
+*/
+
+/* Special style to mark supporting docs link */
+.special
+{
+	color: red;
+	font-weight: bold;
+}
+a.speciallink:link
+{
+	color: red;
+	font-weight: bold;
+}
+a.speciallink:visited
+{
+	color: red;
+	font-weight: bold;
+}
+
+form			{ display: inline; }
+form input 		{ font-family: Verdana, Arial, Helvetica, sans-serif; font-size:10pt }
+form textarea 	{ font-family: Verdana, Arial, Helvetica, sans-serif; font-size:10pt }
+form select		{ font-family: Verdana, Arial, Helvetica, sans-serif; font-size:10pt }
+
+form 	.sort-header			{ padding: 0px; margin-left: -1px; margin-right:-1px; background-color:transparent; border-width:0px; vertical-align:middle; cursor:pointer; cursor:hand; color:blue; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 8pt; text-decoration:underline; font-weight:bold; }
+form    .page-numbers 			{ padding: 0px; margin-left: -1px; margin-right:-1px; background-color:transparent; border-width:0px; vertical-align:middle; cursor:pointer; cursor:hand; color:blue; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 8pt; text-decoration:underline; }
+form    .page-numbers-disabled	{ padding: 0px; margin-left: -2px; margin-right:-2px; background-color:transparent; border-width:0px; vertical-align:middle; 				 cursor:text; color:black;font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 8pt;  }
+
+/* SPAN */
+span			{ font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt; }
+span.print		{ font-size: 8pt; }
+span.required 	{ font-size: 8pt; color: #bb0000; }
+span.small 		{ font-size: 8pt; font-weight: normal; }
+
+/* TABLE */
+
+table				{ }
+table.hide100		{ width: 100%; border: solid 0px #ffffff; }
+table.hide95		{ width: 95%; border: solid 0px #ffffff; }
+table.hide90		{ width: 90%; border: solid 0px #ffffff; }
+table.hide85		{ width: 85%; border: solid 0px #ffffff; }
+table.hide80		{ width: 80%; border: solid 0px #ffffff; }
+table.hide75		{ width: 75%; border: solid 0px #ffffff; }
+table.hide70		{ width: 70%; border: solid 0px #ffffff; }
+table.hide65		{ width: 65%; border: solid 0px #ffffff; }
+table.hide60		{ width: 60%; border: solid 0px #ffffff; }
+table.hide50		{ width: 50%; border: solid 0px #ffffff; }
+table.hide40		{ width: 40%; border: solid 0px #ffffff; }
+
+table.sortable		{ width: 100%; border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width100		{ width: 100%; border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width95		{ width: 95%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width90		{ width: 90%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width85		{ width: 85%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width80		{ width: 80%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width75		{ width: 75%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width70		{ width: 70%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width65		{ width: 65%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width60		{ width: 60%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width50		{ width: 50%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width40		{ width: 40%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width30		{ width: 30%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width20		{ width: 20%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+table.width10		{ width: 10%;  border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+
+table.sub-menu		{ border-collapse: collapse; border: solid 1px #000000; text-align: center;}
+
+table.inner			{ width: 100%; background-color: #99CCFF; border-collapse: collapse; }
+
+/* TABLE HEADER */
+th				{ background-color: #99CCFF; color: #000000; text-align: center; font-size: 8pt; font-family: Verdana, Arial, Helvetica, sans-serif; }
+
+/* TABLE ROW */
+tr					{}
+tr.row-1			{ background-color: #ffffff; color: #000000; }
+tr.row-2			{ background-color: #ffffcc; color: #000000; }
+
+tr.tbl_header		{ background-color: #99CCFF; }
+tr.tbl-header-l		{ background-color: #99CCFF;  text-align: left }
+
+/* TABLE DATA */
+td  				{ font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 8pt;}
+td.center			{ text-align: center; padding: 1px; }
+td.left				{ text-align: left; padding: 1px; }
+td.right			{ text-align: right; padding: 1px;}
+
+td.form-header-l	{text-align: left; color: #000000; font-weight: bold;  padding: 2px; }
+td.form-header-c	{ text-align: center; color: #000000; font-weight: bold; padding: 2px; }
+td.form-header-r	{ text-align: right; color: #000000; font-weight: bold; padding: 2px; }
+
+td.form-lbl-l		{ text-align: left; padding: 1px; font-weight: bold}
+td.form-lbl-c		{ text-align: center; padding: 1px; font-weight: bold}
+td.form-lbl-r		{ text-align: right; padding: 1px; font-weight: bold}
+
+td.form-data-l		{ text-align: left; padding: 1px;}
+td.form-data-c		{ text-align: center; padding: 1px;}
+td.form-data-r		{ text-align: right; padding: 1px;}
+
+td.grid-header-l	{ text-align: left; background-color: #99CCFF; color: #000000; font-weight: bold;  padding: 2px; border: solid black; border-width : 1px; }
+td.grid-header-c	{ text-align: center; background-color: #99CCFF; color: #000000; font-weight: bold; padding: 2px; border: solid black; border-width : 1px; }
+td.grid-header-r	{ text-align: right; background-color: #99CCFF; color: #000000; font-weight: bold; padding: 2px; border: solid black; border-width : 1px; }
+
+td.bg-color			{ text-align: left; background-color: #99CCFF; color: #000000; padding: 2px; border: solid black; border-width: 1px; }
+
+td.white-grid-header-l	{text-align: left; color: #000000; padding: 2px; border: solid black; border-width : 1px}
+td.white-grid-header-c	{ text-align: center; color: #000000; padding: 2px; border: solid black; border-width : 1px}
+td.white-grid-header-r	{ text-align: right; color: #000000; padding: 2px; border: solid black; border-width : 1px}
+
+td.grid-lbl-l		{text-align: left; padding: 1px; color: #000000;	font-weight: bold; border: solid black; border-width : 1px}
+td.grid-lbl-c		{text-align: center; padding: 1px;	color: #000000;	font-weight: bold; border: solid black; border-width : 1px}
+td.grid-lbl-r		{text-align: right;	padding: 1px;	color: #000000;	font-weight: bold; border: solid black; border-width : 1px}
+
+td.grid-data-l		{ text-align: left; padding: 1px; background-color: #e8e8e8; color: #000000; border: solid black; border-width : 1px}
+td.grid-data-c		{ text-align: center; padding: 1px; background-color: #e8e8e8; color: #000000; border: solid black; border-width : 1px}
+td.grid-data-r		{ text-align: right; padding: 1px; background-color: #e8e8e8; color: #000000; border: solid black; border-width : 1px}
+
+td.tbl-header   	{}
+td.tbl-l		{text-align: left; padding: 1px; }
+td.tbl-c		{text-align: center; padding: 1px;}
+td.tbl-r		{text-align: right; padding: 1px;}
+
+td.menu			{ background-color: #e8e8e8; color: #000000; text-align: center; font-size: 10pt; padding: 1px; }
+td.sub_menu		{ background-color: #ffffff; color: #000000; text-align: left; font-size: 10pt; width: 100%; padding: 1px; }
+/*
+Original menu had width specified
+td.menu			{ background-color: #e8e8e8; color: #000000; text-align: center; font-size: 10pt; width: 100% padding: 1px; }
+*/
+
+td.header-l		{ text-align: left; font-size: 8pt}
+td.header-r		{ text-align: right; font-size: 8pt}
+td.header-c		{ text-align: center; font-size: 8pt}
+
+td.footer-l		{ text-align: left; font-size: 8pt }
+td.footer-r		{ text-align: right; font-size: 8pt }
+td.footer-c		{ text-align: center; font-size: 8pt }
+
+/* DIV */
+div				{  }
+
+div.div-l		{ text-align: left; }
+div.div-r		{ text-align: right; }
+div.div-c		{ text-align: center; }
+div.center table	{ margin-left: auto; margin-right: auto; }
+
+/* Heading Text */
+h1	{}
+h2	{ font-size: 12pt; font-weight: bold; text-align: center }
+h3	{ background-color: #ffffff; color: #000000; text-align: left; font-size: 11pt; width: 100%; padding: 1px; }
+h4	{ font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt; text-align: left; color: #000000; font-weight: bold;    position: static;  margin: 5px;               }
+
+h3.hint {color:#990000;}
+
+.error			{ font-weight: bold; text-align: center; color: red; font-size: 8pt;}
+.small			{ font-size: 8pt; }
+.italic			{ font-style: italic; }
+
+.operation-successful { text-align: center; font-weight: bold; }
+
+.manual		{ color: blue; font-size: 8pt; margin-right: 2px; }
+.auto		{ color: red; font-size: 8pt; }
+
+.news-subject { font-weight: bold; font-size: 10pt; }
+.news-body	{ padding: 16px; }
+
+.test-step-info		{ color:red; }

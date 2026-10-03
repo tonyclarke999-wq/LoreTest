@@ -8,40 +8,41 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResource> L
 @attribute [Authorize]
 
-<PageTitle>Delete Test Case</PageTitle>
+<PageTitle>@L["DeleteTestCase"]</PageTitle>
 
-<h1>Delete Test Case</h1>
+<h1>@L["DeleteTestCase"]</h1>
 
 @if (!canEdit)
 {
-    <p>You do not have permission to delete test cases.</p>
+    <p>@L["NoPermissionDeleteTestCase"]</p>
 }
 else if (testCase == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@L["Loading"]</em></p>
 }
 else
 {
-    <h3>Are you sure you want to delete this?</h3>
+    <h3>@L["DeleteConfirmationGeneral"]</h3>
     <div>
-        <h4>Test Case</h4>
+        <h4>@L["TestCase"]</h4>
         <hr />
         <dl class="row">
-            <dt class="col-sm-3">Title</dt>
+            <dt class="col-sm-3">@L["Title"]</dt>
             <dd class="col-sm-9">@testCase.Title</dd>
             
-            <dt class="col-sm-3">Description</dt>
+            <dt class="col-sm-3">@L["Description"]</dt>
             <dd class="col-sm-9">@((MarkupString)(testCase.Description ?? ""))</dd>
             
-            <dt class="col-sm-3">Status</dt>
+            <dt class="col-sm-3">@L["Status"]</dt>
             <dd class="col-sm-9">@testCase.Status</dd>
         </dl>
         
         <EditForm Model="testCase" OnValidSubmit="DeleteTestCase" FormName="deleteTestCase">
-            <button type="submit" class="btn btn-danger">Delete</button> |
-            <a href="/testsuites/details/@testCase.TestSuiteId">Back to Test Suite</a>
+            <button type="submit" class="btn btn-danger">@L["Delete"]</button> |
+            <a href="/testsuites/details/@testCase.TestSuiteId">@L["BackToTestSuite"]</a>
         </EditForm>
     </div>
 }

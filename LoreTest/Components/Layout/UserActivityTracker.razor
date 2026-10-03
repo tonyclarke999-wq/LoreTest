@@ -1,0 +1,81 @@
+@implements IDisposable
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject LoreTest.Utilities.UserActivityService ActivityService
+@inject IJSRuntime JSRuntime
+
+@code {
+    private bool _isDisposed;
+    private string? _cachedUserAgent;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Subscribe to navigation events
+                NavigationManager.LocationChanged += OnLocationChanged;
+
+                // Capture browser User-Agent
+                _cachedUserAgent = await JSRuntime.InvokeAsync<string>("window.getUserAgent");
+
+                // Record the initial page load
+                await LogCurrentPageAsync(NavigationManager.Uri);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[TRACKER ERROR]: Failed to initialize tracking. Error: {ex.Message}");
+            }
+        }
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        try
+        {
+            await LogCurrentPageAsync(e.Location);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[TRACKER ERROR]: Failed to log page transition. Error: {ex.Message}");
+        }
+    }
+
+    private async Task LogCurrentPageAsync(string url)
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        
+        var username = user.Identity?.Name ?? "Anonymous";
+        var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        // Clean up URL to show relative path (makes dashboard cleaner)
+        var relativeUrl = NavigationManager.ToBaseRelativePath(url);
+        if (string.IsNullOrEmpty(relativeUrl))
+        {
+            relativeUrl = "/";
+        }
+        else
+        {
+            relativeUrl = "/" + relativeUrl;
+        }
+
+        // Avoid logging telemetry itself or login redirect loops
+        if (relativeUrl.Contains("Account/Logout", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        await ActivityService.LogActivityAsync(username, userId, "PageView", relativeUrl, _cachedUserAgent);
+    }
+
+    public void Dispose()
+    {
+        if (!_isDisposed)
+        {
+            NavigationManager.LocationChanged -= OnLocationChanged;
+            _isDisposed = true;
+        }
+    }
+}

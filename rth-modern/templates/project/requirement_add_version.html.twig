@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add New Version - Requirement #{{ requirement.reqid }} - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Add New Version</h1>
+            <p class="subtitle">Requirement #{{ requirement.reqid }} — {{ requirement.reqname }}
+                {% if currentVersion %}
+                    <span class="badge badge-blue" style="margin-left: 0.5rem;">Current: v{{ currentVersion.version }}</span>
+                {% endif %}
+            </p>
+        </div>
+        <a href="{{ path('app_project_requirement_detail', {id: project.project_id, reqId: requirement.reqid}) }}" class="badge badge-blue" style="text-decoration: none; margin-bottom: 0.5rem;">Back to Detail</a>
+    </div>
+</div>
+
+<div class="project-card" style="max-width: 900px;">
+    <form method="post" enctype="multipart/form-data">
+        {# --- Requirement Name (read-only) --- #}
+        <div class="form-group">
+            <label>Requirement Name</label>
+            <div style="padding: 0.75rem 1rem; background: rgba(15, 23, 42, 0.3); border: 1px solid var(--glass-border); border-radius: 0.75rem; color: var(--text-muted);">
+                {{ requirement.reqname }}
+            </div>
+        </div>
+
+        {# --- Version Number --- #}
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="version">New Version Number <span style="color: #f87171;">*</span></label>
+                <input type="text" id="version" name="version" class="form-control" value="{{ nextVersion }}" maxlength="10" required style="width: 120px;">
+            </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" name="status" class="form-control" required>
+                    {% set statuses = ['New', 'Draft', 'Approved', 'Rejected', 'Not Testable', 'Obsolete'] %}
+                    {% for s in statuses %}
+                        <option value="{{ s }}" {% if currentVersion and currentVersion.status == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <select id="priority" name="priority" class="form-control" required>
+                    <option value="High" {% if requirement.priority == 'High' %}selected{% endif %}>High</option>
+                    <option value="Medium" {% if requirement.priority == 'Medium' %}selected{% endif %}>Medium</option>
+                    <option value="Low" {% if requirement.priority == 'Low' %}selected{% endif %}>Low</option>
+                </select>
+            </div>
+        </div>
+
+        {# --- Content: Detail or File --- #}
+        {% if requirement.recordorfile == 'F' %}
+        <div class="form-group">
+            <label for="upload_file">Upload New File <span style="color: #f87171;">*</span></label>
+            <input type="file" id="upload_file" name="upload_file" class="form-control" style="padding: 0.5rem;" required>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Upload the new version of the requirement file. Max: 25MB</p>
+        </div>
+        {% else %}
+        <div class="form-group">
+            <label for="detail">Detailed Description <span style="color: #f87171;">*</span></label>
+            <textarea id="detail" name="detail" class="form-control" style="min-height: 200px;" required>{{ currentVersion ? currentVersion.detail : '' }}</textarea>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Pre-filled with current version content. Edit as needed.</p>
+        </div>
+        {% endif %}
+
+        {# --- Change Request & Assigned To --- #}
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="assigned_to">Assigned To</label>
+                <select id="assigned_to" name="assigned_to" class="form-control">
+                    <option value="">— Unassigned —</option>
+                    {% for user in users %}
+                        <option value="{{ user.username }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="assign_release">Assign to Release</label>
+                <select id="assign_release" name="assign_release" class="form-control">
+                    <option value="0">— None —</option>
+                    {% for rel in releases %}
+                        <option value="{{ rel.releaseid }}">{{ rel.releasename }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="defect_id">Change Request / Defect ID</label>
+                <input type="number" id="defect_id" name="defect_id" class="form-control" value="0" min="0">
+            </div>
+        </div>
+
+        {# --- Reason for Change --- #}
+        <div class="form-group">
+            <label for="reason_for_change">Reason for Change <span style="color: #f87171;">*</span></label>
+            <textarea id="reason_for_change" name="reason_for_change" class="form-control" style="min-height: 100px;" placeholder="Explain why this new version is being created..." required></textarea>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn-primary">Create Version v{{ nextVersion }}</button>
+            <a href="{{ path('app_project_requirement_detail', {id: project.project_id, reqId: requirement.reqid}) }}" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-muted); text-decoration: none;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

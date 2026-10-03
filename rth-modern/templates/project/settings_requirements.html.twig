@@ -1,0 +1,114 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Requirement Settings - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div>
+        <h1>Requirement Settings</h1>
+        <p class="subtitle">Configure lookups for {{ project.project_name }}</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;">
+    {# --- Document Types --- #}
+    <div class="project-card" style="cursor: default;">
+        <h2 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--primary);">Document Types</h2>
+        
+        <form method="post" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+            <input type="hidden" name="action" value="add_doc_type">
+            <input type="text" name="doc_type_name" class="form-control" placeholder="New Doc Type..." required style="padding: 0.375rem 0.75rem; font-size: 0.85rem;">
+            <button type="submit" class="badge badge-green" style="border: none; cursor: pointer;">+ Add</button>
+        </form>
+
+        <div class="table-container">
+            <table>
+                <tbody>
+                    {% for dt in docTypes %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ dt.reqdoctypename }}</td>
+                        <td width="40" style="text-align: right;">
+                            <form method="post" style="margin: 0; display: inline;">
+                                <input type="hidden" name="action" value="remove_doc_type">
+                                <input type="hidden" name="id" value="{{ dt.reqdoctypeid }}">
+                                <button type="submit" style="background: none; border: none; color: #fca5a5; cursor: pointer; padding: 0;" title="Remove" onclick="return confirm('Remove this document type?');">✕</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="2" style="color: var(--text-muted); font-size: 0.85rem;">No document types.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# --- Areas Covered --- #}
+    <div class="project-card" style="cursor: default;">
+        <h2 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--primary);">Areas Covered</h2>
+        
+        <form method="post" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+            <input type="hidden" name="action" value="add_area">
+            <input type="text" name="area_name" class="form-control" placeholder="New Area..." required style="padding: 0.375rem 0.75rem; font-size: 0.85rem;">
+            <button type="submit" class="badge badge-green" style="border: none; cursor: pointer;">+ Add</button>
+        </form>
+
+        <div class="table-container">
+            <table>
+                <tbody>
+                    {% for area in areas %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ area.areacoverage }}</td>
+                        <td width="40" style="text-align: right;">
+                            <form method="post" style="margin: 0; display: inline;">
+                                <input type="hidden" name="action" value="remove_area">
+                                <input type="hidden" name="id" value="{{ area.reqareacoverageid }}">
+                                <button type="submit" style="background: none; border: none; color: #fca5a5; cursor: pointer; padding: 0;" title="Remove" onclick="return confirm('Remove this area?');">✕</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="2" style="color: var(--text-muted); font-size: 0.85rem;">No areas covered.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# --- Functionalities --- #}
+    <div class="project-card" style="cursor: default;">
+        <h2 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--primary);">Functionalities</h2>
+        
+        <form method="post" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+            <input type="hidden" name="action" value="add_func">
+            <input type="text" name="func_name" class="form-control" placeholder="New Functionality..." required style="padding: 0.375rem 0.75rem; font-size: 0.85rem;">
+            <button type="submit" class="badge badge-green" style="border: none; cursor: pointer;">+ Add</button>
+        </form>
+
+        <div class="table-container">
+            <table>
+                <tbody>
+                    {% for func in functionalities %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ func.functionalityname }}</td>
+                        <td width="40" style="text-align: right;">
+                            <form method="post" style="margin: 0; display: inline;">
+                                <input type="hidden" name="action" value="remove_func">
+                                <input type="hidden" name="id" value="{{ func.functionalityid }}">
+                                <button type="submit" style="background: none; border: none; color: #fca5a5; cursor: pointer; padding: 0;" title="Remove" onclick="return confirm('Remove this functionality?');">✕</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="2" style="color: var(--text-muted); font-size: 0.85rem;">No functionalities.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

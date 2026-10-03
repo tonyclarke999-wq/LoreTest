@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Sets Status - {{ project.project_name }}{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header" style="margin-bottom: 2rem;">
+    <div>
+        <h1>Test Sets Status</h1>
+        <p class="subtitle">View the latest Test Sets ordered by their creation date.</p>
+    </div>
+</div>
+
+<div class="table-container">
+    <table style="width: 100%; text-align: left; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Release</th>
+                <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Build</th>
+                <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Test Set</th>
+                <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Date Created</th>
+                <th style="background: rgba(15, 23, 42, 0.6); padding: 1rem 1.25rem; font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--glass-border);">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in results %}
+            <tr style="border-bottom: 1px solid var(--glass-border);">
+                <td style="padding: 1rem 1.25rem; color: var(--text-main);">{{ row.releasename }}</td>
+                <td style="padding: 1rem 1.25rem; color: var(--text-main);">{{ row.buildname }}</td>
+                <td style="padding: 1rem 1.25rem; color: var(--text-main); font-weight: 500;">{{ row.testsetname }}</td>
+                <td style="padding: 1rem 1.25rem; color: var(--text-muted);">{{ row.datecreated }}</td>
+                <td style="padding: 1rem 1.25rem;">
+                    {% if row.testsetstatus == 'Finished' %}
+                        <span class="badge badge-green">{{ row.testsetstatus }}</span>
+                    {% elseif row.testsetstatus == 'In Progress' %}
+                        <span class="badge badge-blue">{{ row.testsetstatus }}</span>
+                    {% else %}
+                        <span class="badge badge-yellow">{{ row.testsetstatus ?: 'Pending' }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-muted);">No test sets found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

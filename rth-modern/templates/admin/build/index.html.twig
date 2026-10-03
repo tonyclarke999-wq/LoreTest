@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Release Management - Admin{% endblock %}
+
+{% block sidebar %}
+    {{ include('project/_sidebar.html.twig') }}
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h1>Releases & Builds</h1>
+            <p class="subtitle">System Administration - {{ releases|length }} active releases</p>
+        </div>
+        <a href="{{ path('app_admin_release_new') }}" class="btn-primary" style="text-decoration: none;">Add Release</a>
+    </div>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Release Name</th>
+                <th>Project</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for release in releases %}
+            <tr>
+                <td style="color: var(--primary); font-weight: 600;">#{{ release.releaseid }}</td>
+                <td style="font-weight: 500;">{{ release.releasename }}</td>
+                <td><span class="badge badge-blue">{{ release.project_name }}</span></td>
+                <td style="display: flex; gap: 0.5rem;">
+                    <a href="{{ path('app_admin_builds', {id: release.releaseid}) }}" class="badge badge-green" style="text-decoration: none;">Builds</a>
+                    <a href="{{ path('app_admin_release_edit', {id: release.releaseid}) }}" class="badge badge-blue" style="text-decoration: none;">Edit</a>
+                    <form action="{{ path('app_admin_release_delete', {id: release.releaseid}) }}" method="post" onsubmit="return confirm('Archive this release?');" style="margin: 0;">
+                        <button type="submit" class="badge badge-red" style="border: none; cursor: pointer; font-family: inherit; font-size: inherit;">Archive</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">No releases found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

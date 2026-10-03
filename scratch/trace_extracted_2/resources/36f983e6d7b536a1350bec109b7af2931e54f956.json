@@ -1,0 +1,1 @@
+{"negotiateVersion":1,"connectionId":"E9MPnkrDotCQxEyU3PisSQ","connectionToken":"i4XYH8qBsK3nx0dDZub-1g","availableTransports":[{"transport":"WebSockets","transferFormats":["Text","Binary"]},{"transport":"ServerSentEvents","transferFormats":["Text"]},{"transport":"LongPolling","transferFormats":["Text","Binary"]}]}

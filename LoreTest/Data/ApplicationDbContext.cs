@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Authorization;
+#nullable enable
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ namespace LoreTest.Data
         private readonly IServiceProvider _serviceProvider = serviceProvider;
 
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<UserActivity> UserActivities { get; set; }
         public DbSet<TestProject> TestProjects { get; set; }
         public DbSet<TestSuite> TestSuites { get; set; }
         public DbSet<TestCase> TestCases { get; set; }
@@ -17,6 +19,21 @@ namespace LoreTest.Data
         public DbSet<TestRun> TestRuns { get; set; }
         public DbSet<TestRunCaseResult> TestRunCaseResults { get; set; }
         public DbSet<TestRunStepResult> TestRunStepResults { get; set; }
+        public DbSet<Bug> Bugs { get; set; }
+        public DbSet<BugAttachment> BugAttachments { get; set; }
+        public DbSet<AppSettings> AppSettings { get; set; }
+        public DbSet<SupportedLanguage> SupportedLanguages { get; set; }
+        public DbSet<LocalizationField> LocalizationFields { get; set; }
+        public DbSet<DynamicTranslation> DynamicTranslations { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<LocalizationField>()
+                .HasIndex(f => f.Key)
+                .IsUnique();
+        }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

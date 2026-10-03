@@ -1,0 +1,33 @@
+{# report/_filters.html.twig #}
+<div class="project-card" style="margin-bottom: 2rem;">
+    <form method="GET" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+        
+        {% if filter_type == 'build' or filter_type == 'testset' %}
+            <div style="flex: 1; min-width: 200px;">
+                <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: var(--text-sm);">Select Build</label>
+                <select name="build_id" class="form-control" style="width: 100%; padding: 0.5rem; background: var(--surface); color: var(--text-main); border: 1px solid var(--glass-border); border-radius: var(--radius-sm);">
+                    <option value="">-- Select Build --</option>
+                    {% for build in filters.builds %}
+                        <option value="{{ build.buildid }}" {% if selected_build is defined and selected_build == build.buildid %}selected{% endif %}>{{ build.buildname }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+
+        {% if filter_type == 'testset' %}
+            <div style="flex: 1; min-width: 200px;">
+                <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: var(--text-sm);">Select Test Set</label>
+                <select name="testset_id" class="form-control" style="width: 100%; padding: 0.5rem; background: var(--surface); color: var(--text-main); border: 1px solid var(--glass-border); border-radius: var(--radius-sm);">
+                    <option value="">-- Select Test Set --</option>
+                    {% for ts in filters.testsets %}
+                        <option value="{{ ts.testsetid }}" {% if selected_testset is defined and selected_testset == ts.testsetid %}selected{% endif %}>{{ ts.testsetname }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+
+        <div>
+            <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.5rem; border: none; border-radius: var(--radius-sm); background: var(--primary); color: white; cursor: pointer;">Generate Report</button>
+        </div>
+    </form>
+</div>

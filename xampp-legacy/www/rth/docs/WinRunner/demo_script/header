@@ -1,0 +1,21 @@
+#! asci,100,100,Test Header,Mon Nov 28 19:44:48 2005
+
+[General]
+TDDB_ID=0
+NAME=C:\Apache2\htdocs\rth\docs\WinRunner\demo_script
+TYPE=TP
+AUTHOR=N0096347
+DATE=1133225088
+FUNCTION=
+SPEC=
+FSEARCH=
+TSEARCH=
+SUM_DESCRIPTION=
+DESCRIPTION=
+COMMENTS=
+ADDONS=ActiveX,WebTest
+DATA_TBL=default.xls
+VERSION=7.01
+
+[Params]
+PARAM_CNT=0

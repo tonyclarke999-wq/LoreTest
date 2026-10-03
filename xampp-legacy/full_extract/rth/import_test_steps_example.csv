@@ -1,0 +1,6 @@
+TestStep Number,Action,Test Inputs,Expected Results,Info Step (Y)
+1,The actor enters the URL,url: http://www.rth.net,The system displays a request for a User ID and Password.,Y
+2,The actor enters their User Id and Password.,username: johndoe password: passw,The system displays the home page,Y
+3,Verify that the Client's name and address appears as the first listed location.,,The Client's name and address appears as the first listed location. Name: John Doe Address: 10 Wilbur Street City: NY,
+3,Verify that the Client's name and address appears as the first listed location.,,The Client's name and address appears as the first listed location.,
+,,,,

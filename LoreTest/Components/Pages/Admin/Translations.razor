@@ -1,0 +1,302 @@
+@page "/admin/translations"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using LoreTest.Data
+@using Microsoft.Extensions.Localization
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject IStringLocalizer<SharedResource> L
+@inject IJSRuntime JS
+@using System.Text
+@using System.IO
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+<PageTitle>@L["ManageFieldTranslations"]</PageTitle>
+
+<h1>@L["ManageFieldTranslations"]</h1>
+
+<hr />
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <label class="form-label">@L["SelectLanguage"]</label>
+        <select class="form-select" @onchange="OnLanguageChanged">
+            <option value="">-- @L["ChooseLanguage"] --</option>
+            @foreach (var lang in languages)
+            {
+                <option value="@lang.Id">@lang.Name (@lang.Code)</option>
+            }
+        </select>
+    </div>
+</div>
+
+@if (selectedLanguageId > 0)
+{
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <span>@L["Translations"]</span>
+            <div>
+                <button class="btn btn-sm btn-info me-2" @onclick="ExportToCsv">@L["ExportCSV"]</button>
+                <label class="btn btn-sm btn-warning me-2 mb-0">
+                    @L["ImportCSV"]
+                    <InputFile OnChange="ImportFromCsv" style="display:none;" accept=".csv" />
+                </label>
+                <button class="btn btn-sm btn-success" @onclick="ShowAddTranslationForm">@L["AddTranslation"]</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@L["FieldID"]</th>
+                        <th>@L["FieldKey"]</th>
+                        <th>@L["TranslatedValue"]</th>
+                        <th>@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var trans in translations)
+                    {
+                        <tr>
+                            <td>@trans.FieldId</td>
+                            <td>@trans.Field?.Key</td>
+                            <td>@trans.TranslatedValue</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" @onclick="() => EditTranslation(trans)">@L["Edit"]</button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteTranslation(trans)">@L["Delete"]</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (showForm)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(editingTranslation.Id == 0 ? L["AddTranslation"] : L["EditTranslation"])</h5>
+                    <button type="button" class="btn-close" @onclick="() => showForm = false"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="editingTranslation" OnValidSubmit="HandleSubmit">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">@L["FieldID"]</label>
+                            <InputNumber @bind-Value="editingTranslation.FieldId" class="form-control" />
+                            <ValidationMessage For="() => editingTranslation.FieldId" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">@L["FieldKey"]</label>
+                            <input type="text" class="form-control" value="@editingTranslation.Field?.Key" disabled />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">@L["TranslatedValue"]</label>
+                            <InputText @bind-Value="editingTranslation.TranslatedValue" class="form-control" />
+                            <ValidationMessage For="() => editingTranslation.TranslatedValue" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="() => showForm = false">@L["Cancel"]</button>
+                            <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<SupportedLanguage> languages = new();
+    private List<DynamicTranslation> translations = new();
+    private DynamicTranslation editingTranslation = new();
+    private int selectedLanguageId;
+    private bool showForm = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        languages = await context.SupportedLanguages.ToListAsync();
+    }
+
+    private async Task OnLanguageChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int id))
+        {
+            selectedLanguageId = id;
+            await LoadTranslations();
+        }
+        else
+        {
+            selectedLanguageId = 0;
+            translations.Clear();
+        }
+    }
+
+    private async Task LoadTranslations()
+    {
+        using var context = DbFactory.CreateDbContext();
+        translations = await context.DynamicTranslations
+            .Include(t => t.Field)
+            .Where(t => t.LanguageId == selectedLanguageId)
+            .OrderBy(t => t.FieldId)
+            .ToListAsync();
+    }
+
+    private void ShowAddTranslationForm()
+    {
+        editingTranslation = new DynamicTranslation { LanguageId = selectedLanguageId };
+        showForm = true;
+    }
+
+    private void EditTranslation(DynamicTranslation trans)
+    {
+        editingTranslation = new DynamicTranslation 
+        { 
+            Id = trans.Id, 
+            LanguageId = trans.LanguageId, 
+            FieldId = trans.FieldId,
+            Field = trans.Field,
+            TranslatedValue = trans.TranslatedValue 
+        };
+        showForm = true;
+    }
+
+    private async Task HandleSubmit()
+    {
+        using var context = DbFactory.CreateDbContext();
+        if (editingTranslation.Id == 0)
+        {
+            context.DynamicTranslations.Add(editingTranslation);
+        }
+        else
+        {
+            context.DynamicTranslations.Update(editingTranslation);
+        }
+
+        await context.SaveChangesAsync();
+        await LoadTranslations();
+        showForm = false;
+    }
+
+    private async Task DeleteTranslation(DynamicTranslation trans)
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.DynamicTranslations.Remove(trans);
+        await context.SaveChangesAsync();
+        await LoadTranslations();
+    }
+
+    private async Task ExportToCsv()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("FieldId,FieldKey,TranslatedValue");
+        
+        foreach (var trans in translations)
+        {
+            var key = trans.Field?.Key ?? "";
+            var value = trans.TranslatedValue.Replace("\"", "\"\"");
+            sb.AppendLine($"{trans.FieldId},{key},\"{value}\"");
+        }
+
+        var lang = languages.FirstOrDefault(l => l.Id == selectedLanguageId);
+        var fileName = $"translations_{lang?.Code ?? "unknown"}_{DateTime.Now:yyyyMMdd}.csv";
+        var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+        
+        await JS.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(bytes));
+    }
+
+    private async Task ImportFromCsv(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            using var stream = e.File.OpenReadStream();
+            using var reader = new StreamReader(stream);
+            var header = await reader.ReadLineAsync();
+            
+            using var context = await DbFactory.CreateDbContextAsync();
+            
+            string? line;
+            int count = 0;
+            while ((line = await reader.ReadLineAsync()) != null)
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+                
+                var parts = ParseCsvLine(line);
+                if (parts.Count < 3) continue;
+
+                if (int.TryParse(parts[0], out int fieldId))
+                {
+                    var translatedValue = parts[2];
+                    
+                    var existing = await context.DynamicTranslations
+                        .FirstOrDefaultAsync(t => t.LanguageId == selectedLanguageId && t.FieldId == fieldId);
+                        
+                    if (existing != null)
+                    {
+                        existing.TranslatedValue = translatedValue;
+                        context.DynamicTranslations.Update(existing);
+                    }
+                    else
+                    {
+                        context.DynamicTranslations.Add(new DynamicTranslation
+                        {
+                            LanguageId = selectedLanguageId,
+                            FieldId = fieldId,
+                            TranslatedValue = translatedValue
+                        });
+                    }
+                    count++;
+                }
+            }
+            
+            await context.SaveChangesAsync();
+            await LoadTranslations();
+            // Optional: show success message
+        }
+        catch (Exception ex)
+        {
+            // Optional: show error message
+            Console.Error.WriteLine($"Import error: {ex.Message}");
+        }
+    }
+
+    private List<string> ParseCsvLine(string line)
+    {
+        var result = new List<string>();
+        var current = new StringBuilder();
+        bool inQuotes = false;
+        
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (c == '\"')
+            {
+                if (inQuotes && i + 1 < line.Length && line[i + 1] == '\"')
+                {
+                    current.Append('\"');
+                    i++;
+                }
+                else
+                {
+                    inQuotes = !inQuotes;
+                }
+            }
+            else if (c == ',' && !inQuotes)
+            {
+                result.Add(current.ToString());
+                current.Clear();
+            }
+            else
+            {
+                current.Append(c);
+            }
+        }
+        result.Add(current.ToString());
+        return result;
+    }
+}

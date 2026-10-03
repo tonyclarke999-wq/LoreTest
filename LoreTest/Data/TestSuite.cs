@@ -1,3 +1,4 @@
+#nullable enable
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -20,6 +21,6 @@ namespace LoreTest.Data
         [ForeignKey(nameof(TestProjectId))]
         public TestProject? Project { get; set; }
 
-        public ICollection<TestCase> TestCases { get; set; } = new List<TestCase>();
+        public ICollection<TestCase> TestCases { get; set; } = [];
     }
 }

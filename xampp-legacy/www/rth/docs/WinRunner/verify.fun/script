@@ -1,0 +1,469 @@
+#################################################################################################################################
+#	FUNCTION: TestStarted
+#		This function updates the TestSet_TestSuite_Assoc table and inserts into TestSuiteResults
+#		It updates the TestSet_TestSuite_Assoc table with a test status of WIP.
+#			This gives users the ability to know when a test has started in real time
+#		The insert into TestSuiteResults shows users that a test run has been started.
+#			This is useful so that you know how many times a test was executed
+#		If you're not able to write to the database there are two potential problems:
+#		1. There is no connection to the database (check your CONNECTIONSTRING parameters in wr_initialization)
+#		2. There is a problem with the SQL
+#			a. This can be caused by an invalid test_id or testset_id
+#			b. Be careful of apostrophes in your sql.  Be sure to escape them (I\'m testing).
+#		You'll see the test status change to WIP if you're writing to the database
+#
+#################################################################################################################################
+public function TestStarted( inout arControlArray[]) {
+
+	auto rc, SQLStatement, NumRecords;
+	auto t, P1, CurMemUtil, TotalPhyMem, FreePhyMem, TotalPageFile, FreePageFile, TotalVirMem, FreeVirMem;
+	auto RunID, ResultsPath, ResultsPathArray[], LengthOfResultsArray, arTestEnv[];
+	auto date, cvsFile, line, ind, sub1, ind2, cvsVersion, Started;
+	static TestSetID = getenv("TESTSETID");
+	arControlArray[Environment] = getenv("ENVIRONMENT");
+	
+	date = FormatDate();
+				
+	# Get the name of the wr results file
+	ResultsPath = getvar("result");
+	LengthOfResultsArray = split(ResultsPath, ResultsPathArray, "\\");
+	RunID = ResultsPathArray[LengthOfResultsArray];
+	
+	# Machine ID is generated here
+	get_computer_name(arControlArray[MachineName]);
+		
+	# Machine OS is generated here
+	MGetMSWindowsInfo(arTestEnv[4],arTestEnv[5],arTestEnv[6], arTestEnv[7], arTestEnv[8]);
+
+	# Set Variables, and if not assigned assign a default value
+	Started = "1";
+		
+	if (arControlArray[MachineName] == "")
+		arControlArray[MachineName] = "not set";
+
+	if (arControlArray[MachineLogin] == "")
+		arControlArray[MachineLogin] = "not set";
+		
+	if (arControlArray[TestName] == "")
+		arControlArray[TestName] = "not set";
+				
+	# 	code to get the system memory information
+	t = TOMEMORYSTATUS();
+	GlobalMemoryStatus(t);
+	FROMMEMORYSTATUS(P1, CurMemUtil, TotalPhyMem, FreePhyMem, TotalPageFile, FreePageFile, TotalVirMem, FreeVirMem, t);
+	
+	# Get CVS Version
+	cvsFile = arControlArray[TestPath] & "\cvs\Entries";
+	file_open( cvsFile, FO_MODE_READ);
+	while( file_getline( cvsFile, line ) == 0 ) {
+		ind = index(line,"/script/");
+		if(ind) {
+			sub1 = substr(line, 9);
+			ind2 = index(sub1,"/");
+			cvsVersion = (substr(line, 9, ind2 - 1));
+		} 
+	}
+	file_close(cvsFile);
+		
+	if(getenv("WRITETORTH") == 1) # ie User Wants to write to TMS else skip out rest of function
+	{
+		
+		# determine from the if this is a test suite or a test case
+		arControlArray[TSUniqueID] = "S" & get_time();
+		
+		SQLStatement = "INSERT INTO TestSuiteResults "
+			& "(TestID, TestSetID, UserID, MachineName, NnumberID, Environment, TestSuite, TestPath"
+			& ", RunID, Started, TS_UniqueRunID, OS, SP, TimeStarted, CVSVersion) " 
+			& "VALUES ('" 
+			& arControlArray[TestID] & "','" 
+			& TestSetID & "','" 
+			& arControlArray[AppLogin] & "','" 
+			& arControlArray[MachineName] & "','" 
+			& arControlArray[MachineLogin] & "','" 
+			& arControlArray[Environment] & "','" 
+			& arControlArray[TestName] & "','" 
+			& arControlArray[TestPath] & "','" 
+			& RunID & "','" 
+			& Started & "','" 
+			& arControlArray[TSUniqueID] & "','" 
+			& arTestEnv[4] & "','" 
+			& arTestEnv[8] & "','" 
+			& date & "','" 
+			& cvsVersion & "');";
+		
+		#pause(SQLStatement);
+		rc = db_connect ("DB",CONNECTIONSTRING); # rc = db_connect ("DB","DSN=DB");  # used if you're creating an ODBC connection on each device
+		wait(1);
+		rc = db_execute_query("DB",SQLStatement, NumRecords);
+		db_disconnect ("DB");
+
+		if (rc != 0)
+			tl_step("Failure",1,"INSERT INTO TestSuitesResults failed with error code " & rc);	
+		
+		# Update TestSet_TestSuite_Assoc
+		SQLStatement = "UPDATE TestSet_TestSuite_Assoc "
+						& "SET TestStatus = 'WIP' "
+						& "WHERE TestSetID= '" 
+						& TestSetID 
+						& "' AND TestID= '" & arControlArray[TestID] & "';";
+						
+		#pause(SQLStatement);		
+		db_connect ("DB",CONNECTIONSTRING);
+		rc = db_execute_query("DB",SQLStatement, NumRecords);
+		db_disconnect ("DB");
+		
+		if (rc != 0)
+			tl_step("Failure",1,"UPDATE TestSet_TestSuite_Assoc failed with error code " & rc);	
+
+		return arControlArray[TSUniqueID];		
+			
+			
+	} # End of if (WRITETORTH == 1) 
+} 
+
+
+#################################################################################################################################
+#	FUNCTION: WriteVerification
+#   	This function will write a verification record to the rth database
+#		It writes specifically to the verifyresults table
+#		If you're not able to write to the database there are two potential problems:
+#		1. There is no connection to the database (check your CONNECTIONSTRING parameters in wr_initialization)
+#		2. There is a problem with the SQL
+#			a. This can be caused by an invalid test_id or testset_id
+#			b. Be careful of apostrophes in your sql.  Be sure to escape them (I\'m testing).
+#   	There are 6 custom fields that you can write to verifyresults table.
+#			1. Update the database so that the custom field has the correct data type
+#			2. Define the custom field in arControlArray
+#			3. Set the value of arControlArray[your_custom_field_name] in your script
+#			4. Update the sql statement below to insert the custom field
+#		The custom field is intended to help people recreate problems found during automation.
+#		For example: If you're testing software for a loan shark you may want to input custom fields for 
+#			the points, vig, etc.  This can be very useful if your automation is being run off hours or off site.
+#			It makes it easy for users to recreate the problem found by the automation.
+#
+#################################################################################################################################
+public function WriteVerification( in StepNumber, 
+								   in Action,
+								   in ExpectedResult,
+								   in ActualResult,
+								   in Status,
+								   in Win, 
+								   in Obj, 
+								   in ObjType, 
+								   in LineNumber, 
+								   inout arControlArray[] ) {
+
+	auto rc, SQLStatement, NumRecords;
+	auto t, P1, CurMemUtil, TotalPhyMem, FreePhyMem, TotalPageFile, FreePageFile, TotalVirMem, FreeVirMem;
+	auto RunID,resultsPath, resultsPathArray[], LengthOfArray, date;
+	
+	date = FormatDate();
+		
+	# Get Run ID from Winrunner
+	# Split the path to have the results only
+	resultsPath = getvar("result");
+	LengthOfArray = split(resultsPath,resultsPathArray,"\\");
+	RunID = resultsPathArray[LengthOfArray];
+
+	# Get Machine ID
+	get_computer_name(arControlArray[MachineName]);
+	
+	#arControlArray[VerificationID] = VerifyID;
+	arControlArray[Window] = Win;
+	arControlArray[Object] = Obj;
+
+	# Check to see if each variable has got a value, if not assign a default 
+	if (StepNumber == "")
+		StepNumber = "NOT SET";
+	
+	if (arControlArray[MachineName] == "")
+		arControlArray[MachineName] = "NOT SET";
+	
+	if (arControlArray[MachineLogin] == "")
+		arControlArray[MachineLogin] = "NOT SET";
+	 
+	if (arControlArray[TestName] == "")
+		arControlArray[TestName] = "NOT SET";
+		
+	# code to get the system memory information
+ 	t = TOMEMORYSTATUS();
+ 	GlobalMemoryStatus(t);
+ 	FROMMEMORYSTATUS(P1, CurMemUtil, TotalPhyMem, FreePhyMem, TotalPageFile, FreePageFile, TotalVirMem, FreeVirMem, t);
+	
+	if(getenv("WRITETORTH") == 1) # ie User Wants to write to RTH database
+	{
+		db_connect ("DB",CONNECTIONSTRING);
+		
+		SQLStatement = "INSERT INTO VerifyResults "
+			& "(StepNumber, Action, ExpectedResult, ActualResult, TestStatus, Window, Object, LineNumber, ObjType"
+			& ", TotalPhyMem, FreePhyMem, TotalVirMem, FreeVirMem, CurMemUtil, TotalPageFile, FreePageFile," 
+			& " TS_UniqueRunID, TimeStamp, Custom_1, Custom_2, Custom_3 ) " 
+			& "VALUES ('"
+			& StepNumber & "','"  
+			& Action & "','"
+			& ExpectedResult & "','" 
+			& ActualResult & "','" 
+			& Status & "', '" 
+			& Win "', '" 
+			& Obj & "', '" 
+			& LineNumber & "','"
+			& ObjType & "','" 
+			& TotalPhyMem & "','" 
+			& FreePhyMem & "','" 
+			& TotalVirMem & "','" 
+			& FreeVirMem & "','" 
+			& CurMemUtil & "','" 
+			& TotalPageFile & "','" 
+			& FreePageFile & "','" 
+			& arControlArray[TSUniqueID] & "','" 
+			& date & "','" 
+			& arControlArray[MachineLogin] & "','"
+			& arControlArray[Custom_1] & "','" 
+			& arControlArray[Custom_2] & "' );";
+	
+		wait(1);
+		pause(SQLStatement);
+		
+		rc = db_execute_query("DB",SQLStatement, NumRecords);
+		
+		db_disconnect ("DB");
+		
+		if (rc != 0)
+			tl_step("",1,"INSERT INTO VerifyResults Table Failed");
+	}
+
+	else # write to winrunner results
+		report_msg("Step Num - " & StepNumber & "\n\t" & "Action - " & Action & "\n\t" & "ExpectedResult - " & ExpectedResult & "\n\t" & "Test Status - " & Status & "\n\t" & "Window - " & Win & "\n\t" & "Object - " & Obj & "\n\t" & "LineNumber - " & LineNumber );
+
+}
+
+#################################################################################################################################
+#	FUNCTION: TestCompleted
+#		This function updates the TestSet_TestSuite_Assoc table
+#		It updates the TestSet_TestSuite_Assoc table with a test status of Finished: Awaiting Review.
+#			This gives users the ability to know when a test has finished in real time
+#		It updates to TestSuiteResults table to show the time a test was finished.
+#			This is useful so that you know how long it took to run a test.
+#			This is also good to help estimate the time it will take for future iterations
+#
+#################################################################################################################################
+public function TestCompleted( UniqueID ) {
+
+	auto SQLStatement, rc, NumRecords, date;
+	static TestSetID = getenv("TESTSETID");
+	
+	date = FormatDate();	
+		
+	if(getenv("WRITETORTH") == 1) # User Wants to write to RTH database
+	{
+		# Write to TestSuiteResults Table
+		SQLStatement = "UPDATE TestSuiteResults "
+					& "SET TestSuiteResults.Finished = 1, "
+					& "TestSuiteResults.TimeFinished = '" & date & "' "
+					& "WHERE TestSuiteResults.TS_UniqueRunID= '" & UniqueID & "';";
+					
+					
+		# pause(SQLStatement);
+		rc = db_connect ("DB",CONNECTIONSTRING);	
+		rc = db_execute_query("DB",SQLStatement, NumRecords);
+		db_disconnect ("DB");
+	
+		if (rc != 0)
+			tl_step("TestCompleted",1,"UPDATE TestSuiteResults Failed, with error code " & rc);	
+	
+		# Write to TestSet_TestSuite_Assoc table
+		SQLStatement = "UPDATE TestSet_TestSuite_Assoc "
+		    			& "SET TestStatus = 'Finished : Awaiting Review', "
+						& "LogTimeStamp = '" & date & "' "
+						& "WHERE TestSetID= '" & TestSetID & "' "
+						& "AND TestID= '" & arControlArray[TestID] & "';";	
+		
+		# pause(SQLStatement);
+		db_connect ("DB",CONNECTIONSTRING);	
+		rc = db_execute_query("DB",SQLStatement, NumRecords);
+		db_disconnect ("DB");
+		
+		if (rc != 0)
+			tl_step("TestCompleted",1,"UPDATE TestSet_TestSuite_Assoc Failed, with error code " & rc);
+	
+	} # END of if (WRITETORTH == 1) 
+	
+}
+
+
+#################################################################################################################################
+#	FUNCTION: SetTestName
+#   INPUT: The full path of the test 
+#   OUTPUT: The test name
+#
+#################################################################################################################################
+public function SetTestName( in TestPath ) {
+
+	auto TestName, TestPathArray[], LengthOfTestArray;
+	
+	#	Split the Path to have the testname only
+	LengthOfTestArray = split( TestPath, TestPathArray, "\\");
+		
+	return TestPathArray[LengthOfTestArray];
+	
+}
+
+
+#################################################################################################################################
+#	FUNCTION: SaveControlArray
+#		Writes the values of the arControlArray to a text file
+#
+#################################################################################################################################
+public function SaveControlArray( inout arControlArray[] ) {
+
+	static i;
+	static FileName = M_ROOT & "\\dat\\CtrlAry.txt";
+	
+	if (arControlArray[ArrayLastValue] != "Anchor")
+		return FALSE;
+
+	file_open(FileName, FO_MODE_WRITE);
+	
+	for (i=1; i<=ArrayLastValue; i++)
+	{
+		file_printf(FileName, "%s\n", arControlArray[i]);
+	}
+	file_close(FileName);
+
+	return TRUE;
+}
+
+#################################################################################################################################
+#	FUNCTION: SaveControlArray
+#		Resets arControlArray if the last value does not equal "Anchor"
+#
+#################################################################################################################################
+public function CheckControlArray( inout arControlArray[] ) {
+
+	static rc;
+	static FileName = M_ROOT & "\\dat\\CtrlAry.txt";
+	
+	if (arControlArray[ArrayLastValue] != "Anchor")
+		rc = RestoreControlArray(arControlArray);
+	else
+		rc = SaveControlArray(arControlArray);
+
+	return rc;
+}
+
+#################################################################################################################################
+#	FUNCTION: RestoreControlArray
+#		Reads the values from the txt file into arControlArray
+#		Used if you have a problem
+#
+#################################################################################################################################
+public function RestoreControlArray( inout arControlArray[] ) {
+	static line, i;
+	static FileName = M_ROOT & "\\dat\\CtrlAry.txt";
+	
+	i = 1;
+
+	if (FileExists(FileName))
+	{
+		file_open(FileName, FO_MODE_READ);
+
+		while(file_getline(FileName, line)==0)
+			arControlArray[i++] = line;
+
+		file_close(FileName);
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
+#################################################################################################################################
+#	FUNCTION: InitializeControlArray
+#		Creates the CtrlAry.txt file
+#
+#################################################################################################################################
+public function InitializeControlArray() {
+
+	static i;
+	static FileName = M_ROOT & "\\dat\\CtrlAry.txt";
+	
+	file_open(FileName, FO_MODE_WRITE);
+	
+	for (i=1; i<ArrayLastValue; i++)
+	{
+		file_printf(FileName, "%s\n");
+	}
+	file_printf(FileName, "%s\n", "Anchor");
+	file_close(FileName);
+
+	return TRUE;
+}
+
+#################################################################################################################################
+#	FUNCTION: FileExists
+#		Verify that a given file exists
+#
+#################################################################################################################################
+public function FileExists( in FileName ) {
+	
+	static rc;
+	
+	rc = file_exists(FileName);
+
+	if (rc == 0) #file exists
+		return TRUE;
+	else
+		return FALSE;
+}
+
+
+#################################################################################################################################
+#	FUNCTION: FormatDate
+#		Format the date for input into the RTH database
+#		The format is yyyy-mm-dd HH:MM:SS
+#
+#################################################################################################################################
+public function FormatDate() {
+	
+	auto date, array[], time_array[], month;
+	auto day, time, year, hour, minute, second;
+	
+	static month_name[ ]=
+	{
+		"Jan" = "01",
+		"Feb" = "02", 
+		"Mar" = "03", 
+		"Apr" = "04",
+		"May" = "05", 
+		"Jun" = "06",
+		"Jul" = "07", 
+		"Aug" = "08",
+		"Sep" = "09", 
+		"Oct" = "10",
+		"Nov" = "11", 
+		"Dec" = "12" 
+	};
+	
+	#Get the current time on the machine
+	date = time_str();
+	
+	#Split it up into the array and extract the month, day, time and year
+	split (date, array, " ");
+	month = array[2];
+	day = array[3];
+	time = array[4];
+	year = array[5];
+
+	#Split the time into hour, minute and second
+	split(time,time_array, ":");
+	hour = time_array[1];
+	minute = time_array[2];
+	second = time_array[3];
+
+	#Format the string
+	date = year & "-" & month_name[array[2]] & "-" & day & " " & hour & ":" & minute & ":" & second;
+
+	return date;
+
+}
+

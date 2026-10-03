@@ -1,0 +1,130 @@
+# ---------------------------------------------------------------------
+# rth is a requirement, test, and bugtracking system
+# Copyright (C) 2005 George Holbrook - rth@lists.sourceforge.net
+# This program is distributed under the terms and conditions of the GPL
+# See the README and LICENSE files for details
+#----------------------------------------------------------------------
+
+INSTALLATION
+
+The following details the basic steps for installation on any system.  The
+instructions will work fine on a Linux or Windows systems.
+Barring complications, it should take you about 10-20 minutes to install,
+configure, and start using rth.
+
+If you are upgrading, please read /rth/sql/[version]_upgrade_db.sql
+This file will contain directions for upgrading
+
+# --- Requirements ----------
+
+* MySQL 3.23.2 and higher
+* PHP 4.1.3 and higher
+* a webserver
+
+# --- Summary ---------------
+
+1. Copy rth directory to web server document root.
+2. Create database 
+3. Edit configuration file
+4. Login
+
+# --- Detail ----------------
+
+1. First, transfer the file to your webserver using whatever method you like (ftp, scp, etc).  
+You will need to telnet/ssh into the server machine for the next steps.
+
+2. untar/gunzip it to the web server document root.
+The usual command is (1 step):
+
+	tar zxvf <filename.tar.gz>
+
+OR  (2 steps):
+
+	gunzip <filename.tar.gz>
+	tar xvf <filename.tar>
+
+
+3. Create the rth database
+	There are two databases located under /rth/sql
+	db.sql - This file creates a database with a single project with one user
+	demo.sql - This file contains a database with some example data in the demo project.
+		   This configuration is HIGHLY RECOMMENDED unless you have some experience with
+                   the rth setup.
+	Create an empty database called rth
+	Now run the following command from the command line: mysql -u [username] -p [db_name] < demo.sql
+
+3a. Update the rth database
+	If you are upgrading from a prior version of rth, check the /rth/sql directory for updates to the database schema
+	Look for a file name [version]_update_db.sql ( 1.5.1_update_db.sql for example )
+	If you find a file that's related to the version of rth you're downloading, you'll want to run the updates
+	in the .sql file against the rth database
+
+4. Configure /api/properties_inc.php
+	1. Set web server settings
+	2. Enter database information
+	3. Set the file upload path.  This will be used to store docs
+	4. Select Login Method.  (MD5 is default. LDAP has not been tested thoroughly.)
+	5. Turn javascript ON or OFF
+		rth does a check at login to find out if a user has javascript enabled.
+		If you know that the majority of your users have javascript disabled, you
+		may want to turn off all javascript functionality.
+	6. Turn FCKeditor ON or OFF
+		You must have javascript enabled if you want to use FCKeditor
+		Turning this on will make all html textarea objects appear as a WYSIWYG object
+	7. Set debug options
+	8. Set e-mail options
+		Set the e-mail administrator - user or group that receives e-mail from users
+					     - see the admin link on the home page
+		Set sendmail equal to true or false.  The system will send no mail if turned off.
+		Select the smtp server name
+		Note: the full e-mail functionality for bugs is not yet complete
+
+5. Move file upload directories for DEMO project
+	There are four directories under the rth directory that are intended for file 
+	upload for the DEMO project.
+	You may want to move these directories from your web root directory to another 	
+	location.  
+	create the following directories under the FILE_UPLOAD_PATH (../rth_file_upload/)
+	/DEMO_req_docs
+	/DEMO_test_docs
+	/DEMO_test_run_docs
+	/DEMO_test_plan_docs
+	You will have to update the file upload paths in the project table in the database
+	if you decide to move these directories.
+
+6. Login
+	http://server_name/rth/login.php
+	uname: admin
+	pword: password
+
+7. You can rename the DEMO project to begin using it as a project for your application.  Perhaps "project" is the wrong name.
+   If you are testing software, it is probably best to think of a project as the application that you're testing.   
+
+
+# --- FAQ ----------------
+ 
+Below are a few debugging tecniques if you're having basic problems with the installation
+I've listed solutions to problems that are frequently asked.
+
+1. Is your web server running?  
+	Try opening http://server_name in your web browser
+	You should see a splash screen with information about your web server.
+	If not, you need to review your web server documentation
+
+2. Is php running?
+	If you're having a problem opening http://server_name/rth/login.php try checking your php installation
+	create a file called test.php and place the following lines in the file
+		<?php
+		phpinfo();
+		?>
+	Save this file to the document root of your web server.  Typically, "htdocs" if you're using Apache or "wwwroot" if you're using IIS.
+	Now try opening test.php in your browser http://server_name/test.php
+	You should get a page that gives you information about your php installation
+	If not, you probably need to configure your web server to interpret php pages.  
+	There are many useful tutorials on the internet
+
+3. Database errors?
+	Make sure that the database is enabled in php.  MySQL is now installed by default with php but you may have to 
+		enable MySQL if you're running an older version of php.
+	You also may have a problem with permissions to the database.  Check the mysql database for permissions.
+		
