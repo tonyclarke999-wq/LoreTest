@@ -1,0 +1,13 @@
+Target Site: http://host.docker.internal:5001
+Alert: [10111] Authentication Request Identified
+Risk: Informational (High)
+
+Description:
+<p>The given request has been identified as an authentication request. The 'Other Info' field contains a set of key=value lines which identify any relevant fields. If the request is in a context which has an Authentication Method set to "Auto-Detect" then this rule will change the authentication to match the request identified.</p>
+
+Solution:
+<p>This is an informational alert rather than a vulnerability and so there is nothing to fix.</p>
+
+Instances (2):
+  - POST http://host.docker.internal:5001/Account/Login
+  - POST http://host.docker.internal:5001/Account/Login?ReturnUrl=%2Freporting

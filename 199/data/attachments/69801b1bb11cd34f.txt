@@ -1,0 +1,16 @@
+Target Site: http://host.docker.internal:5001
+Alert: [90003] Sub Resource Integrity Attribute Missing
+Risk: Medium (High)
+
+Description:
+<p>The integrity attribute is missing on a script or link tag served by an external server. The integrity tag prevents an attacker who have gained access to this server from injecting a malicious content.</p>
+
+Solution:
+<p>Provide a valid integrity attribute to the tag.</p>
+
+Instances (5):
+  - GET http://host.docker.internal:5001
+  - GET http://host.docker.internal:5001
+  - GET http://host.docker.internal:5001/robots.txt
+  - GET http://host.docker.internal:5001/sitemap.xml
+  - GET http://host.docker.internal:5001/sitemap.xml

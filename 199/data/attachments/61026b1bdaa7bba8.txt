@@ -1,0 +1,16 @@
+Target Site: http://host.docker.internal:5001
+Alert: [90004] Cross-Origin-Resource-Policy Header Missing or Invalid
+Risk: Low (Medium)
+
+Description:
+<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>
+
+Solution:
+<p>Ensure that the application/web server sets the Cross-Origin-Resource-Policy header appropriately, and that it sets the Cross-Origin-Resource-Policy header to 'same-origin' for all web pages.</p><p>'same-site' is considered as less secured and should be avoided.</p><p>If resources must be shared, set the header to 'cross-origin'.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that supports the Cross-Origin-Resource-Policy header (https://caniuse.com/mdn-http_headers_cross-origin-resource-policy).</p>
+
+Instances (5):
+  - GET http://host.docker.internal:5001
+  - GET http://host.docker.internal:5001/Components/Layout/ReconnectModal.cyz5k529gx.razor.js
+  - GET http://host.docker.internal:5001/LoreTest.nkzgkoio5c.styles.css
+  - GET http://host.docker.internal:5001/app.lba64ap0sz.css
+  - GET http://host.docker.internal:5001/favicon.png

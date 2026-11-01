@@ -1,0 +1,17 @@
+Target Site: http://host.docker.internal:5001
+Alert: [10112] Session Management Response Identified
+Risk: Informational (Medium)
+
+Description:
+<p>The given response has been identified as containing a session management token. The 'Other Info' field contains a set of header tokens that can be used in the Header Based Session Management Method. If the request is in a context which has a Session Management Method set to "Auto-Detect" then this rule will change the session management to use the tokens identified.</p>
+
+Solution:
+<p>This is an informational alert rather than a vulnerability and so there is nothing to fix.</p>
+
+Instances (6):
+  - GET http://host.docker.internal:5001
+  - GET http://host.docker.internal:5001/Account/Login?ReturnUrl=%2F
+  - GET http://host.docker.internal:5001/sitemap.xml
+  - POST http://host.docker.internal:5001/Culture/SetCulture
+  - GET http://host.docker.internal:5001/Account/Login?ReturnUrl=%2F
+  - GET http://host.docker.internal:5001/sitemap.xml
