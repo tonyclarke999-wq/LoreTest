@@ -187,7 +187,7 @@ app.MapRazorComponents<global::LoreTest.Components.App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-app.MapControllers();
+app.MapControllers().DisableAntiforgery();
 
 app.MapPost("/Culture/SetCulture", ([FromForm] string culture, [FromForm] string returnUrl, HttpContext httpContext) =>
 {

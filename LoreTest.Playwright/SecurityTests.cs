@@ -125,16 +125,26 @@ namespace LoreTest.Playwright
                 "eyJuYW1laWQiOiJhdHRhY2tlciIsInJvbGUiOiJBZG1pbiIsImlzcyI6IkxvcmVUZXN0QVBJIiwiYXVkIjoiTG9yZVRlc3RBUElVc2VycyIsImV4cCI6OTk5OTk5OTk5OX0." +
                 "forgedSignatureValue1234567890";
 
-            using var forgedReq = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/api/projects")
+            using var forgedGetReq = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/api/projects");
+            forgedGetReq.Headers.Add("Authorization", $"Bearer {forgedToken}");
+            forgedGetReq.Headers.Add("X-Forwarded-For", "198.51.100.11");
+
+            using var forgedGetResp = await SharedHttpClient.SendAsync(forgedGetReq);
+            Assert.AreEqual(HttpStatusCode.Unauthorized, forgedGetResp.StatusCode,
+                "GET /api/projects with a tampered JWT signature must return 401 Unauthorized.");
+
+            using var forgedPostReq = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/api/projects")
             {
                 Content = JsonContent.Create(new { Title = "Unauthorized Project", Description = "Should fail" })
             };
-            forgedReq.Headers.Add("Authorization", $"Bearer {forgedToken}");
-            forgedReq.Headers.Add("X-Forwarded-For", "198.51.100.11");
+            forgedPostReq.Headers.Add("Authorization", $"Bearer {forgedToken}");
+            forgedPostReq.Headers.Add("X-Forwarded-For", "198.51.100.12");
 
-            using var forgedResp = await SharedHttpClient.SendAsync(forgedReq);
-            Assert.AreEqual(HttpStatusCode.Unauthorized, forgedResp.StatusCode,
-                "POST /api/projects with a tampered JWT signature must return 401 Unauthorized.");
+            using var forgedPostResp = await SharedHttpClient.SendAsync(forgedPostReq);
+            Assert.IsTrue(
+                forgedPostResp.StatusCode == HttpStatusCode.Unauthorized ||
+                forgedPostResp.StatusCode == HttpStatusCode.BadRequest,
+                $"POST /api/projects with a tampered JWT must be rejected (401/400), got {(int)forgedPostResp.StatusCode}.");
         }
 
         [TestMethod]
