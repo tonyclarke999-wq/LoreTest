@@ -1,0 +1,14 @@
+Target Site: http://host.docker.internal:5002
+Alert: [90004] Cross-Origin-Embedder-Policy Header Missing or Invalid
+Risk: Low (Medium)
+
+Description:
+<p>Cross-Origin-Embedder-Policy header is a response header that prevents a document from loading any cross-origin resources that don't explicitly grant the document permission (using CORP or CORS).</p>
+
+Solution:
+<p>Ensure that the application/web server sets the Cross-Origin-Embedder-Policy header appropriately, and that it sets the Cross-Origin-Embedder-Policy header to 'require-corp' for documents.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that supports the Cross-Origin-Embedder-Policy header (https://caniuse.com/mdn-http_headers_cross-origin-embedder-policy).</p>
+
+Instances (3):
+  - GET http://host.docker.internal:5002
+  - GET http://host.docker.internal:5002/Account/Login?ReturnUrl=%2F
+  - GET http://host.docker.internal:5002/Account/ResendEmailConfirmation

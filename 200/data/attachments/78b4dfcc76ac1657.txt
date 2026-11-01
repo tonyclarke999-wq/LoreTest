@@ -1,0 +1,12 @@
+Target Site: http://host.docker.internal:5002
+Alert: [10055] CSP: Failure to Define Directive with No Fallback
+Risk: Medium (High)
+
+Description:
+<p>The Content Security Policy fails to define one of the directives that has no fallback. Missing/excluding them is the same as allowing anything.</p>
+
+Solution:
+<p>Ensure that your web server, application server, load balancer, etc. is properly configured to set the Content-Security-Policy header.</p>
+
+Instances (1):
+  - GET http://host.docker.internal:5002

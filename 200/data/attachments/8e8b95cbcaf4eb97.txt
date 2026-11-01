@@ -1,0 +1,16 @@
+Target Site: http://host.docker.internal:5002
+Alert: [10109] Modern Web Application
+Risk: Informational (Medium)
+
+Description:
+<p>The application appears to be a modern web application. If you need to explore it automatically then the Client Spider may well be more effective than the standard one.</p>
+
+Solution:
+<p>This is an informational alert and so no changes are required.</p>
+
+Instances (5):
+  - GET http://host.docker.internal:5002
+  - GET http://host.docker.internal:5002/Account/Login?ReturnUrl=%2F
+  - GET http://host.docker.internal:5002/Account/ResendEmailConfirmation
+  - GET http://host.docker.internal:5002/robots.txt
+  - GET http://host.docker.internal:5002/sitemap.xml

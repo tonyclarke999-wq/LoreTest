@@ -1,0 +1,13 @@
+Target Site: http://host.docker.internal:5002
+Alert: [10027] Information Disclosure - Suspicious Comments
+Risk: Informational (Medium)
+
+Description:
+<p>The response appears to contain suspicious comments which may help an attacker.</p>
+
+Solution:
+<p>Remove all comments that return information that may help an attacker and fix any underlying problems they refer to.</p>
+
+Instances (2):
+  - GET http://host.docker.internal:5002/Components/Account/Shared/PasskeySubmit.7ozcgj5zvk.razor.js
+  - GET http://host.docker.internal:5002/Components/Layout/ReconnectModal.cyz5k529gx.razor.js

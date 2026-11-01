@@ -1,0 +1,16 @@
+Target Site: http://host.docker.internal:5002
+Alert: [10017] Cross-Domain JavaScript Source File Inclusion
+Risk: Low (Medium)
+
+Description:
+<p>The page includes one or more script files from a third-party domain.</p>
+
+Solution:
+<p>Ensure JavaScript source files are loaded from only trusted sources, and the sources can't be controlled by end users of the application.</p>
+
+Instances (5):
+  - GET http://host.docker.internal:5002
+  - GET http://host.docker.internal:5002/Account/Login?ReturnUrl=%2F
+  - GET http://host.docker.internal:5002/Account/ResendEmailConfirmation
+  - GET http://host.docker.internal:5002/robots.txt
+  - GET http://host.docker.internal:5002/sitemap.xml

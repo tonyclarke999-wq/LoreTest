@@ -1,0 +1,12 @@
+Target Site: http://host.docker.internal:5002
+Alert: [10029] Cookie Poisoning
+Risk: Informational (Low)
+
+Description:
+<p>This check looks at user-supplied input in query string parameters and POST data to identify where cookie parameters might be controlled. This is called a cookie poisoning attack, and becomes exploitable when an attacker can manipulate the cookie in various ways. In some cases this will not be exploitable, however, allowing URL parameters to set cookie values is generally considered a bug.</p>
+
+Solution:
+<p>Do not allow user input to control cookie names and values. If some query string parameters must be set in cookie values, be sure to filter out semicolon's that can serve as name/value pair delimiters.</p>
+
+Instances (1):
+  - POST http://host.docker.internal:5002/Culture/SetCulture

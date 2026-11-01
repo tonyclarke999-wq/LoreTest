@@ -1,0 +1,14 @@
+Target Site: http://host.docker.internal:5002
+Alert: [90004] Cross-Origin-Opener-Policy Header Missing or Invalid
+Risk: Low (Medium)
+
+Description:
+<p>Cross-Origin-Opener-Policy header is a response header that allows a site to control if others included documents share the same browsing context. Sharing the same browsing context with untrusted documents might lead to data leak.</p>
+
+Solution:
+<p>Ensure that the application/web server sets the Cross-Origin-Opener-Policy header appropriately, and that it sets the Cross-Origin-Opener-Policy header to 'same-origin' for documents.</p><p>'same-origin-allow-popups' is considered as less secured and should be avoided.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that supports the Cross-Origin-Opener-Policy header (https://caniuse.com/mdn-http_headers_cross-origin-opener-policy).</p>
+
+Instances (3):
+  - GET http://host.docker.internal:5002
+  - GET http://host.docker.internal:5002/Account/Login?ReturnUrl=%2F
+  - GET http://host.docker.internal:5002/Account/ResendEmailConfirmation
