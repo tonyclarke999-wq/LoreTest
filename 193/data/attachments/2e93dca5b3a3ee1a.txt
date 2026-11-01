@@ -1,0 +1,29 @@
+-> Loading plugin C:\actions-runner\_work\LoreTest\LoreTest\LoreTest.Specs\bin\Debug\net10.0\Reqnroll.MSTest.ReqnrollPlugin.dll
+-> Loading plugin C:\actions-runner\_work\LoreTest\LoreTest\LoreTest.Specs\bin\Debug\net10.0\LoreTest.Specs.dll
+-> Using reqnroll.json
+Given the user navigates to the login page
+-> error: net::ERR_CONNECTION_REFUSED at http://localhost:5001/Account/Login
+Call log:
+  - navigating to "http://localhost:5001/Account/Login", waiting until "load" (2.5s)
+When they sign in with administrator credentials
+-> skipped because of previous errors
+And they navigate to the home page
+-> skipped because of previous errors
+Then the dashboard title should be displayed
+-> skipped because of previous errors
+Failure screenshot captured: C:\actions-runner\_work\LoreTest\LoreTest\LoreTest.Specs\bin\Debug\net10.0\allure-results\CONNIE\screenshot_Home_Page_loads_successfully_after_admin_authentication.png
+Playwright trace saved: C:\actions-runner\_work\LoreTest\LoreTest\LoreTest.Specs\bin\Debug\net10.0\allure-results\CONNIE\trace_Home_Page_loads_successfully_after_admin_authentication.zip
+
+
+
+TestContext Messages:
+Given the user navigates to the login page
+-> error: net::ERR_CONNECTION_REFUSED at http://localhost:5001/Account/Login
+Call log:
+  - navigating to "http://localhost:5001/Account/Login", waiting until "load" (2.5s)
+When they sign in with administrator credentials
+-> skipped because of previous errors
+And they navigate to the home page
+-> skipped because of previous errors
+Then the dashboard title should be displayed
+-> skipped because of previous errors

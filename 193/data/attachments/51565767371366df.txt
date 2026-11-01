@@ -1,0 +1,82 @@
+Given the user is authenticated as an administrator
+-> error: net::ERR_CONNECTION_REFUSED at http://localhost:5001/Account/Login
+Call log:
+  - navigating to "http://localhost:5001/Account/Login", waiting until "load" (2.4s)
+And they navigate to the Reporting page
+-> skipped because of previous errors
+Then they should see the Reporting dashboard with active metrics summary cards
+-> skipped because of previous errors
+When they switch to the "Projects" reporting tab
+-> skipped because of previous errors
+Then they should see a list of all projects
+-> skipped because of previous errors
+And they can filter projects by a search query "Specs"
+-> skipped because of previous errors
+When they switch to the "TestSuites" reporting tab
+-> skipped because of previous errors
+Then they should see test suites grouped by project
+-> skipped because of previous errors
+And they can filter test suites by selecting a project
+-> skipped because of previous errors
+When they switch to the "TestCases" reporting tab
+-> skipped because of previous errors
+Then they should see test cases grouped by test suite
+-> skipped because of previous errors
+And they can filter test cases by priority "High"
+-> skipped because of previous errors
+When they switch to the "TestRuns" reporting tab
+-> skipped because of previous errors
+Then they should see test runs grouped by test case
+-> skipped because of previous errors
+And they can filter test runs by status "Passed"
+-> skipped because of previous errors
+When they switch to the "Bugs" reporting tab
+-> skipped because of previous errors
+Then they should see a list of all bugs with filters
+-> skipped because of previous errors
+And they can filter bugs by severity "Critical"
+-> skipped because of previous errors
+Failure screenshot captured: C:\actions-runner\_work\LoreTest\LoreTest\LoreTest.Specs\bin\Debug\net10.0\allure-results\CONNIE\screenshot_Navigating_the_reporting_dashboard_and_validating_all_reports_and_filters.png
+Playwright trace saved: C:\actions-runner\_work\LoreTest\LoreTest\LoreTest.Specs\bin\Debug\net10.0\allure-results\CONNIE\trace_Navigating_the_reporting_dashboard_and_validating_all_reports_and_filters.zip
+
+
+
+TestContext Messages:
+Given the user is authenticated as an administrator
+-> error: net::ERR_CONNECTION_REFUSED at http://localhost:5001/Account/Login
+Call log:
+  - navigating to "http://localhost:5001/Account/Login", waiting until "load" (2.4s)
+And they navigate to the Reporting page
+-> skipped because of previous errors
+Then they should see the Reporting dashboard with active metrics summary cards
+-> skipped because of previous errors
+When they switch to the "Projects" reporting tab
+-> skipped because of previous errors
+Then they should see a list of all projects
+-> skipped because of previous errors
+And they can filter projects by a search query "Specs"
+-> skipped because of previous errors
+When they switch to the "TestSuites" reporting tab
+-> skipped because of previous errors
+Then they should see test suites grouped by project
+-> skipped because of previous errors
+And they can filter test suites by selecting a project
+-> skipped because of previous errors
+When they switch to the "TestCases" reporting tab
+-> skipped because of previous errors
+Then they should see test cases grouped by test suite
+-> skipped because of previous errors
+And they can filter test cases by priority "High"
+-> skipped because of previous errors
+When they switch to the "TestRuns" reporting tab
+-> skipped because of previous errors
+Then they should see test runs grouped by test case
+-> skipped because of previous errors
+And they can filter test runs by status "Passed"
+-> skipped because of previous errors
+When they switch to the "Bugs" reporting tab
+-> skipped because of previous errors
+Then they should see a list of all bugs with filters
+-> skipped because of previous errors
+And they can filter bugs by severity "Critical"
+-> skipped because of previous errors
