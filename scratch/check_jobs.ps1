@@ -1,7 +1,7 @@
-$resp = Invoke-RestMethod -Uri "https://api.github.com/repos/tonyclarke999-wq/LoreTest/actions/runs/26374001621/jobs"
-foreach ($job in $resp.jobs) {
-    Write-Output "Job: $($job.name) | Status: $($job.status) | Conclusion: $($job.conclusion)"
-    foreach ($step in $job.steps) {
-        Write-Output "  Step: $($step.name) | Status: $($step.status) | Conclusion: $($step.conclusion)"
+foreach ($jobId in @("124857032508", "124885881621")) {
+    Write-Output "=== ANNOTATIONS FOR JOB $jobId ==="
+    $annotations = Invoke-RestMethod -Uri "https://api.github.com/repos/tonyclarke999-wq/LoreTest/check-runs/$jobId/annotations"
+    foreach ($a in $annotations) {
+        Write-Output "[$($a.annotation_level)] $($a.path):$($a.start_line) - $($a.title): $($a.message)"
     }
 }
