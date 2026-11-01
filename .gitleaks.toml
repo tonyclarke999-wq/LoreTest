@@ -1,0 +1,24 @@
+title = "LoreTest Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist local development/test fixtures and non-production test certificates"
+paths = [
+    '''^certs/''',
+    '''^scratch/''',
+    '''^xampp-legacy/''',
+    '''^rth/''',
+    '''^rth-modern/''',
+    '''^LoreTest\.Tests/''',
+    '''^LoreTest\.Playwright/''',
+    '''^LoreTest\.Specs/''',
+    '''docker-compose\.(test|preprod)\.yml$''',
+    '''appsettings(\.Development)?\.json$'''
+]
+regexes = [
+    '''SuperSecretKeyThatIsAtLeast32CharactersLong!''',
+    '''HomePlate4(_PreProd)?''',
+    '''Password1-'''
+]

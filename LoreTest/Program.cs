@@ -200,6 +200,7 @@ app.MapPost("/Culture/SetCulture", ([FromForm] string culture, [FromForm] string
             {
                 Expires = DateTimeOffset.UtcNow.AddYears(1),
                 HttpOnly = true,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             }
         );

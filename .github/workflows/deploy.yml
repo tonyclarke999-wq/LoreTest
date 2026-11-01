@@ -17,6 +17,15 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks Secret Scan (Stage 2)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
       - name: Setup .NET SDK (Manual Install)
         run: |
           curl -sSL https://dot.net/v1/dotnet-install.sh -O
@@ -24,10 +33,22 @@ jobs:
           ./dotnet-install.sh --channel 10.0
           echo "DOTNET_ROOT=$HOME/.dotnet" >> $GITHUB_ENV
           echo "$HOME/.dotnet" >> $GITHUB_PATH
+
       - name: Restore dependencies
         run: dotnet restore
-      - name: Build
+
+      - name: NuGet Dependency Vulnerability Audit (Stage 2)
+        run: |
+          output=$(dotnet list LoreTest.slnx package --vulnerable --include-transitive)
+          echo "$output"
+          if echo "$output" | grep -E "Critical|High"; then
+            echo "High or Critical vulnerable NuGet packages detected!"
+            exit 1
+          fi
+
+      - name: Build (with Roslyn SAST Security Analyzers)
         run: dotnet build --no-restore
+
       - name: Test
         run: dotnet test LoreTest.Tests/LoreTest.Tests.csproj --no-build --verbosity normal
 
@@ -42,6 +63,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+
+      - name: Trivy Config & Dockerfile Scan (Stage 3)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
 
       - name: Log in to the Container registry
         uses: docker/login-action@v4
@@ -66,6 +95,16 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Trivy Container Image Vulnerability Scan (Stage 3)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          image-ref: '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}'
+          format: 'table'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
 
   deploy-test:
     needs: build-and-push
@@ -109,11 +148,11 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v7
-      - name: Build Playwright Tests
+      - name: Build Playwright Tests (including SecurityTests)
         run: dotnet build LoreTest.Playwright/LoreTest.Playwright.csproj
       - name: Build Reqnroll BDD Specs
         run: dotnet build LoreTest.Specs/LoreTest.Specs.csproj
-      - name: Run Playwright Tests
+      - name: Run Playwright E2E & Security Tests (Stage 1)
         env:
           BASE_URL: ${{ github.ref == 'refs/heads/main' && (secrets.PREPROD_URL || 'http://localhost:5002') || (secrets.TEST_URL || 'http://localhost:5001') }}
           PLAYWRIGHT_BROWSERS_PATH: C:\actions-runner\_work\ms-playwright
@@ -124,6 +163,15 @@ jobs:
           BASE_URL: ${{ github.ref == 'refs/heads/main' && (secrets.PREPROD_URL || 'http://localhost:5002') || (secrets.TEST_URL || 'http://localhost:5001') }}
           PLAYWRIGHT_BROWSERS_PATH: C:\actions-runner\_work\ms-playwright
         run: dotnet test LoreTest.Specs/LoreTest.Specs.csproj --no-build --verbosity normal --logger trx --results-directory allure-results-combined
+      - name: Run OWASP ZAP Baseline DAST Scan (Stage 4)
+        if: always()
+        env:
+          ZAP_TARGET_URL: ${{ github.ref == 'refs/heads/main' && 'http://host.docker.internal:5002' || 'http://host.docker.internal:5001' }}
+        run: |
+          New-Item -ItemType Directory -Force -Path allure-results-combined | Out-Null
+          Copy-Item -Path ".zap\rules.tsv" -Destination "allure-results-combined\rules.tsv" -Force
+          $workDir = (Resolve-Path "allure-results-combined").Path
+          docker run --rm --add-host=host.docker.internal:host-gateway -v "${workDir}:/zap/wrk:rw" -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t $env:ZAP_TARGET_URL -c rules.tsv -J zap-report.json -r zap-report.html -I
       - name: Upload Allure Results Artifact
         uses: actions/upload-artifact@v7
         if: always()
@@ -146,7 +194,7 @@ jobs:
         with:
           name: allure-results
           path: allure-results
-      - name: Convert TRX to Native Allure JSON Results
+      - name: Convert TRX & ZAP Results to Native Allure JSON Results
         run: |
           python convert-trx.py
       - name: Load Allure Report History
@@ -168,4 +216,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: allure-history
-

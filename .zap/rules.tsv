@@ -1,0 +1,9 @@
+# OWASP ZAP Baseline Rule Configuration for LoreTest (Blazor Server + REST API)
+# Format: <rule_id> <TAB> <WARN|FAIL|IGNORE> <TAB> <optional_note>
+10020	FAIL	Missing Anti-clickjacking Header (X-Frame-Options)
+10021	FAIL	X-Content-Type-Options Header Missing
+10036	FAIL	Server Leaks Version Information via Server HTTP Response Header
+10038	WARN	Content Security Policy (CSP) Header Not Set (Blazor Server circuit compatibility)
+10055	WARN	CSP Notices
+10027	WARN	Information Disclosure - Suspicious Comments
+10096	WARN	Timestamp Disclosure

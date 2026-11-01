@@ -28,4 +28,7 @@ COPY --from=publish /app/publish .
 EXPOSE 8080
 EXPOSE 8081
 
+# Run container as built-in non-root user
+USER $APP_UID
+
 ENTRYPOINT ["dotnet", "LoreTest.dll"]

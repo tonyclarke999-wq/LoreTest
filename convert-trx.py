@@ -5,6 +5,141 @@ import uuid
 import shutil
 from datetime import datetime
 
+def convert_zap_to_allure(results_dir='allure-results'):
+    """Convert OWASP ZAP JSON report (zap-report.json) into native Allure result JSON files."""
+    zap_json_path = None
+    zap_html_path = None
+
+    for root_dir, _, files in os.walk(results_dir):
+        for f in files:
+            if f == 'zap-report.json' and not zap_json_path:
+                zap_json_path = os.path.join(root_dir, f)
+            elif f == 'zap-report.html' and not zap_html_path:
+                zap_html_path = os.path.join(root_dir, f)
+
+    if not zap_json_path or not os.path.exists(zap_json_path):
+        return
+
+    print(f"\n--- Processing OWASP ZAP Report: {zap_json_path} ---")
+    try:
+        with open(zap_json_path, 'r', encoding='utf-8') as zf:
+            zap_data = json.load(zf)
+
+        now_ms = int(datetime.now().timestamp() * 1000)
+        html_attachment = []
+        if zap_html_path and os.path.exists(zap_html_path):
+            dest_html_name = "owasp-zap-report.html"
+            dest_html_path = os.path.join(results_dir, dest_html_name)
+            if os.path.abspath(zap_html_path) != os.path.abspath(dest_html_path):
+                shutil.copy2(zap_html_path, dest_html_path)
+            html_attachment.append({
+                "name": "OWASP ZAP Full HTML Report",
+                "source": dest_html_name,
+                "type": "text/html"
+            })
+
+        sites = zap_data.get('site', [])
+        if isinstance(sites, dict):
+            sites = [sites]
+
+        alerts = []
+        for site in sites:
+            site_alerts = site.get('alerts', [])
+            for a in site_alerts:
+                alerts.append((site.get('@name', 'PreProd'), a))
+
+        suite_name = "LoreTest.Security.OwaspZapDast"
+
+        if not alerts:
+            exec_id = str(uuid.uuid4())
+            allure_result = {
+                "uuid": exec_id,
+                "historyId": f"{suite_name}.BaselineScanClean",
+                "fullName": f"{suite_name}.BaselineScanClean",
+                "name": "OWASP ZAP Baseline Scan (0 Alerts)",
+                "status": "passed",
+                "stage": "finished",
+                "steps": [],
+                "attachments": html_attachment,
+                "parameters": [],
+                "start": now_ms,
+                "stop": now_ms + 100,
+                "labels": [
+                    {"name": "suite", "value": suite_name},
+                    {"name": "testClass", "value": suite_name},
+                    {"name": "package", "value": suite_name},
+                    {"name": "severity", "value": "normal"}
+                ]
+            }
+            with open(os.path.join(results_dir, f"{exec_id}-result.json"), 'w', encoding='utf-8') as rf:
+                json.dump(allure_result, rf, indent=2, ensure_ascii=False)
+        else:
+            for site_name, alert in alerts:
+                exec_id = str(uuid.uuid4())
+                plugin_id = alert.get('pluginid', 'unknown')
+                alert_name = alert.get('name') or alert.get('alert') or f"ZAP Rule {plugin_id}"
+                risk_code = str(alert.get('riskcode', '0'))
+                risk_desc = alert.get('riskdesc', 'Informational')
+                desc = alert.get('desc', '')
+                solution = alert.get('solution', '')
+                instances = alert.get('instances', [])
+
+                # Risk codes in ZAP: 3 = High, 2 = Medium, 1 = Low, 0 = Informational
+                status = "failed" if risk_code == "3" else "passed"
+                severity_map = {"3": "critical", "2": "normal", "1": "minor", "0": "trivial"}
+
+                detail_file_name = f"{exec_id}-zap-alert-{plugin_id}.txt"
+                detail_path = os.path.join(results_dir, detail_file_name)
+                with open(detail_path, 'w', encoding='utf-8') as df:
+                    df.write(f"Target Site: {site_name}\n")
+                    df.write(f"Alert: [{plugin_id}] {alert_name}\n")
+                    df.write(f"Risk: {risk_desc}\n\n")
+                    df.write(f"Description:\n{desc}\n\n")
+                    df.write(f"Solution:\n{solution}\n\n")
+                    df.write(f"Instances ({len(instances)}):\n")
+                    for inst in instances[:10]:
+                        df.write(f"  - {inst.get('method', 'GET')} {inst.get('uri', '')}\n")
+
+                attachments = [{
+                    "name": f"ZAP Alert {plugin_id} Details",
+                    "source": detail_file_name,
+                    "type": "text/plain"
+                }] + html_attachment
+
+                test_display_name = f"[ZAP-{plugin_id}] {alert_name} ({risk_desc})"
+                full_name = f"{suite_name}.ZAP_{plugin_id}"
+
+                allure_result = {
+                    "uuid": exec_id,
+                    "historyId": full_name,
+                    "fullName": full_name,
+                    "name": test_display_name,
+                    "status": status,
+                    "stage": "finished",
+                    "steps": [],
+                    "attachments": attachments,
+                    "parameters": [],
+                    "start": now_ms,
+                    "stop": now_ms + 100,
+                    "labels": [
+                        {"name": "suite", "value": suite_name},
+                        {"name": "testClass", "value": suite_name},
+                        {"name": "package", "value": suite_name},
+                        {"name": "severity", "value": severity_map.get(risk_code, "normal")}
+                    ],
+                    "statusDetails": {
+                        "message": f"Risk: {risk_desc} | Instances: {len(instances)}"
+                    }
+                }
+                with open(os.path.join(results_dir, f"{exec_id}-result.json"), 'w', encoding='utf-8') as rf:
+                    json.dump(allure_result, rf, indent=2, ensure_ascii=False)
+
+        os.remove(zap_json_path)
+        print(f"Successfully converted {len(alerts)} OWASP ZAP alert(s) to Allure results.")
+    except Exception as e:
+        print(f"Failed to convert OWASP ZAP JSON report {zap_json_path}: {e}")
+
+
 def convert_trx_to_allure(results_dir='allure-results'):
     if not os.path.exists(results_dir):
         print(f"No results directory found at: {results_dir}")
@@ -228,6 +363,9 @@ def convert_trx_to_allure(results_dir='allure-results'):
 
         except Exception as e:
             print(f"Failed to parse and convert TRX file {trx_path}: {e}")
+
+    # Also process OWASP ZAP JSON report if present
+    convert_zap_to_allure(results_dir)
 
 if __name__ == '__main__':
     convert_trx_to_allure()
