@@ -19,15 +19,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=loretest-db-test;Port=5432;Database=loretest_test;Username=postgres;Password=${TEST_DB_PASSWORD:-HomePlate4}
-      - ASPNETCORE_URLS=https://+:8081;http://+:8080
-      - ASPNETCORE_HTTPS_PORTS=5003
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/loretest.pfx
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=LoreTestSecret123!
     ports:
       - "5001:8080"
-      - "5003:8081"
-    volumes:
-      - ./certs/loretest.pfx:/https/loretest.pfx:ro
     depends_on:
       - loretest-db-test
     networks:
