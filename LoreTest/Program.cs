@@ -15,6 +15,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Suppress Server response header to prevent server banner disclosure
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.AddServerHeader = false;
+});
+
 // Configure Sentry
 builder.WebHost.UseSentry(options =>
 {
@@ -117,6 +123,18 @@ builder.Services.AddHttpClient<LoreTest.Utilities.JiraIntegrationService>();
 
 var app = builder.Build();
 
+// Add HTTP Security Headers middleware
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.TryAdd("X-Frame-Options", "DENY");
+    context.Response.Headers.TryAdd("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.TryAdd("Permissions-Policy", "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()");
+    context.Response.Headers.TryAdd("X-Permitted-Cross-Domain-Policies", "none");
+
+    await next();
+});
+
 app.Use(async (context, next) =>
 {
     try
@@ -178,7 +196,12 @@ app.MapPost("/Culture/SetCulture", ([FromForm] string culture, [FromForm] string
         httpContext.Response.Cookies.Append(
             CookieRequestCultureProvider.DefaultCookieName,
             CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-            new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+            new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddYears(1),
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax
+            }
         );
     }
 
