@@ -25,7 +25,7 @@ namespace LoreTest.Utilities
             CalendarEventType.BugTriage,
             CalendarEventType.TeamMeeting,
             CalendarEventType.ReleaseFreeze,
-            CalendarEventType.SprintMilestone,
+            CalendarEventType.Milestone,
             CalendarEventType.FocusTime
         ];
         public bool OnlyConflicts { get; set; }

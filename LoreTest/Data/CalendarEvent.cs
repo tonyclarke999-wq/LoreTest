@@ -10,7 +10,7 @@ namespace LoreTest.Data
         BugTriage,
         TeamMeeting,
         ReleaseFreeze,
-        SprintMilestone,
+        Milestone,
         FocusTime
     }
 

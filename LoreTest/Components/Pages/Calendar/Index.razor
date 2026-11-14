@@ -149,6 +149,30 @@
         </div>
     </div>
 
+    <!-- Active Milestones Highlight Banner -->
+    @{
+        var activeMilestones = events.Where(e => e.EventType == CalendarEventType.Milestone).OrderBy(e => e.StartTimeUtc).ToList();
+    }
+    @if (activeMilestones.Count > 0)
+    {
+        <div class="alert alert-info border-info d-flex flex-wrap align-items-center justify-content-between gap-2 py-2 px-3 mb-3 shadow-sm rounded-3">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="material-symbols-outlined text-info-emphasis">flag</span>
+                <span class="fw-bold small text-info-emphasis">Project Milestones in Range:</span>
+                @foreach (var m in activeMilestones)
+                {
+                    <button type="button" class="btn btn-sm btn-light border border-info py-0 px-2 small d-inline-flex align-items-center gap-1 shadow-sm"
+                            @onclick="() => selectedEvent = m">
+                        <span class="material-symbols-outlined text-info" style="font-size: 0.85rem;">flag</span>
+                        <strong class="text-dark">@m.Title</strong>
+                        <span class="text-muted">(@(m.IsAllDay ? m.StartTimeUtc.ToLocalTime().ToString("MMM dd") : m.StartTimeUtc.ToLocalTime().ToString("MMM dd HH:mm")))</span>
+                    </button>
+                }
+            </div>
+            <span class="badge bg-info text-dark rounded-pill">@activeMilestones.Count Milestone(s)</span>
+        </div>
+    }
+
     <!-- Calendar Canvas -->
     @if (isLoading)
     {
@@ -1002,12 +1026,17 @@
                                     <div class="d-flex flex-column gap-1">
                                         @foreach (var ev in dayEvents.Take(3))
                                         {
-                                            <div class="px-1 py-0 rounded border small text-truncate cursor-pointer @(ev.HasConflict ? "border-warning bg-warning bg-opacity-25" : "bg-primary bg-opacity-10 border-primary")"
+                                            var isMilestone = ev.EventType == CalendarEventType.Milestone;
+                                            <div class="px-1 py-0 rounded border small text-truncate cursor-pointer @(ev.HasConflict ? "border-warning bg-warning bg-opacity-25" : isMilestone ? "border-info bg-info bg-opacity-25 fw-semibold" : "bg-primary bg-opacity-10 border-primary")"
                                                  style="font-size: 0.72rem;"
                                                  @onclick="() => selectedEvent = ev">
                                                 @if (ev.HasConflict)
                                                 {
                                                     <span class="text-warning fw-bold">! </span>
+                                                }
+                                                @if (isMilestone)
+                                                {
+                                                    <span class="text-info-emphasis">🚩 </span>
                                                 }
                                                 @ev.Title
                                             </div>
@@ -1071,10 +1100,12 @@
 
     private RenderFragment RenderEventCard(CalendarEvent ev) => __builder =>
     {
-        <div class="p-2 rounded-3 border @(ev.HasConflict ? "border-warning bg-warning bg-opacity-10" : "border-primary bg-primary bg-opacity-10") d-flex justify-content-between align-items-center cursor-pointer"
+        var isMilestone = ev.EventType == CalendarEventType.Milestone;
+        <div class="p-2 rounded-3 border @(ev.HasConflict ? "border-warning bg-warning bg-opacity-10" : isMilestone ? "border-info bg-info bg-opacity-10 shadow-xs" : "border-primary bg-primary bg-opacity-10") d-flex justify-content-between align-items-center cursor-pointer"
              @onclick="() => selectedEvent = ev">
             <div>
                 <div class="d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined fs-6 @(isMilestone ? "text-info-emphasis" : "text-muted")">@GetCategoryIcon(ev.EventType)</span>
                     <span class="fw-bold">@ev.Title</span>
                     <span class="badge @GetCategoryBadgeClass(ev.EventType)">@GetCategoryLabel(ev.EventType)</span>
                     @if (ev.HasConflict)
@@ -1102,15 +1133,20 @@
 
     private RenderFragment RenderCompactEventCard(CalendarEvent ev) => __builder =>
     {
-        <div class="p-1 mb-1 rounded border @(ev.HasConflict ? "border-warning bg-warning bg-opacity-25" : "border-primary bg-primary bg-opacity-10") cursor-pointer"
+        var isMilestone = ev.EventType == CalendarEventType.Milestone;
+        <div class="p-1 mb-1 rounded border @(ev.HasConflict ? "border-warning bg-warning bg-opacity-25" : isMilestone ? "border-info bg-info bg-opacity-25 fw-semibold" : "border-primary bg-primary bg-opacity-10") cursor-pointer"
              style="font-size: 0.75rem;"
              @onclick="() => selectedEvent = ev">
-            <div class="fw-bold text-truncate">
+            <div class="fw-bold text-truncate d-flex align-items-center gap-1">
                 @if (ev.HasConflict)
                 {
                     <span class="text-warning-emphasis">&#9888; </span>
                 }
-                @ev.Title
+                @if (isMilestone)
+                {
+                    <span class="material-symbols-outlined text-info-emphasis" style="font-size: 0.85rem;">flag</span>
+                }
+                <span>@ev.Title</span>
             </div>
             <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 0.68rem;">
                 <span>@(ev.IsAllDay ? "All Day" : ev.StartTimeUtc.ToLocalTime().ToString("HH:mm"))</span>
@@ -1169,7 +1205,7 @@
         CalendarEventType.BugTriage => "Bug Triage",
         CalendarEventType.TeamMeeting => "Meeting",
         CalendarEventType.ReleaseFreeze => "Release Freeze",
-        CalendarEventType.SprintMilestone => "Milestone",
+        CalendarEventType.Milestone => "Milestone",
         CalendarEventType.FocusTime => "Focus Time",
         _ => cat.ToString()
     };
@@ -1180,7 +1216,7 @@
         CalendarEventType.BugTriage => "btn-warning text-dark",
         CalendarEventType.TeamMeeting => "btn-primary",
         CalendarEventType.ReleaseFreeze => "btn-danger",
-        CalendarEventType.SprintMilestone => "btn-info text-white",
+        CalendarEventType.Milestone => "btn-info text-white",
         CalendarEventType.FocusTime => "btn-secondary",
         _ => "btn-primary"
     };
@@ -1191,9 +1227,20 @@
         CalendarEventType.BugTriage => "bg-warning text-dark",
         CalendarEventType.TeamMeeting => "bg-primary",
         CalendarEventType.ReleaseFreeze => "bg-danger",
-        CalendarEventType.SprintMilestone => "bg-info text-dark",
+        CalendarEventType.Milestone => "bg-info text-dark",
         CalendarEventType.FocusTime => "bg-secondary",
         _ => "bg-primary"
+    };
+
+    private static string GetCategoryIcon(CalendarEventType cat) => cat switch
+    {
+        CalendarEventType.TestRunExecution => "play_circle",
+        CalendarEventType.BugTriage => "bug_report",
+        CalendarEventType.TeamMeeting => "videocam",
+        CalendarEventType.ReleaseFreeze => "lock",
+        CalendarEventType.Milestone => "flag",
+        CalendarEventType.FocusTime => "hourglass_empty",
+        _ => "event"
     };
 
     private static string GetRsvpBadgeClass(AttendeeStatus status) => status switch
