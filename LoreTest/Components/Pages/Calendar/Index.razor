@@ -1,0 +1,1209 @@
+@page "/calendar"
+@using System.Security.Claims
+@using LoreTest.Data
+@using LoreTest.Utilities
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@inject CalendarService CalendarSvc
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IStringLocalizer<SharedResource> L
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>@L["Calendar"] - LoreTest</PageTitle>
+
+<div class="container-fluid py-4" id="smart-calendar-page">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 rounded-4 shadow-sm border-0 position-relative overflow-hidden"
+                 style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white;">
+                <div class="position-absolute top-0 end-0 opacity-10" style="font-size: 8rem; transform: translate(20px, -20px); pointer-events: none;">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                </div>
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 position-relative">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h1 class="h3 fw-bold mb-0">Smart Team Calendar</h1>
+                            <span class="badge @(isAdmin ? "bg-warning text-dark" : "bg-light text-dark") rounded-pill">
+                                @(isAdmin ? "Administrator: All Team Events" : "Scoped: My Events & Invites")
+                            </span>
+                        </div>
+                        <p class="mb-0 text-white-50 small">
+                            Schedule QA test runs, bug triages, and Teams / Google Meet sessions with real-time conflict awareness.
+                        </p>
+                    </div>
+                    <button class="btn btn-light fw-semibold d-flex align-items-center gap-1 shadow-sm" @onclick="() => OpenCreateModal(DateTime.Today)">
+                        <span class="material-symbols-outlined fs-5">add</span>
+                        <span>New Event</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Last Saved Conflict Report Banner (Permissive Save Feedback) -->
+    @if (lastSavedConflicts.Count > 0)
+    {
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm border-warning d-flex align-items-start gap-2 mb-3" role="alert">
+            <span class="material-symbols-outlined text-warning mt-1">warning</span>
+            <div class="flex-grow-1">
+                <strong>Event saved with scheduling conflicts:</strong>
+                <ul class="mb-0 mt-1 small">
+                    @foreach (var c in lastSavedConflicts)
+                    {
+                        <li>
+                            <strong>@string.Join(", ", c.ConflictingUserNames)</strong> overlapped with
+                            <em>'@c.ConflictingEventTitle'</em> (@c.StartTimeUtc.ToLocalTime().ToString("HH:mm") - @c.EndTimeUtc.ToLocalTime().ToString("HH:mm"))
+                        </li>
+                    }
+                </ul>
+            </div>
+            <button type="button" class="btn-close" @onclick="() => lastSavedConflicts.Clear()"></button>
+        </div>
+    }
+
+    <!-- Toolbar: Navigation, View Switcher, Filters -->
+    <div class="card border-0 shadow-sm rounded-3 mb-3">
+        <div class="card-body py-3">
+            <div class="row g-3 align-items-center">
+                <!-- Date Navigation -->
+                <div class="col-12 col-lg-4 d-flex align-items-center gap-2">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-secondary btn-sm" @onclick="() => NavigatePeriod(-1)" title="Previous">
+                            <span class="material-symbols-outlined fs-6 align-middle">chevron_left</span>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm fw-semibold px-3" @onclick="GoToToday">Today</button>
+                        <button class="btn btn-outline-secondary btn-sm" @onclick="() => NavigatePeriod(1)" title="Next">
+                            <span class="material-symbols-outlined fs-6 align-middle">chevron_right</span>
+                        </button>
+                    </div>
+                    <h2 class="h5 fw-bold mb-0 ms-2 text-dark">@GetCurrentRangeTitle()</h2>
+                </div>
+
+                <!-- View Switcher -->
+                <div class="col-12 col-lg-4 d-flex justify-content-lg-center">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Calendar Views">
+                        @foreach (var mode in Enum.GetValues<CalendarViewMode>())
+                        {
+                            <button type="button"
+                                    class="btn @(currentView == mode ? "btn-primary fw-semibold" : "btn-outline-secondary")"
+                                    @onclick="() => SetViewMode(mode)">
+                                @GetViewModeLabel(mode)
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- Quick Search & Conflicts Toggle -->
+                <div class="col-12 col-lg-4 d-flex align-items-center justify-content-lg-end gap-2">
+                    <div class="input-group input-group-sm" style="max-width: 220px;">
+                        <span class="input-group-text bg-white"><span class="material-symbols-outlined fs-6">search</span></span>
+                        <input type="text" class="form-control" placeholder="Search events..." @bind="filter.SearchTerm" @bind:event="oninput" @onchange="LoadEventsAsync" />
+                    </div>
+                    <div class="form-check form-switch mb-0 ms-1">
+                        <input class="form-check-input" type="checkbox" id="onlyConflictsSwitch" checked="@filter.OnlyConflicts" @onchange="ToggleOnlyConflicts" />
+                        <label class="form-check-label small fw-semibold text-nowrap" for="onlyConflictsSwitch">Conflicts only</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Row: Category Pills, Project Filter, Admin User Filter -->
+            <div class="row g-2 align-items-center mt-2 pt-2 border-top">
+                <div class="col-12 col-xl-7 d-flex flex-wrap align-items-center gap-2">
+                    <span class="small fw-semibold text-muted me-1">Categories:</span>
+                    @foreach (var cat in Enum.GetValues<CalendarEventType>())
+                    {
+                        var isSelected = filter.EventTypes.Contains(cat);
+                        <button type="button"
+                                class="btn btn-sm rounded-pill py-0 px-2 @(isSelected ? GetCategoryButtonClass(cat) : "btn-outline-secondary opacity-50")"
+                                style="font-size: 0.78rem;"
+                                @onclick="() => ToggleCategory(cat)">
+                            @GetCategoryLabel(cat)
+                        </button>
+                    }
+                </div>
+                <div class="col-12 col-xl-5 d-flex flex-wrap justify-content-xl-end gap-2">
+                    <select class="form-select form-select-sm" style="max-width: 200px;" value="@(filter.ProjectId?.ToString() ?? "")" @onchange="OnProjectFilterChanged">
+                        <option value="">All Projects</option>
+                        @foreach (var p in projects)
+                        {
+                            <option value="@p.Id">@p.Title</option>
+                        }
+                    </select>
+
+                    @if (isAdmin)
+                    {
+                        <select class="form-select form-select-sm" style="max-width: 200px;" value="@(filter.UserId ?? "")" @onchange="OnUserFilterChanged">
+                            <option value="">All Team Members</option>
+                            @foreach (var u in allUsers)
+                            {
+                                <option value="@u.Id">@GetDisplayUser(u) (@(u.Role ?? "User"))</option>
+                            }
+                        </select>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Canvas -->
+    @if (isLoading)
+    {
+        <div class="d-flex justify-content-center align-items-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">@L["Loading"]</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+            @if (currentView == CalendarViewMode.Day)
+            {
+                @RenderDayView()
+            }
+            else if (currentView == CalendarViewMode.WorkWeek || currentView == CalendarViewMode.Week)
+            {
+                @RenderWeekView(currentView == CalendarViewMode.WorkWeek)
+            }
+            else if (currentView == CalendarViewMode.Month)
+            {
+                @RenderMonthView()
+            }
+            else
+            {
+                @RenderYearView()
+            }
+        </div>
+    }
+</div>
+
+<!-- Create / Edit Event Modal -->
+@if (showEditModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(15, 23, 42, 0.55);">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">event_note</span>
+                        @(editInput.Id.HasValue ? "Edit Calendar Event" : "Schedule New Event")
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    @if (!string.IsNullOrEmpty(modalError))
+                    {
+                        <div class="alert alert-danger py-2 small">@modalError</div>
+                    }
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Event Title *</label>
+                            <input type="text" class="form-control" @bind="editInput.Title" placeholder="e.g., Sprint 24 Regression Execution or Bug Triage" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">Category</label>
+                            <select class="form-select" @bind="editInput.EventType">
+                                @foreach (var cat in Enum.GetValues<CalendarEventType>())
+                                {
+                                    <option value="@cat">@GetCategoryLabel(cat)</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">Project (Optional)</label>
+                            <select class="form-select" @bind="editInput.ProjectId">
+                                <option value="">None</option>
+                                @foreach (var p in projects)
+                                {
+                                    <option value="@p.Id">@p.Title</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">Linked Test Run (Optional)</label>
+                            <select class="form-select" @bind="editInput.TestRunId">
+                                <option value="">None</option>
+                                @foreach (var tr in testRuns)
+                                {
+                                    <option value="@tr.Id">Run #@tr.RunNumber (@(tr.Project?.Title ?? "Project"))</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Date & Time -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">Date</label>
+                            <input type="date" class="form-control" value="@editDateLocal.ToString("yyyy-MM-dd")" @onchange="OnEditDateChanged" />
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Start Time</label>
+                            <input type="time" class="form-control" disabled="@editInput.IsAllDay" value="@editStartTimeLocal" @onchange="OnStartTimeChanged" />
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">End Time</label>
+                            <input type="time" class="form-control" disabled="@editInput.IsAllDay" value="@editEndTimeLocal" @onchange="OnEndTimeChanged" />
+                        </div>
+
+                        <div class="col-md-2 d-flex align-items-end pb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="allDayCheck" checked="@editInput.IsAllDay" @onchange="OnAllDayChanged" />
+                                <label class="form-check-label small fw-semibold" for="allDayCheck">All Day</label>
+                            </div>
+                        </div>
+
+                        <!-- Attendees -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Invite Team Members (also appears on their calendars)</label>
+                            <div class="border rounded-3 p-2 bg-light" style="max-height: 140px; overflow-y: auto;">
+                                <div class="row g-2">
+                                    @foreach (var u in allUsers.Where(u => u.Id != currentUserId))
+                                    {
+                                        var isInvited = editInput.AttendeeUserIds.Contains(u.Id);
+                                        <div class="col-md-6">
+                                            <label class="d-flex align-items-center gap-2 p-1 rounded bg-white border small cursor-pointer mb-0">
+                                                <input type="checkbox" class="form-check-input mt-0" checked="@isInvited" @onchange="(e) => ToggleAttendee(u.Id, (bool)(e.Value ?? false))" />
+                                                <span class="text-truncate fw-medium">@GetDisplayUser(u)</span>
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary ms-auto">@(u.Role ?? "User")</span>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Real-Time Pre-Submission Conflict Banner -->
+                        <div class="col-12">
+                            @if (liveConflicts.Count > 0)
+                            {
+                                <div class="alert alert-warning border-warning mb-0 py-2 px-3">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <span class="fw-bold small d-flex align-items-center gap-1">
+                                            <span class="material-symbols-outlined fs-6">warning</span>
+                                            Conflict Detected (Allowed on Save — will be reported)
+                                        </span>
+                                        <button type="button" class="btn btn-warning btn-sm py-0 px-2 fw-semibold" style="font-size: 0.75rem;" @onclick="AutoSuggestSlotAsync">
+                                            Auto-Suggest Free Slot
+                                        </button>
+                                    </div>
+                                    <ul class="mb-0 small ps-3">
+                                        @foreach (var c in liveConflicts)
+                                        {
+                                            <li>
+                                                <strong>@string.Join(", ", c.ConflictingUserNames)</strong> is booked in
+                                                <em>'@c.ConflictingEventTitle'</em> (@c.StartTimeUtc.ToLocalTime().ToString("HH:mm") - @c.EndTimeUtc.ToLocalTime().ToString("HH:mm"))
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-success border-success mb-0 py-2 px-3 small d-flex align-items-center gap-2">
+                                    <span class="material-symbols-outlined fs-6">check_circle</span>
+                                    <span>All selected participants are available for this time slot.</span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Online Meeting Setup -->
+                        <div class="col-12 border-top pt-3">
+                            <label class="form-label fw-semibold small">Online Meeting Setup</label>
+                            <div class="btn-group w-100 mb-2" role="group">
+                                <button type="button" class="btn btn-sm @(editInput.Platform == MeetingPlatform.None ? "btn-dark" : "btn-outline-secondary")" @onclick="() => SetMeetingPlatform(MeetingPlatform.None)">In-Person / None</button>
+                                <button type="button" class="btn btn-sm @(editInput.Platform == MeetingPlatform.MicrosoftTeams ? "btn-primary" : "btn-outline-secondary")" @onclick="() => SetMeetingPlatform(MeetingPlatform.MicrosoftTeams)">Microsoft Teams</button>
+                                <button type="button" class="btn btn-sm @(editInput.Platform == MeetingPlatform.GoogleMeet ? "btn-success" : "btn-outline-secondary")" @onclick="() => SetMeetingPlatform(MeetingPlatform.GoogleMeet)">Google Meet</button>
+                                <button type="button" class="btn btn-sm @(editInput.Platform == MeetingPlatform.CustomUrl ? "btn-info text-white" : "btn-outline-secondary")" @onclick="() => SetMeetingPlatform(MeetingPlatform.CustomUrl)">Custom Link</button>
+                            </div>
+
+                            @if (editInput.Platform != MeetingPlatform.None)
+                            {
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><span class="material-symbols-outlined fs-6">videocam</span></span>
+                                    <input type="url" class="form-control font-monospace" @bind="editInput.MeetingUrl" placeholder="Meeting join URL..." />
+                                    @if (editInput.Platform is MeetingPlatform.MicrosoftTeams or MeetingPlatform.GoogleMeet)
+                                    {
+                                        <button type="button" class="btn btn-outline-secondary" @onclick="RegenerateMeetingUrl">Regenerate</button>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Agenda / Notes</label>
+                            <textarea class="form-control" rows="2" @bind="editInput.Description" placeholder="Meeting agenda, test scope, or instructions..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CloseEditModal">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm fw-semibold px-3 d-flex align-items-center gap-1" disabled="@isSaving" @onclick="HandleSaveClickAsync">
+                        <span class="material-symbols-outlined fs-6">save</span>
+                        <span>@(liveConflicts.Count > 0 ? "Review Conflicts & Save" : "Save Event")</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Conflict Reporting Confirmation Modal (Permissive Save) -->
+@if (showConflictConfirmModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(15, 23, 42, 0.65); z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-warning shadow-lg rounded-4">
+                <div class="modal-header bg-warning bg-opacity-10 border-warning">
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined text-warning">warning</span>
+                        Confirm Save with Conflicts
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="() => showConflictConfirmModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted mb-2">
+                        The following attendees have overlapping commitments. Conflicts are allowed, and this event will be flagged with a conflict indicator:
+                    </p>
+                    <div class="bg-light border rounded-3 p-2 mb-3">
+                        @foreach (var c in liveConflicts)
+                        {
+                            <div class="small py-1 border-bottom last-border-0">
+                                <strong>@string.Join(", ", c.ConflictingUserNames)</strong> &mdash; already in
+                                <em>'@c.ConflictingEventTitle'</em> (@c.StartTimeUtc.ToLocalTime().ToString("HH:mm") - @c.EndTimeUtc.ToLocalTime().ToString("HH:mm"))
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => showConflictConfirmModal = false">Edit Times</button>
+                    <button type="button" class="btn btn-warning btn-sm fw-semibold" @onclick="AutoSuggestAndContinueAsync">Use Free Slot</button>
+                    <button type="button" class="btn btn-primary btn-sm fw-semibold" disabled="@isSaving" @onclick="CommitSaveAsync">Save Anyway (Allow Conflict)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Event Details & RSVP Modal -->
+@if (selectedEvent != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(15, 23, 42, 0.55);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header bg-light border-bottom">
+                    <div>
+                        <span class="badge @GetCategoryBadgeClass(selectedEvent.EventType) mb-1">@GetCategoryLabel(selectedEvent.EventType)</span>
+                        @if (selectedEvent.HasConflict)
+                        {
+                            <span class="badge bg-warning text-dark ms-1 mb-1">Overlap / Conflict</span>
+                        }
+                        <h5 class="modal-title fw-bold mb-0">@selectedEvent.Title</h5>
+                    </div>
+                    <button type="button" class="btn-close" @onclick="() => selectedEvent = null"></button>
+                </div>
+
+                <div class="modal-body p-4 small">
+                    <div class="mb-3 d-flex align-items-center gap-2 text-muted">
+                        <span class="material-symbols-outlined fs-5">schedule</span>
+                        <span>
+                            @selectedEvent.StartTimeUtc.ToLocalTime().ToString("ddd, MMM d, yyyy") &bull;
+                            @(selectedEvent.IsAllDay ? "All Day" : $"{selectedEvent.StartTimeUtc.ToLocalTime():HH:mm} - {selectedEvent.EndTimeUtc.ToLocalTime():HH:mm}")
+                        </span>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(selectedEvent.Description))
+                    {
+                        <p class="mb-3 text-dark">@selectedEvent.Description</p>
+                    }
+
+                    @if (selectedEvent.HasConflict && !string.IsNullOrWhiteSpace(selectedEvent.ConflictSummary))
+                    {
+                        <div class="alert alert-warning py-2 px-3 small mb-3">
+                            <strong>Reported Conflict:</strong> @selectedEvent.ConflictSummary
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(selectedEvent.MeetingUrl))
+                    {
+                        <div class="p-2 bg-light border rounded-3 d-flex align-items-center justify-content-between mb-3">
+                            <span class="fw-semibold d-flex align-items-center gap-1">
+                                <span class="material-symbols-outlined fs-5 text-primary">videocam</span>
+                                @(selectedEvent.Platform == MeetingPlatform.MicrosoftTeams ? "Microsoft Teams" :
+                                  selectedEvent.Platform == MeetingPlatform.GoogleMeet ? "Google Meet" : "Online Meeting")
+                            </span>
+                            <a href="@selectedEvent.MeetingUrl" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm fw-semibold">
+                                Join Meeting
+                            </a>
+                        </div>
+                    }
+
+                    @if (selectedEvent.TestRunId.HasValue)
+                    {
+                        <div class="mb-3">
+                            <a href="/testruns/@selectedEvent.TestRunId" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1">
+                                <span class="material-symbols-outlined fs-6">play_circle</span>
+                                Open Linked Test Run #@selectedEvent.TestRun?.RunNumber
+                            </a>
+                        </div>
+                    }
+
+                    <div class="border-top pt-3">
+                        <div class="fw-semibold mb-2">Organizer: @GetDisplayUser(selectedEvent.Organizer)</div>
+                        @if (selectedEvent.Attendees.Count > 0)
+                        {
+                            <div class="fw-semibold mb-1">Attendees (@selectedEvent.Attendees.Count):</div>
+                            <ul class="list-unstyled mb-0">
+                                @foreach (var att in selectedEvent.Attendees)
+                                {
+                                    <li class="d-flex align-items-center justify-content-between py-1">
+                                        <span>@GetDisplayUser(att.User)</span>
+                                        <span class="badge @GetRsvpBadgeClass(att.Status)">@att.Status</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+
+                    @{
+                        var myAttendee = selectedEvent.Attendees.FirstOrDefault(a => a.UserId == currentUserId);
+                    }
+                    @if (myAttendee != null)
+                    {
+                        <div class="border-top mt-3 pt-3">
+                            <div class="fw-semibold mb-2">Your RSVP:</div>
+                            <div class="btn-group btn-group-sm w-100">
+                                <button class="btn @(myAttendee.Status == AttendeeStatus.Accepted ? "btn-success" : "btn-outline-success")" @onclick="() => UpdateMyRsvpAsync(selectedEvent.Id, AttendeeStatus.Accepted)">Accept</button>
+                                <button class="btn @(myAttendee.Status == AttendeeStatus.Tentative ? "btn-warning" : "btn-outline-warning")" @onclick="() => UpdateMyRsvpAsync(selectedEvent.Id, AttendeeStatus.Tentative)">Tentative</button>
+                                <button class="btn @(myAttendee.Status == AttendeeStatus.Declined ? "btn-danger" : "btn-outline-danger")" @onclick="() => UpdateMyRsvpAsync(selectedEvent.Id, AttendeeStatus.Declined)">Decline</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-footer bg-light">
+                    @if (isAdmin || selectedEvent.OrganizerId == currentUserId)
+                    {
+                        <button type="button" class="btn btn-outline-danger btn-sm me-auto" @onclick="() => DeleteSelectedEventAsync(selectedEvent.Id)">Delete</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => OpenEditFromDetails(selectedEvent)">Edit</button>
+                    }
+                    <button type="button" class="btn btn-secondary btn-sm" @onclick="() => selectedEvent = null">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    public enum CalendarViewMode { Day, WorkWeek, Week, Month, Year }
+
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private bool isAdmin = false;
+    private string currentUserId = string.Empty;
+    private ClaimsPrincipal currentPrincipal = new();
+
+    private CalendarViewMode currentView = CalendarViewMode.Week;
+    private DateTime activeDate = DateTime.Today;
+    private CalendarFilterOptions filter = new();
+
+    private List<CalendarEvent> events = [];
+    private List<TestProject> projects = [];
+    private List<TestRun> testRuns = [];
+    private List<ApplicationUser> allUsers = [];
+
+    // Modal state
+    private bool showEditModal = false;
+    private bool showConflictConfirmModal = false;
+    private string? modalError;
+    private CalendarEventInput editInput = new();
+    private DateTime editDateLocal = DateTime.Today;
+    private string editStartTimeLocal = "10:00";
+    private string editEndTimeLocal = "11:00";
+    private List<CalendarConflictInfo> liveConflicts = [];
+    private List<CalendarConflictInfo> lastSavedConflicts = [];
+    private CalendarEvent? selectedEvent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        currentPrincipal = authState.User;
+        currentUserId = currentPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        isAdmin = CalendarService.IsAdmin(currentPrincipal);
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+        projects = await db.TestProjects.AsNoTracking().OrderBy(p => p.Title).ToListAsync();
+        testRuns = await db.TestRuns.AsNoTracking().Include(tr => tr.Project).OrderByDescending(tr => tr.StartTime).Take(50).ToListAsync();
+        allUsers = await db.Users.AsNoTracking().OrderBy(u => u.Name ?? u.Email).ToListAsync();
+
+        await LoadEventsAsync();
+    }
+
+    private (DateTime StartUtc, DateTime EndUtc) GetViewRangeUtc()
+    {
+        DateTime localStart;
+        DateTime localEnd;
+
+        switch (currentView)
+        {
+            case CalendarViewMode.Day:
+                localStart = activeDate.Date;
+                localEnd = localStart.AddDays(1);
+                break;
+            case CalendarViewMode.WorkWeek:
+                localStart = GetStartOfWeek(activeDate, DayOfWeek.Monday);
+                localEnd = localStart.AddDays(5);
+                break;
+            case CalendarViewMode.Week:
+                localStart = GetStartOfWeek(activeDate, DayOfWeek.Monday);
+                localEnd = localStart.AddDays(7);
+                break;
+            case CalendarViewMode.Month:
+                var firstOfMonth = new DateTime(activeDate.Year, activeDate.Month, 1);
+                localStart = GetStartOfWeek(firstOfMonth, DayOfWeek.Monday);
+                localEnd = localStart.AddDays(42);
+                break;
+            case CalendarViewMode.Year:
+            default:
+                localStart = new DateTime(activeDate.Year, 1, 1);
+                localEnd = localStart.AddYears(1);
+                break;
+        }
+
+        return (localStart.ToUniversalTime(), localEnd.ToUniversalTime());
+    }
+
+    private async Task LoadEventsAsync()
+    {
+        isLoading = true;
+        var (startUtc, endUtc) = GetViewRangeUtc();
+        events = await CalendarSvc.GetEventsAsync(startUtc, endUtc, currentPrincipal, filter);
+        isLoading = false;
+    }
+
+    private async Task SetViewMode(CalendarViewMode mode)
+    {
+        currentView = mode;
+        await LoadEventsAsync();
+    }
+
+    private async Task NavigatePeriod(int delta)
+    {
+        activeDate = currentView switch
+        {
+            CalendarViewMode.Day => activeDate.AddDays(delta),
+            CalendarViewMode.WorkWeek or CalendarViewMode.Week => activeDate.AddDays(delta * 7),
+            CalendarViewMode.Month => activeDate.AddMonths(delta),
+            CalendarViewMode.Year => activeDate.AddYears(delta),
+            _ => activeDate
+        };
+        await LoadEventsAsync();
+    }
+
+    private async Task GoToToday()
+    {
+        activeDate = DateTime.Today;
+        await LoadEventsAsync();
+    }
+
+    private async Task ToggleCategory(CalendarEventType cat)
+    {
+        if (!filter.EventTypes.Add(cat))
+        {
+            filter.EventTypes.Remove(cat);
+        }
+        await LoadEventsAsync();
+    }
+
+    private async Task ToggleOnlyConflicts(ChangeEventArgs e)
+    {
+        filter.OnlyConflicts = (bool)(e.Value ?? false);
+        await LoadEventsAsync();
+    }
+
+    private async Task OnProjectFilterChanged(ChangeEventArgs e)
+    {
+        filter.ProjectId = int.TryParse(e.Value?.ToString(), out var id) ? id : null;
+        await LoadEventsAsync();
+    }
+
+    private async Task OnUserFilterChanged(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString();
+        filter.UserId = string.IsNullOrWhiteSpace(val) ? null : val;
+        await LoadEventsAsync();
+    }
+
+    private async Task OpenCreateModal(DateTime date, int? hour = null)
+    {
+        modalError = null;
+        editDateLocal = date.Date;
+        var startHour = hour ?? 10;
+        editStartTimeLocal = $"{startHour:D2}:00";
+        editEndTimeLocal = $"{Math.Min(startHour + 1, 23):D2}:00";
+
+        editInput = new CalendarEventInput
+        {
+            EventType = CalendarEventType.TeamMeeting,
+            Platform = MeetingPlatform.None
+        };
+
+        SyncInputTimes();
+        showEditModal = true;
+        await RunLiveConflictCheckAsync();
+    }
+
+    private async Task OpenEditFromDetails(CalendarEvent ev)
+    {
+        selectedEvent = null;
+        modalError = null;
+        var localStart = ev.StartTimeUtc.ToLocalTime();
+        var localEnd = ev.EndTimeUtc.ToLocalTime();
+
+        editDateLocal = localStart.Date;
+        editStartTimeLocal = localStart.ToString("HH:mm");
+        editEndTimeLocal = localEnd.ToString("HH:mm");
+
+        editInput = new CalendarEventInput
+        {
+            Id = ev.Id,
+            Title = ev.Title,
+            Description = ev.Description,
+            StartTimeUtc = ev.StartTimeUtc,
+            EndTimeUtc = ev.EndTimeUtc,
+            IsAllDay = ev.IsAllDay,
+            EventType = ev.EventType,
+            Platform = ev.Platform,
+            MeetingUrl = ev.MeetingUrl,
+            ProjectId = ev.ProjectId,
+            TestRunId = ev.TestRunId,
+            AttendeeUserIds = ev.Attendees.Select(a => a.UserId).ToList()
+        };
+
+        showEditModal = true;
+        await RunLiveConflictCheckAsync();
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        showConflictConfirmModal = false;
+    }
+
+    private async Task OnEditDateChanged(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out var parsed))
+        {
+            editDateLocal = parsed.Date;
+            SyncInputTimes();
+            await RunLiveConflictCheckAsync();
+        }
+    }
+
+    private async Task OnStartTimeChanged(ChangeEventArgs e)
+    {
+        editStartTimeLocal = e.Value?.ToString() ?? "10:00";
+        SyncInputTimes();
+        await RunLiveConflictCheckAsync();
+    }
+
+    private async Task OnEndTimeChanged(ChangeEventArgs e)
+    {
+        editEndTimeLocal = e.Value?.ToString() ?? "11:00";
+        SyncInputTimes();
+        await RunLiveConflictCheckAsync();
+    }
+
+    private async Task OnAllDayChanged(ChangeEventArgs e)
+    {
+        editInput.IsAllDay = (bool)(e.Value ?? false);
+        SyncInputTimes();
+        await RunLiveConflictCheckAsync();
+    }
+
+    private async Task ToggleAttendee(string userId, bool selected)
+    {
+        if (selected && !editInput.AttendeeUserIds.Contains(userId))
+            editInput.AttendeeUserIds.Add(userId);
+        else if (!selected)
+            editInput.AttendeeUserIds.Remove(userId);
+
+        await RunLiveConflictCheckAsync();
+    }
+
+    private void SyncInputTimes()
+    {
+        if (editInput.IsAllDay)
+        {
+            editInput.StartTimeUtc = editDateLocal.Date.ToUniversalTime();
+            editInput.EndTimeUtc = editDateLocal.Date.AddDays(1).ToUniversalTime();
+            return;
+        }
+
+        if (!TimeSpan.TryParse(editStartTimeLocal, out var s)) s = TimeSpan.FromHours(10);
+        if (!TimeSpan.TryParse(editEndTimeLocal, out var e)) e = TimeSpan.FromHours(11);
+
+        editInput.StartTimeUtc = editDateLocal.Date.Add(s).ToUniversalTime();
+        editInput.EndTimeUtc = editDateLocal.Date.Add(e).ToUniversalTime();
+    }
+
+    private async Task RunLiveConflictCheckAsync()
+    {
+        SyncInputTimes();
+        if (editInput.EndTimeUtc <= editInput.StartTimeUtc)
+        {
+            liveConflicts = [];
+            return;
+        }
+
+        var participants = editInput.AttendeeUserIds.Append(currentUserId).Distinct();
+        liveConflicts = await CalendarSvc.CheckConflictsAsync(
+            editInput.StartTimeUtc,
+            editInput.EndTimeUtc,
+            participants,
+            editInput.Id);
+    }
+
+    private async Task AutoSuggestSlotAsync()
+    {
+        SyncInputTimes();
+        var duration = editInput.EndTimeUtc - editInput.StartTimeUtc;
+        if (duration <= TimeSpan.Zero) duration = TimeSpan.FromHours(1);
+
+        var participants = editInput.AttendeeUserIds.Append(currentUserId).Distinct();
+        var freeStartUtc = await CalendarSvc.SuggestNextFreeSlotAsync(
+            editInput.StartTimeUtc,
+            duration,
+            participants,
+            editInput.Id);
+
+        if (freeStartUtc.HasValue)
+        {
+            var localStart = freeStartUtc.Value.ToLocalTime();
+            var localEnd = localStart.Add(duration);
+            editDateLocal = localStart.Date;
+            editStartTimeLocal = localStart.ToString("HH:mm");
+            editEndTimeLocal = localEnd.ToString("HH:mm");
+            await RunLiveConflictCheckAsync();
+        }
+        else
+        {
+            modalError = "No conflict-free slot found in the next 7 days during working hours.";
+        }
+    }
+
+    private async Task AutoSuggestAndContinueAsync()
+    {
+        showConflictConfirmModal = false;
+        await AutoSuggestSlotAsync();
+    }
+
+    private void SetMeetingPlatform(MeetingPlatform platform)
+    {
+        editInput.Platform = platform;
+        if (platform is MeetingPlatform.MicrosoftTeams or MeetingPlatform.GoogleMeet)
+        {
+            var (url, _) = CalendarService.GenerateMeetingLink(platform, editInput.Id ?? Guid.NewGuid());
+            editInput.MeetingUrl = url;
+        }
+        else if (platform == MeetingPlatform.None)
+        {
+            editInput.MeetingUrl = null;
+        }
+    }
+
+    private void RegenerateMeetingUrl()
+    {
+        var (url, _) = CalendarService.GenerateMeetingLink(editInput.Platform, Guid.NewGuid());
+        editInput.MeetingUrl = url;
+    }
+
+    private async Task HandleSaveClickAsync()
+    {
+        modalError = null;
+        if (string.IsNullOrWhiteSpace(editInput.Title))
+        {
+            modalError = "Please enter an event title.";
+            return;
+        }
+
+        SyncInputTimes();
+        if (editInput.EndTimeUtc <= editInput.StartTimeUtc)
+        {
+            modalError = "End time must be after start time.";
+            return;
+        }
+
+        await RunLiveConflictCheckAsync();
+        if (liveConflicts.Count > 0)
+        {
+            showConflictConfirmModal = true;
+            return;
+        }
+
+        await CommitSaveAsync();
+    }
+
+    private async Task CommitSaveAsync()
+    {
+        isSaving = true;
+        try
+        {
+            var (_, conflicts) = await CalendarSvc.SaveEventAsync(editInput, currentPrincipal);
+            lastSavedConflicts = conflicts;
+            showConflictConfirmModal = false;
+            showEditModal = false;
+            await LoadEventsAsync();
+        }
+        catch (Exception ex)
+        {
+            modalError = ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task UpdateMyRsvpAsync(Guid eventId, AttendeeStatus status)
+    {
+        await CalendarSvc.UpdateRsvpAsync(eventId, currentUserId, status);
+        await LoadEventsAsync();
+        selectedEvent = events.FirstOrDefault(e => e.Id == eventId);
+    }
+
+    private async Task DeleteSelectedEventAsync(Guid eventId)
+    {
+        await CalendarSvc.DeleteEventAsync(eventId, currentPrincipal);
+        selectedEvent = null;
+        await LoadEventsAsync();
+    }
+
+    // View Renderers
+    private RenderFragment RenderDayView() => __builder =>
+    {
+        var dayEvents = events.Where(e =>
+            e.StartTimeUtc.ToLocalTime().Date <= activeDate.Date &&
+            e.EndTimeUtc.ToLocalTime().Date >= activeDate.Date).ToList();
+
+        <div class="p-3 border-bottom bg-light d-flex justify-content-between align-items-center">
+            <span class="fw-bold">@activeDate.ToString("dddd, MMMM d, yyyy")</span>
+            <span class="badge bg-primary rounded-pill">@dayEvents.Count event(s)</span>
+        </div>
+        <div class="divide-y">
+            @for (var hour = 8; hour <= 19; hour++)
+            {
+                var h = hour;
+                var slotEvents = dayEvents.Where(e => e.StartTimeUtc.ToLocalTime().Hour == h || (e.IsAllDay && h == 8)).ToList();
+                <div class="d-flex border-bottom" style="min-height: 60px;">
+                    <div class="p-2 text-muted small font-monospace border-end bg-light text-end" style="width: 78px;">
+                        @($"{h:D2}:00")
+                    </div>
+                    <div class="flex-grow-1 p-2 d-flex flex-column gap-2" @ondblclick="() => OpenCreateModal(activeDate, h)">
+                        @foreach (var ev in slotEvents)
+                        {
+                            @RenderEventCard(ev)
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    };
+
+    private RenderFragment RenderWeekView(bool workWeekOnly) => __builder =>
+    {
+        var weekStart = GetStartOfWeek(activeDate, DayOfWeek.Monday);
+        var dayCount = workWeekOnly ? 5 : 7;
+        var days = Enumerable.Range(0, dayCount).Select(i => weekStart.AddDays(i)).ToList();
+
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0 align-top" style="table-layout: fixed; min-width: 820px;">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 70px;" class="text-center small text-muted">Time</th>
+                        @foreach (var d in days)
+                        {
+                            var isToday = d.Date == DateTime.Today;
+                            <th class="text-center small @(isToday ? "bg-primary bg-opacity-10 text-primary fw-bold" : "")">
+                                @d.ToString("ddd dd MMM")
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var hour = 8; hour <= 18; hour++)
+                    {
+                        var h = hour;
+                        <tr>
+                            <td class="text-center small font-monospace text-muted bg-light">@($"{h:D2}:00")</td>
+                            @foreach (var d in days)
+                            {
+                                var cellEvents = events.Where(e =>
+                                    e.StartTimeUtc.ToLocalTime().Date == d.Date &&
+                                    (e.StartTimeUtc.ToLocalTime().Hour == h || (e.IsAllDay && h == 8))).ToList();
+                                <td class="p-1" style="min-height: 54px;" @ondblclick="() => OpenCreateModal(d, h)">
+                                    @foreach (var ev in cellEvents)
+                                    {
+                                        @RenderCompactEventCard(ev)
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    };
+
+    private RenderFragment RenderMonthView() => __builder =>
+    {
+        var firstOfMonth = new DateTime(activeDate.Year, activeDate.Month, 1);
+        var gridStart = GetStartOfWeek(firstOfMonth, DayOfWeek.Monday);
+        var dayNames = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0" style="table-layout: fixed; min-width: 780px;">
+                <thead class="table-light">
+                    <tr>
+                        @foreach (var name in dayNames)
+                        {
+                            <th class="text-center small fw-semibold py-2">@name</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var row = 0; row < 6; row++)
+                    {
+                        <tr>
+                            @for (var col = 0; col < 7; col++)
+                            {
+                                var cellDate = gridStart.AddDays(row * 7 + col);
+                                var inMonth = cellDate.Month == activeDate.Month;
+                                var isToday = cellDate.Date == DateTime.Today;
+                                var dayEvents = events.Where(e =>
+                                    e.StartTimeUtc.ToLocalTime().Date <= cellDate.Date &&
+                                    e.EndTimeUtc.ToLocalTime().Date >= cellDate.Date).ToList();
+
+                                <td class="p-1 align-top @(inMonth ? "" : "bg-light text-muted")" style="height: 110px;" @ondblclick="() => OpenCreateModal(cellDate)">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="small fw-semibold @(isToday ? "badge bg-primary rounded-circle" : "")">@cellDate.Day</span>
+                                    </div>
+                                    <div class="d-flex flex-column gap-1">
+                                        @foreach (var ev in dayEvents.Take(3))
+                                        {
+                                            <div class="px-1 py-0 rounded border small text-truncate cursor-pointer @(ev.HasConflict ? "border-warning bg-warning bg-opacity-25" : "bg-primary bg-opacity-10 border-primary")"
+                                                 style="font-size: 0.72rem;"
+                                                 @onclick="() => selectedEvent = ev">
+                                                @if (ev.HasConflict)
+                                                {
+                                                    <span class="text-warning fw-bold">! </span>
+                                                }
+                                                @ev.Title
+                                            </div>
+                                        }
+                                        @if (dayEvents.Count > 3)
+                                        {
+                                            <span class="text-muted" style="font-size: 0.7rem;">+@(dayEvents.Count - 3) more</span>
+                                        }
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    };
+
+    private RenderFragment RenderYearView() => __builder =>
+    {
+        <div class="p-3">
+            <div class="row g-3">
+                @for (var m = 1; m <= 12; m++)
+                {
+                    var monthIdx = m;
+                    var monthStart = new DateTime(activeDate.Year, monthIdx, 1);
+                    var daysInMonth = DateTime.DaysInMonth(activeDate.Year, monthIdx);
+                    var monthCount = events.Count(e => e.StartTimeUtc.ToLocalTime().Month == monthIdx && e.StartTimeUtc.ToLocalTime().Year == activeDate.Year);
+
+                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                        <div class="card h-100 border shadow-sm">
+                            <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                                <button class="btn btn-link btn-sm p-0 fw-bold text-decoration-none" @onclick="() => JumpToMonthAsync(monthIdx)">
+                                    @monthStart.ToString("MMMM yyyy")
+                                </button>
+                                <span class="badge bg-secondary rounded-pill">@monthCount</span>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="d-flex flex-wrap gap-1">
+                                    @for (var d = 1; d <= daysInMonth; d++)
+                                    {
+                                        var dayDate = new DateTime(activeDate.Year, monthIdx, d);
+                                        var hasEv = events.Any(e => e.StartTimeUtc.ToLocalTime().Date <= dayDate && e.EndTimeUtc.ToLocalTime().Date >= dayDate);
+                                        var hasConf = events.Any(e => e.HasConflict && e.StartTimeUtc.ToLocalTime().Date <= dayDate && e.EndTimeUtc.ToLocalTime().Date >= dayDate);
+
+                                        <button type="button"
+                                                class="btn btn-sm p-0 border @(hasConf ? "btn-warning" : hasEv ? "btn-primary" : "btn-outline-light text-dark")"
+                                                style="width: 26px; height: 26px; font-size: 0.72rem;"
+                                                @onclick="() => JumpToDayAsync(dayDate)">
+                                            @d
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    };
+
+    private RenderFragment RenderEventCard(CalendarEvent ev) => __builder =>
+    {
+        <div class="p-2 rounded-3 border @(ev.HasConflict ? "border-warning bg-warning bg-opacity-10" : "border-primary bg-primary bg-opacity-10") d-flex justify-content-between align-items-center cursor-pointer"
+             @onclick="() => selectedEvent = ev">
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold">@ev.Title</span>
+                    <span class="badge @GetCategoryBadgeClass(ev.EventType)">@GetCategoryLabel(ev.EventType)</span>
+                    @if (ev.HasConflict)
+                    {
+                        <span class="badge bg-warning text-dark">Overlap / Conflict</span>
+                    }
+                </div>
+                <div class="small text-muted">
+                    @(ev.IsAllDay ? "All Day" : $"{ev.StartTimeUtc.ToLocalTime():HH:mm} - {ev.EndTimeUtc.ToLocalTime():HH:mm}")
+                    &bull; Organizer: @GetDisplayUser(ev.Organizer)
+                    @if (ev.Attendees.Count > 0)
+                    {
+                        <span>&bull; @ev.Attendees.Count attendee(s)</span>
+                    }
+                </div>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(ev.MeetingUrl))
+            {
+                <a href="@ev.MeetingUrl" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" @onclick:stopPropagation="true">
+                    Join
+                </a>
+            }
+        </div>
+    };
+
+    private RenderFragment RenderCompactEventCard(CalendarEvent ev) => __builder =>
+    {
+        <div class="p-1 mb-1 rounded border @(ev.HasConflict ? "border-warning bg-warning bg-opacity-25" : "border-primary bg-primary bg-opacity-10") cursor-pointer"
+             style="font-size: 0.75rem;"
+             @onclick="() => selectedEvent = ev">
+            <div class="fw-bold text-truncate">
+                @if (ev.HasConflict)
+                {
+                    <span class="text-warning-emphasis">&#9888; </span>
+                }
+                @ev.Title
+            </div>
+            <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 0.68rem;">
+                <span>@(ev.IsAllDay ? "All Day" : ev.StartTimeUtc.ToLocalTime().ToString("HH:mm"))</span>
+                @if (!string.IsNullOrWhiteSpace(ev.MeetingUrl))
+                {
+                    <a href="@ev.MeetingUrl" target="_blank" rel="noopener noreferrer" class="badge bg-primary text-decoration-none" @onclick:stopPropagation="true">Join</a>
+                }
+            </div>
+        </div>
+    };
+
+    private async Task JumpToMonthAsync(int month)
+    {
+        activeDate = new DateTime(activeDate.Year, month, 1);
+        currentView = CalendarViewMode.Month;
+        await LoadEventsAsync();
+    }
+
+    private async Task JumpToDayAsync(DateTime day)
+    {
+        activeDate = day;
+        currentView = CalendarViewMode.Day;
+        await LoadEventsAsync();
+    }
+
+    // Formatting Helpers
+    private string GetCurrentRangeTitle() => currentView switch
+    {
+        CalendarViewMode.Day => activeDate.ToString("MMM d, yyyy"),
+        CalendarViewMode.WorkWeek => $"{GetStartOfWeek(activeDate, DayOfWeek.Monday):MMM d} - {GetStartOfWeek(activeDate, DayOfWeek.Monday).AddDays(4):MMM d, yyyy}",
+        CalendarViewMode.Week => $"{GetStartOfWeek(activeDate, DayOfWeek.Monday):MMM d} - {GetStartOfWeek(activeDate, DayOfWeek.Monday).AddDays(6):MMM d, yyyy}",
+        CalendarViewMode.Month => activeDate.ToString("MMMM yyyy"),
+        CalendarViewMode.Year => activeDate.Year.ToString(),
+        _ => activeDate.ToString("MMMM yyyy")
+    };
+
+    private static DateTime GetStartOfWeek(DateTime dt, DayOfWeek startOfWeek)
+    {
+        int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
+        return dt.AddDays(-1 * diff).Date;
+    }
+
+    private static string GetViewModeLabel(CalendarViewMode mode) => mode switch
+    {
+        CalendarViewMode.Day => "Day",
+        CalendarViewMode.WorkWeek => "Work Week",
+        CalendarViewMode.Week => "Week",
+        CalendarViewMode.Month => "Month",
+        CalendarViewMode.Year => "Year",
+        _ => mode.ToString()
+    };
+
+    private static string GetCategoryLabel(CalendarEventType cat) => cat switch
+    {
+        CalendarEventType.TestRunExecution => "Test Run",
+        CalendarEventType.BugTriage => "Bug Triage",
+        CalendarEventType.TeamMeeting => "Meeting",
+        CalendarEventType.ReleaseFreeze => "Release Freeze",
+        CalendarEventType.SprintMilestone => "Milestone",
+        CalendarEventType.FocusTime => "Focus Time",
+        _ => cat.ToString()
+    };
+
+    private static string GetCategoryButtonClass(CalendarEventType cat) => cat switch
+    {
+        CalendarEventType.TestRunExecution => "btn-success",
+        CalendarEventType.BugTriage => "btn-warning text-dark",
+        CalendarEventType.TeamMeeting => "btn-primary",
+        CalendarEventType.ReleaseFreeze => "btn-danger",
+        CalendarEventType.SprintMilestone => "btn-info text-white",
+        CalendarEventType.FocusTime => "btn-secondary",
+        _ => "btn-primary"
+    };
+
+    private static string GetCategoryBadgeClass(CalendarEventType cat) => cat switch
+    {
+        CalendarEventType.TestRunExecution => "bg-success",
+        CalendarEventType.BugTriage => "bg-warning text-dark",
+        CalendarEventType.TeamMeeting => "bg-primary",
+        CalendarEventType.ReleaseFreeze => "bg-danger",
+        CalendarEventType.SprintMilestone => "bg-info text-dark",
+        CalendarEventType.FocusTime => "bg-secondary",
+        _ => "bg-primary"
+    };
+
+    private static string GetRsvpBadgeClass(AttendeeStatus status) => status switch
+    {
+        AttendeeStatus.Accepted => "bg-success",
+        AttendeeStatus.Tentative => "bg-warning text-dark",
+        AttendeeStatus.Declined => "bg-danger",
+        _ => "bg-secondary"
+    };
+
+    private static string GetDisplayUser(ApplicationUser? user) =>
+        user == null ? "Unknown" : (!string.IsNullOrWhiteSpace(user.Name) ? user.Name : user.Email ?? user.UserName ?? "User");
+}

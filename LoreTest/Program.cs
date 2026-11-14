@@ -118,6 +118,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<LoreTest.Utilities.UserActivityService>();
+builder.Services.AddScoped<LoreTest.Utilities.CalendarService>();
 builder.Services.AddScoped<ITranslationService, MockTranslationService>();
 builder.Services.AddHttpClient<LoreTest.Utilities.JiraIntegrationService>();
 

@@ -25,6 +25,8 @@ namespace LoreTest.Data
         public DbSet<SupportedLanguage> SupportedLanguages { get; set; }
         public DbSet<LocalizationField> LocalizationFields { get; set; }
         public DbSet<DynamicTranslation> DynamicTranslations { get; set; }
+        public DbSet<CalendarEvent> CalendarEvents { get; set; }
+        public DbSet<CalendarEventAttendee> CalendarEventAttendees { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -33,6 +35,21 @@ namespace LoreTest.Data
             builder.Entity<LocalizationField>()
                 .HasIndex(f => f.Key)
                 .IsUnique();
+
+            builder.Entity<CalendarEventAttendee>()
+                .HasKey(a => new { a.EventId, a.UserId });
+
+            builder.Entity<CalendarEventAttendee>()
+                .HasOne(a => a.Event)
+                .WithMany(e => e.Attendees)
+                .HasForeignKey(a => a.EventId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CalendarEvent>()
+                .HasIndex(e => new { e.StartTimeUtc, e.EndTimeUtc });
+
+            builder.Entity<CalendarEvent>()
+                .HasIndex(e => e.OrganizerId);
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
